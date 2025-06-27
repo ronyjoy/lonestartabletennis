@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  ttacademy:
+    build: .
+    ports:
+      - "3001:3001"  # Backend
+      - "8080:8080"  # Frontend
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres.pulgxexevxxnoejrngfq:1ZLvp50r@aws-0-us-east-2.pooler.supabase.com:6543/postgres
+      - JWT_SECRET=lonestartabletennis-super-secret-key-2024
+      - FRONTEND_URL=https://lonestartabletennis.vercel.app
+    volumes:
+      - .:/app
+      - /app/node_modules

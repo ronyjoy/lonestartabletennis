@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Logo from '../components/Logo'
 
 function RankingPage() {
   const navigate = useNavigate()
@@ -77,7 +78,8 @@ function RankingPage() {
               >
                 ← Dashboard
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">🏆 Student Rankings</h1>
+              <Logo size="small" showText={false} className="mr-2" />
+        <h1 className="text-2xl font-bold text-gray-900">🏆 Student Rankings</h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.firstName}!</span>

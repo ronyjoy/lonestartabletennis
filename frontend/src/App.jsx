@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import Logo from './components/Logo'
 
 function App() {
   return (
@@ -38,9 +39,7 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          🏓 Table Tennis Academy
-        </h1>
+        <Logo size="large" showText={true} className="mb-4" />
         <p className="text-xl text-gray-600 mb-8">
           Welcome to the Table Tennis Academy Management System
         </p>
@@ -119,8 +118,9 @@ function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
         <div className="text-center">
+          <Logo size="medium" showText={false} className="mb-4" />
           <h2 className="text-3xl font-bold text-gray-900">
-            🏓 {isLogin ? 'Sign In' : 'Register'}
+            {isLogin ? 'Sign In' : 'Register'}
           </h2>
           <p className="mt-2 text-gray-600">
             {isLogin ? 'Access your Table Tennis Academy account' : 'Create your Table Tennis Academy account'}
@@ -335,7 +335,7 @@ function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">🏓 Table Tennis Academy</h1>
+              <Logo size="small" showText={false} />
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.firstName}!</span>
@@ -647,7 +647,8 @@ function SkillsPage() {
               >
                 ← Dashboard
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">📊 Skills Tracking</h1>
+              <Logo size="small" showText={false} className="mr-2" />
+        <h1 className="text-2xl font-bold text-gray-900">Skills Tracking</h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.firstName}!</span>
