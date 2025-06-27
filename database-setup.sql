@@ -5,13 +5,14 @@
 -- Then run this script to add admin and coach accounts
 
 -- Add Admin and Coach Accounts
--- Password for all accounts: password123
+-- Admin password: lonestaradmin@austin
+-- Coach accounts password: lonestarcoach@austin
 
 INSERT INTO users (email, password_hash, first_name, last_name, role) VALUES
-('admin@lonestartabletennis.com', '$2a$10$VF2KjpbaGe5SoEYDNXN7UeXcxUKD.SDrIX/cm0A.Yp/4lFVasJFAK', 'Admin', 'User', 'admin'),
-('bright@lonestartabletennis.com', '$2a$10$uyb7sg1nw.W7vjZ6MaWxJeqh0PWQwTCwSQLBD9JaOY/0NWIpPviUi', 'Bright', 'Coach', 'coach'),
-('eday@lonestartabletennis.com', '$2a$10$uyb7sg1nw.W7vjZ6MaWxJeqh0PWQwTCwSQLBD9JaOY/0NWIpPviUi', 'Eday', 'Coach', 'coach'),
-('maba@lonestartabletennis.com', '$2a$10$uyb7sg1nw.W7vjZ6MaWxJeqh0PWQwTCwSQLBD9JaOY/0NWIpPviUi', 'Maba', 'Coach', 'coach');
+('admin@lonestartabletennis.com', '$2a$10$WsN19E1k23U2a29Tm1z5guDjvTuBduoUxjAOKUsddxeol1dDeq9YS', 'Admin', 'User', 'admin'),
+('bright@lonestartabletennis.com', '$2a$10$gSAy8Wcze8l1kZiwL3abXeg8dHTZm6TdftRbytawS8xLMEfRjGKa.', 'Bright', 'Coach', 'coach'),
+('eday@lonestartabletennis.com', '$2a$10$gSAy8Wcze8l1kZiwL3abXeg8dHTZm6TdftRbytawS8xLMEfRjGKa.', 'Eday', 'Coach', 'coach'),
+('maba@lonestartabletennis.com', '$2a$10$gSAy8Wcze8l1kZiwL3abXeg8dHTZm6TdftRbytawS8xLMEfRjGKa.', 'Maba', 'Coach', 'coach');
 
 -- Verify accounts were created
 SELECT email, first_name, last_name, role FROM users WHERE role IN ('admin', 'coach');
