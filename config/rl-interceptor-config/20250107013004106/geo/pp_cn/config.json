@@ -1,0 +1,16 @@
+{
+    "ngrl": {
+        "middleware-enabled-app-list": "authnodeweb,bizcomponentsnodeweb,bizsignupnodeweb,causefundraisernodeweb,causemisspiggynodeweb,creditapplyweb,creditnodeweb,donatenodeweb,gcclaimlinknodeweb,investmentnodeweb,merchantsignupnodeweb,musenodeweb,progressivenodeweb,selfhelpnodeweb,selfservicenodeweb,xoonboardingnodeweb,ngrlxhrtestnodeweb,walletexpnodeweb,devdiscoverynodeweb,developernodeweb,ppme,bizwalletnodeweb,bizactivitynodeweb,merchantcorenodeweb,unifiedloginnodeweb,sessionmonitornodeweb,bizprofilenodeweb,bizmoneynodeweb,ucsnodeweb,identityappsnodeweb",
+        "loadAsyncNgrlCaptchaScript": true,
+        "recaptchav3-app-url-mapping": "{}",
+        "recaptchav3-enabled": false,
+        "recaptchav3-enabled-app-list": "ngrlxhrtestnodeweb,authnodeweb,progressivenodeweb,unifiedloginnodeweb,creditnodeweb,p2pnodeweb,bizsignupnodeweb,moneynodeweb,xoonboardingnodeweb,donatenodeweb,bizactivitynodeweb,bizmoneynodeweb,bizwalletnodeweb,merchantsignupnodeweb,bizprofilenodeweb,walletexpnodeweb,bankingbundlenodeweb,poolsnodeweb,shippingnodeweb,identityappsnodeweb,smarthelpnodeweb,pixnodeweb,mppnodeweb,referralsnodeweb,growthnodeweb",
+        "recaptchav3-location": "/auth/createchallenge/${random}/recaptchav3.js",
+        "standalone-app-list": "invoicingnodeweb,ariesnodeweb",
+        "ajax-interceptor-location": "https://objects.paypal.cn/webcaptcha/ngrlCaptcha.min.js",
+        "ajax-interceptor-enabled-app-list": "ngrlxhrtestnodeweb,walletexpnodeweb,creditnodeweb,xoonboardingnodeweb,hermesnodeweb,p2pnodeweb,bizwalletnodeweb,bizactivitynodeweb,merchantcorenodeweb,financeportalnodeweb,homeinfonodeweb,sessionmonitornodeweb,poolsnodeweb,bizprofilenodeweb,bizsignupnodeweb,dualcontrolnodeweb,risksimmerchantnodeweb,merchmoneynodeweb,smarthelpnodeweb,bizmoneynodeweb,cartrecoverynodeweb,progressivenodeweb,merchantbillingnodeweb,billingnodeweb,debitcardnodeweb,ucsnodeweb,locationmgmtnodeweb,unifiedloginnodeweb,securitysettingnodeweb,causefundraisernodeweb,risksimadvmerchnodeweb,insightsnodeweb,brcappnodeweb,bankingbundlenodeweb,dpnodeweb,donatenodeweb,rewardsnodeweb,smartchatnodeweb,crowdfundingnodeweb,identityappsnodeweb,profilenodeweb,smarthelpnodeweb,pixnodeweb,mppnodeweb,referralsnodeweb,growthnodeweb,policydashboardnodeweb,authnodeweb",
+        "middleware-enabled": true,
+        "ajax-interceptor-enabled": true
+    }
+  }
+  

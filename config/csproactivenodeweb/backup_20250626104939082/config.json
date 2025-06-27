@@ -1,0 +1,278 @@
+{
+  "requestURI": "/proactivemanager",
+
+  "i18n": {
+    "contentPath": "path:./locales",
+    "fallback": "en-US"
+  },
+
+  "ucp": {
+    "configurations": [
+      {
+        "name": "csproactivenodeweb",
+        "mappings": [
+          {
+            "namespace": "settings",
+            "$ref": "#/settings"
+          }
+        ]
+      }
+    ]
+  },
+
+  "settings": {},
+
+  "services": {
+    "servicecore": {
+      "rejectUnauthorized": false,
+      "socketTimeout": 31000,
+      "connectTimeout": 5000,
+      "handshakeTimeout": 5000
+    }
+  },
+
+  "express": {
+    "view engine": "dust",
+    "view cache": true,
+    "views": "path:./public/templates",
+    "mountpath": "/proactivemanager"
+  },
+
+  "dust": {
+    "helpers": [
+      "ppdustjs-filters-secure",
+      "dustjs-helpers",
+      {
+        "name": "dust-makara-helpers",
+        "arguments": {
+          "autoloadTemplateContent": false
+        }
+      }
+    ]
+  },
+
+  "juno": {
+    "appName": "csproactivenodeweb",
+    "namespace": "csproactivenodeweb",
+    "enableRetry": true,
+    "lifetime": 28800,
+    "connectTimeout": 3000
+  },
+
+  "view engines": {
+    "dust": {
+      "module": "makara",
+      "renderer": {
+        "method": "dust",
+        "arguments": [
+          {
+            "cache": true,
+            "helpers": "config:dust.helpers"
+          }
+        ]
+      }
+    },
+
+    "js": {
+      "module": "makara",
+      "renderer": {
+        "method": "js",
+        "arguments": [
+          {
+            "cache": true,
+            "helpers": "config:dust.helpers"
+          }
+        ]
+      }
+    }
+  },
+
+  "middleware": {
+    "sso": {
+      "enabled": true,
+      "priority": 108,
+      "module": {
+        "name": "sso-paypal",
+        "arguments": [
+          {
+            "issuer": "csproactivenodeweb",
+            "protocol": "https://",
+            "entryPoint": "https://sso.paypalcorp.com/idp/SSO.saml2",
+            "exclude": ["/proactivemanager/logout"],
+            "ssoKeyStore": "node_sso_2025_keystore"
+          }
+        ]
+      }
+    },
+
+    "session": {
+      "enabled": true,
+      "priority": 100,
+      "module": {
+        "name": "@infra/connect-mayfly/middleware",
+        "arguments": [
+          {
+            "name": "proactivemanager.nsid",
+            "proxy": null
+          }
+        ]
+      }
+    },
+
+    "appsec": {
+      "enabled": true,
+      "priority": 110,
+      "module": {
+        "name": "lusca",
+        "arguments": [
+          {
+            "csp": {
+              "policy": {
+                "script-src": "'self' https://*.paypal.com https://*.paypalinc.com https://*.paypalobjects.com 'unsafe-inline' 'unsafe-eval'",
+                "img-src": "'self' data: https:",
+                "frame-src": "'self' https://*.paypal.com https://*.paypalinc.com https://*.paypalobjects.com",
+                "object-src": "'none'",
+                "font-src": "'self' data: https://*.paypal.com https://*.paypalinc.com https://*.paypalobjects.com 'unsafe-inline' 'unsafe-eval'",
+                "style-src": "'self' https://*.paypal.com https://*.paypalinc.com https://*.paypalobjects.com 'unsafe-inline' 'unsafe-eval'",
+                "form-action": "'self' https://*.paypal.com https://*.paypalcorp.com https://*.paypalinc.com",
+                "base-uri": "'self' https://*.paypal.com https://*.paypalcorp.com https://*.paypalinc.com",
+                "connect-src": "'self' https://*.paypal.com https://*.paypalcorp.com https://*.paypalinc.com https://*.paypalobjects.com"
+              },
+              "scriptNonce": true,
+              "styleNonce": false
+            },
+            "csrf": {
+              "whitelist": ["/v1/csproactiveserv"]
+            },
+            "xframe": "SAMEORIGIN",
+            "xssProtection": true
+          }
+        ]
+      }
+    },
+
+    "logger": {
+      "module": {
+        "name": "morgan",
+        "arguments": ["tiny"]
+      }
+    },
+
+    "static": {
+      "enabled": true,
+      "priority": 40,
+      "name": "serve-static",
+      "module": {
+        "arguments": ["path:./.build"]
+      }
+    },
+
+    "makara": {
+      "enabled": true,
+      "priority": 100,
+      "module": {
+        "name": "makara",
+        "arguments": [
+          {
+            "i18n": "config:i18n",
+            "specialization": "config:specialization"
+          }
+        ]
+      }
+    },
+
+    "encryptedcookies": {
+      "enabled": true,
+      "priority": 111,
+      "module": {
+        "name": "encryptedcookies-paypal",
+        "arguments": [
+          {
+            "encryptionKey": "keymaker:encrypted_crypt_key",
+            "macKey": "keymaker:encrypted_mac_key"
+          }
+        ]
+      }
+    },
+
+    "auth": {
+      "enabled": true,
+      "priority": 113,
+      "module": {
+        "name": "auth-paypal",
+        "arguments": [
+          {
+            "cookieEncryptionKey": "keymaker:encrypted_crypt_key",
+            "cookieMacKey": "keymaker:encrypted_mac_key"
+          }
+        ]
+      }
+    },
+
+    "locale": {
+      "enabled": true,
+      "priority": 114,
+      "module": {
+        "name": "locale"
+      }
+    },
+
+    "experiementation": {
+      "priority": 115,
+      "enabled": true,
+      "module": "experimentation-paypal"
+    },
+
+    "router": {
+      "module": {
+        "arguments": [
+          {
+            "directory": "path:./routes"
+          }
+        ]
+      }
+    },
+
+    "fileNotFound": {
+      "enabled": true,
+      "priority": 130,
+      "module": {
+        "name": "errorsnodewebserv/404"
+      }
+    },
+
+    "serverError": {
+      "enabled": true,
+      "priority": 140,
+      "module": {
+        "name": "path:./lib/errorHandler"
+      }
+    }
+  },
+
+  "pplogger": {
+    "enabled": true,
+    "priority": 94,
+    "module": {
+      "name": "pplogger",
+      "arguments": [
+        {
+          "type": "cal"
+        }
+      ]
+    }
+  },
+
+  "cal": {
+    "module": {
+      "arguments": [
+        {
+          "pool": {
+            "type": "cald",
+            "formatter": "pretty"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "ngrl": {
+    "ajax-interceptor-enabled.10.239.62.111": true,
+    "middleware-enabled-app-list": "authnodeweb,bizmoneynodeweb,ngrlxhrtestnodeweb,devdiscoverynodeweb,developernodeweb,financeportalnodeweb,merchantaccountnodeweb,unifiedloginnodeweb,connectnodeweb,creditapplyweb,sessionmonitornodeweb,invoicingnodewebnew,identityappsnodeweb",
+    "loadAsyncNgrlCaptchaScript": true,
+    "recaptchav3-location": "/auth/createchallenge/${random}/recaptchav3.js",
+    "ajax-interceptor-location": "https://www.paypalobjects.com/webcaptcha/ngrlCaptchaStage.min.js",
+    "middleware-enabled": true,
+    "ajax-interceptor-enabled": true,
+    "recaptchav3-app-url-mapping": "{}",
+    "recaptchav3-enabled": true,
+    "recaptchav3-enabled-app-list": "ngrlxhrtestnodeweb,unifiedloginnodeweb,authnodeweb,progressivenodeweb,walletexpnodeweb,invoicingnodeweb,xorouternodeweb,creditnodeweb,p2pnodeweb,bizsignupnodeweb,moneynodeweb,xoonboardingnodeweb,donatenodeweb,bizactivitynodeweb,bizmoneynodeweb,bizwalletnodeweb,merchantsignupnodeweb,bizprofilenodeweb,heliosnodeweb,bankingbundlenodeweb,poolsnodeweb,shippingnodeweb,walletexpnodeweb,identityappsnodeweb,mfsauth,smarthelpnodeweb,pixnodeweb,mppnodeweb,growthnodeweb,referralsnodeweb,cponboardingnodeweb,xorouternodeweb,ucsnodeweb,receivablesnodeweb,axoprofilemgntnodeweb,shoppingcartnodeweb",
+    "standalone-app-list": "invoicingnodeweb,ariesnodeweb",
+    "ajax-interceptor-enabled-app-list": "smarthelpnodeweb,xoonboardingnodeweb,merchantaccountnodeweb,accountswitchernodeweb,autopaynodeweb,creditapplyweb,merchantcorenodeweb,poolsnodeweb,bizprofilenodeweb,walletexpnodeweb,debitcardnodeweb,mepnodeweb,creditnodeweb,p2pnodeweb,shoplistnodeweb,hermesnodeweb,bizmanageusersnodeweb,bizmanagenodeweb,bizwalletnodeweb,restoreaccessnodeweb,insightsnodeweb,tionodeweb,financeportalnodeweb,bizactivitynodeweb,bizlistingnodeweb,ngrlxhrtestnodeweb,homeinfonodeweb,billingnodeweb,sessionmonitornodeweb,bizsignupnodeweb,merchmoneynodeweb,unifiedloginnodeweb,risksimmerchantnodeweb,dualcontrolnodeweb,summarynodeweb,smartchatnodeweb,merchantsignupnodeweb,cartrecoverynodeweb,bizmoneynodeweb,progressivenodeweb,ucsnodeweb,merchantbillingnodeweb,locationmgmtnodeweb,compliancedashboardwebnodeweb,securitysettingnodeweb,causefundraisernodeweb,risksimadvmerchnodeweb,graphqlnodeweb,donatenodeweb,dpnodeweb,smartchatnodeweb,mppnodeweb,rewardsnodeweb,crowdfundingnodeweb,compgilersnodeweb,channelconnectnodeweb,identityappsnodeweb,profilenodeweb,policydashboardnodeweb,pixnodeweb,growthnodeweb,referralsnodeweb,moneynodeweb,causemisspiggynodeweb,idassurancenodeweb,rescenternodeweb,cponboardingnodeweb,activitiesnodeweb,invoicingnodeweb,xorouternodeweb,msgsnodeweb,receivablesnodeweb,axoprofilemgntnodeweb,shoppingcartnodeweb,crcinstacqnodeweb,checkoutuinodeweb,modularcheckoutnodeweb,privacynodeweb,disputesnodeweb,privacydsrnodeweb,nocodenodeweb,consumerappnodeweb",
+    "body-to-buffer-enabled": true,
+    "body-to-buffer-enabled-app-list": "modularcheckoutnodeweb",
+    "body-to-typed-array-enabled": true,
+    "body-to-typed-array-enabled-app-list": "modularcheckoutnodeweb",
+    "hcaptcha-passive-override-enabled": true,
+    "hcaptcha-passive-override-enabled-app-list": "modularcheckoutnodeweb",
+    "hcaptcha-passive-location": "/auth/createchallenge/${random}/hcaptchapassive.js",
+    "append-to-last-script-tag-enabled": true,
+    "append-to-last-script-tag-enabled-app-list": "modularcheckoutnodeweb",
+    "iwc-ads-cookie-enabled": true,
+    "ajax-interceptor-experimentation-enabled": false
+  }
+}

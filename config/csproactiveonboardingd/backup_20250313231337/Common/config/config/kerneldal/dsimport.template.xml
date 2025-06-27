@@ -1,0 +1,15 @@
+<data-sources>
+    <!-- Please update dsimport file for your test case. -->
+    <jdbc-driver action="update" name="OccJDBCDriver">
+        <data-source name="_cjp">
+            <config-properties>
+                <property name="URL" value="jdbc:occ:${cjp_occ_host}"/>
+                <property name="connectionProperties" value="occ.client_conn_pooling=true;"/>
+                <property name="enableConnOrphanTimeoutOverride" value="false"/>
+                <property name="ensureMinConnections" value="true"/>
+                <property name="connectionProperties" value="occ.client_conn_pooling=true;"/>
+                <property name="occ.connection.retries" value="2"/>
+            </config-properties>
+        </data-source>
+    </jdbc-driver>
+</data-sources>

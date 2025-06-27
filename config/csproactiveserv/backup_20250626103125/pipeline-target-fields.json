@@ -1,0 +1,97 @@
+[
+  {
+    "name": "event_ltid",
+    "description": ""
+  },
+  {
+    "name": "tenant_id",
+    "description": "Usually user assign a value, PayPal or Vemon."
+  },
+  {
+    "name": "entity_type",
+    "description": ""
+  },
+  {
+    "name": "entity_id",
+    "description": ""
+  },
+  {
+    "name": "entity_key",
+    "description": ""
+  },
+  {
+    "name": "external_id",
+    "description": ""
+  },
+  {
+    "name": "external_type_name",
+    "description": ""
+  },
+  {
+    "name": "event_intent_name",
+    "description": "Usually user assign a value."
+  },
+  {
+    "name": "event_domain_name",
+    "description": "Usually user assign a value."
+  },
+  {
+    "name": "event_source_name",
+    "description": "Usually user assign a value."
+  },
+  {
+    "name": "event_type_name",
+    "description": "Type, which is actually event category that may have a list of sub types."
+  },
+  {
+    "name": "event_subtype_name",
+    "description": "Sub type, which is actually event type that we interested, for exanple \"addCard\""
+  },
+  {
+    "name": "media_type_name",
+    "description": "The media type name."
+  },
+  {
+    "name": "time_created",
+    "description": "The event time in epoch format"
+  },
+  {
+    "name": "date_created",
+    "description": "The event date in epoch format"
+  },
+  {
+    "name": "event_time_utc",
+    "description": "The event time in UTC format"
+  },
+  {
+    "name": "event_date_utc",
+    "description": "The event data in UTC format"
+  },
+  {
+    "name": "pipeline_id",
+    "description": "The pipeline event type that will be set internally.",
+    "internal_only": true
+  },
+  {
+    "name": "pipeline_version",
+    "description": "The pipeline version that will be set internally.",
+    "internal_only": true
+  },
+  {
+    "name": "payload",
+    "description": "The event data that will be set internally.",
+    "internal_only": true
+  },
+  {
+    "name": "country",
+    "description": "The country where the event happened."
+  },
+  {
+    "name": "language",
+    "description": "The used language when the event happened."
+  },
+  {
+    "name": "additional_info",
+    "description": "Any additional info."
+  }
+]

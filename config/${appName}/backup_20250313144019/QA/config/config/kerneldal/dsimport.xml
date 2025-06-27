@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<data-sources>
+    <jdbc-driver action="update" name="OccJDBCDriver">
+        <data-source name="_cjp">
+            <config-properties>
+                <property name="URL" value="jdbc:occ:1:msmaster.qa.paypal.com:13887"/>
+                <property name="connectionProperties" value="occ.client_conn_pooling=true;"/>
+                <property name="enableConnOrphanTimeoutOverride" value="false"/>
+                <property name="ensureMinConnections" value="true"/>
+                <property name="connectionProperties" value="occ.client_conn_pooling=true;"/>
+                <property name="occ.connection.retries" value="2"/>
+            </config-properties>
+        </data-source>
+    </jdbc-driver>
+</data-sources>

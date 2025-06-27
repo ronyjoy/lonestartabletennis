@@ -1,0 +1,52 @@
+name: tt-academy
+services:
+- name: backend
+  source_dir: /backend-starter
+  github:
+    repo: your-username/tt-academy
+    branch: main
+  run_command: npm start
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 3001
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: PORT
+    value: "3001"
+  - key: DB_HOST
+    value: ${db.HOSTNAME}
+  - key: DB_PORT
+    value: ${db.PORT}
+  - key: DB_NAME
+    value: ${db.DATABASE}
+  - key: DB_USER
+    value: ${db.USERNAME}
+  - key: DB_PASSWORD
+    value: ${db.PASSWORD}
+  - key: JWT_SECRET
+    value: your-jwt-secret-here
+  - key: FRONTEND_URL
+    value: ${frontend.PUBLIC_URL}
+
+- name: frontend
+  source_dir: /frontend-starter
+  github:
+    repo: your-username/tt-academy
+    branch: main
+  build_command: npm run build
+  environment_slug: node-js
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  envs:
+  - key: VITE_API_URL
+    value: ${backend.PUBLIC_URL}/api
+  - key: VITE_ENVIRONMENT
+    value: production
+
+databases:
+- name: db
+  engine: PG
+  version: "14"
+  size: basic-xxs

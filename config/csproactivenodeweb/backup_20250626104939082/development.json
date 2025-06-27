@@ -1,0 +1,92 @@
+{
+  "express": {
+    "view cache": false
+  },
+  "topos": {
+    "host": "msmaster.qa.paypal.com"
+  },
+  "@paypalcorp/juno-gen": {
+    "host": "msmaster.qa.paypal.com",
+    "port": "26945"
+  },
+  "services": {
+    "servicecore": {
+      "connectTimeout": 40000,
+      "socketTimeout": 60000,
+      "rejectUnauthorized": false
+    },
+    "@paypalcorp/contenttoolsnodeserv": {
+      "protocol": "https:",
+      "hostname": "te-proactive.qa.paypal.com",
+      "port": 15760
+    },
+    "@paypalcorp/csproactiveserv": {
+      "protocol": "http:",
+      "hostname": "localhost",
+      "port": 8083
+    }
+  },
+  "settings": {
+    "isShowStudioManager": "false"
+  },
+  "middleware": {
+    "sso": {
+      "enabled": true,
+      "priority": 108,
+      "module": {
+        "name": "path:./lib/sso-override",
+        "arguments": [
+          {
+            "issuer": "csproactivenodeweb",
+            "protocol": "https://",
+            "entryPoint": "https://ssoqa.paypalcorp.com/idp/SSO.saml2",
+            "callbackUrl": "http://localhost.paypal.com:8000/proactivemanager/saml/acs",
+            "exclude": ["/proactivemanager/logout"],
+            "ssoKeyStore": "node_sso_2025_keystore"
+          }
+        ]
+      }
+    },
+    "devtools": {
+      "enabled": true,
+      "priority": 35,
+      "module": {
+        "name": "construx",
+        "arguments": [
+          "path:./public",
+          "path:./.build",
+          {
+            "css": {
+              "module": "construx-less",
+              "files": "/css/**/*.css"
+            },
+            "copier": {
+              "module": "construx-copier",
+              "files": "**/*"
+            }
+          }
+        ]
+      }
+    },
+    "webpack": {
+      "enabled": true,
+      "priority": 35,
+      "module": {
+        "name": "path:./lib/webpack-middleware",
+        "arguments": [
+          {
+            "writeToDisk": false
+          }
+        ]
+      }
+    },
+    "logger": {
+      "module": {
+        "name": "morgan",
+        "arguments": [
+          "dev"
+        ]
+      }
+    }
+  }
+}

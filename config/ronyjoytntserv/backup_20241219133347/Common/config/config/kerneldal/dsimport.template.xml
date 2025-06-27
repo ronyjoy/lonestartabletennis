@@ -1,0 +1,12 @@
+<data-sources>
+    <!-- Please update dsimport file for your test case. -->
+    <jdbc-driver action="update" name="OccJDBCDriver">
+        <data-source name="_QTOC">
+            <config-properties>
+                <!-- Please add appropriate OCC dependency details for your application via Console
+               so that ${qtoc_occ_host} variable below get resolved for OCC server from OCC topology variables. -->
+                <!-- <property name="URL" value="jdbc:occ:${qtoc_occ_host}"/>-->
+            </config-properties>
+        </data-source>
+    </jdbc-driver>
+</data-sources>

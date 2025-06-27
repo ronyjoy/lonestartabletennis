@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<data-sources>
+    <jdbc-driver action="update" name="OccJDBCDriver">
+        <data-source name="_okmim">
+            <config-properties>
+                <property name="URL" value="jdbc:occ:${okmim_occ_host}"/>
+                <property name="connectionProperties" value="occ.client_conn_pooling=true;;occ.response.timeout.ms=90000"/>
+            </config-properties>
+        </data-source>
+    </jdbc-driver>
+    <query-properties/>
+</data-sources>

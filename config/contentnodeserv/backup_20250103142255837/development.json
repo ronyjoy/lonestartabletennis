@@ -1,0 +1,62 @@
+{
+	"services": {
+		"servicecore": {
+			"socketTimeout": 15000,
+			"connectTimeout": 5000,
+			"handshakeTimeout": 5000,
+			"rejectUnauthorized": false
+		},
+		"@paypalcorp/espgopsecmserv": {
+			"rejectUnauthorized": false,
+			"protocol": "https:",
+			"hostname": "msmaster.qa.paypal.com",
+			"port": "13411"
+		},
+		"cssearchserv": {
+			"rejectUnauthorized": false,
+			"protocol": "https:",
+			"hostname": "msmaster.qa.paypal.com",
+			"port": "22591"
+		},
+		"@paypalcorp/contentmanagerserv": {
+			"protocol": "https:",
+			"hostname": "msmaster.qa.paypal.com",
+			"port": "26463"
+		},
+		"@paypalcorp/contentidentityserv": {
+			"rejectUnauthorized": false,
+			"protocol": "https:",
+			"hostname": "msmaster.qa.paypal.com",
+			"port": "27002"
+		}
+	},
+	"@paypalcorp/juno-gen": {
+		"host": "msmaster.qa.paypal.com",
+		"port": "26945"
+	},
+	"ssl": {
+		"server_options": {
+			"requestCert": false,
+			"rejectUnauthorized": false
+		}
+	},
+	"elastic": {
+		"v2": {
+			"entries": {
+				"exploded": "/v2/tenant/gops-ecm/proxy/ecm-content-exploded-v4/_search",
+				"unexploded": "/v2/tenant/gops-ecm/proxy/ecm-content-unexploded-v4/_search"
+			},
+			"assets": "/v2/tenant/gops-ecm/proxy/ecm-content-new/_search",
+			"entryTemplates": "/v2/tenant/gops-ecm/proxy/ecm-content-types-new5/_search"
+		},
+		"te-contentful": {
+			"entries": {
+				"exploded": "/v2/tenant/gops-ecm/proxy/live-ecm-content-exploded-v4/_search",
+				"unexploded": "/v2/tenant/gops-ecm/proxy/live-ecm-content-unexploded-v4/_search"
+			},
+			"assets": "/v2/tenant/gops-ecm/proxy/ecm-content-new/_search",
+			"entryTemplates": "/v2/tenant/gops-ecm/proxy/ecm-live-content-types/_search"
+		},
+		"current": "v2"
+	}
+}

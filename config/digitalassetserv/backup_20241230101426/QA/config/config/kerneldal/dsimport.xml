@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<data-sources>
+    <jdbc-driver action="update" name="OccJDBCDriver">
+        <data-source name="_okmim">
+            <config-properties>
+                <property name="URL" value="jdbc:occ:1:msmaster.qa.paypal.com:23826"/>
+                <property name="connectionProperties" value="occ.client_conn_pooling=true;"/>
+                <property name="enableConnOrphanTimeoutOverride" value="false"/>
+                <property name="ensureMinConnections" value="true"/>
+                <property name="connectionProperties" value="occ.client_conn_pooling=true;"/>
+                <property name="occ.connection.retries" value="2"/>
+            </config-properties>
+        </data-source>
+    </jdbc-driver>
+    <query-properties>
+        <property name="connectTimeout" value="7000"/>
+        <!--:SI effective readTimeout:'60000'::connectionProperties response_timeout_ms:'70000'-->
+        <property name="datasource.okmim.readTimeout" value="70000"/>
+    </query-properties>
+</data-sources>

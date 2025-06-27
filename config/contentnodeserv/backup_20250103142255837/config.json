@@ -1,0 +1,54 @@
+{
+	"appName": "contentnodeserv",
+	"ucp": {
+		"configurations": [
+			{
+				"name": "contentnodeserv",
+				"mappings": [
+					{
+						"namespace": "appconfig",
+						"$ref": "#/appconfig"
+					}
+				]
+			}
+		]
+	},
+	"appconfig": {
+		"enableCache": true,
+		"elasticVersion": 6,
+		"enableCreateEntry": false,
+		"enableOkLogic": false,
+		"okLogicWhiteList": ["devdiscoverynodeweb","ppcmsnodeweb","marketingnodeweb","globalnavnodeweb","brcappnodeweb","csinfocenternodeweb","caiorchestrationserv","mppnodeweb","developerstudionodeweb","kana_integration"],
+		"recommendationsPerIntent": 5
+	},
+	"middleware": {
+		"securitycontext": {
+			"priority": 100,
+			"module": "path:./middleware/securityContext"
+		},
+		"locale": {
+			"priority": 110,
+			"module": {
+				"name": "locale"
+			}
+		},
+		"router": {
+			"priority": 120,
+			"module": {
+				"name": "express-enrouten",
+				"arguments": [
+					{
+						"index": "path:./routes"
+					}
+				]
+			}
+		},
+		"platformheaders": {
+			"enabled": false
+		}
+	},
+	"express": {
+		"mountpath": "/contentnodeserv"
+	},
+	"requestURI": "/contentnodeserv"
+}

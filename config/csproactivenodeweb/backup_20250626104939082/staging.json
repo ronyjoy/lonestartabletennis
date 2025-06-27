@@ -1,0 +1,47 @@
+{
+  "@paypalcorp/juno-gen": {
+    "host": "msmaster.qa.paypal.com",
+    "port": "26945"
+  },
+
+  "services": {
+    "servicecore": {
+      "connectTimeout": 40000,
+      "socketTimeout": 60000,
+      "rejectUnauthorized": false
+    },
+    "@paypalcorp/contenttoolsnodeserv": {
+      "protocol": "https:",
+      "hostname": "te-proactive.qa.paypal.com",
+      "port": 15760
+    },
+    "@paypalcorp/csproactiveserv": {
+      "protocol": "https:",
+      "hostname": "te-proactive-cj-api.qa.paypal.com",
+      "port": 15760
+    }
+  },
+
+  "settings": {
+    "isShowStudioManager": "false"
+  },
+
+  "middleware": {
+    "sso": {
+      "enabled": true,
+      "priority": 108,
+      "module": {
+        "name": "path:./lib/sso-override",
+        "arguments": [
+          {
+            "issuer": "csproactivenodeweb",
+            "protocol": "https://",
+            "entryPoint": "https://ssoqa.paypalcorp.com/idp/SSO.saml2",
+            "exclude": ["/proactivemanager/logout"],
+            "ssoKeyStore": "node_sso_2025_keystore"
+          }
+        ]
+      }
+    }
+  }
+}

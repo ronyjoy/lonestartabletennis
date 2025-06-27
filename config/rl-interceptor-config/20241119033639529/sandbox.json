@@ -1,0 +1,14 @@
+{
+  "ngrl": {
+    "middleware-enabled-app-list": "authnodeweb,bizcomponentsnodeweb,bizsignupnodeweb,causefundraisernodeweb,causemisspiggynodeweb,creditapplyweb,creditnodeweb,donatenodeweb,gcclaimlinknodeweb,investmentnodeweb,merchantsignupnodeweb,musenodeweb,progressivenodeweb,selfhelpnodeweb,selfservicenodeweb,xoonboardingnodeweb,ngrlxhrtestnodeweb,walletexpnodeweb,devdiscoverynodeweb,developernodeweb,ppme,bizwalletnodeweb,bizactivitynodeweb,merchantcorenodeweb,unifiedloginnodeweb,sessionmonitornodeweb,bizprofilenodeweb,bizmoneynodeweb,ucsnodeweb",
+    "recaptchav3-app-url-mapping": "{\"authnodeweb\":[\"/authflow/email-recovery/\",\"/authflow/password-recovery/\"],\"progressivenodeweb\":[\"/welcome/signup\",\"/welcome/mobile/signup\"],\"unifiedloginnodeweb\":[\"/signin\",\"/signin/inject\",\"/signin/authorize\"]}",
+    "recaptchav3-enabled": false,
+    "recaptchav3-enabled-app-list": "progressivenodeweb",
+    "recaptchav3-location": "/auth/createchallenge/${random}/recaptchav3.js",
+    "standalone-app-list": "invoicingnodeweb,ariesnodeweb",
+    "ajax-interceptor-location": "https://www.paypalobjects.com/webcaptcha/ngrlCaptcha.min.js",
+    "ajax-interceptor-enabled-app-list": "ngrlxhrtestnodeweb,walletexpnodeweb,creditnodeweb,xoonboardingnodeweb,hermesnodeweb,p2pnodeweb,bizwalletnodeweb,bizactivitynodeweb,merchantcorenodeweb,financeportalnodeweb,homeinfonodeweb,sessionmonitornodeweb,poolsnodeweb,bizprofilenodeweb,bizsignupnodeweb,dualcontrolnodeweb,risksimmerchantnodeweb,merchmoneynodeweb,smarthelpnodeweb,bizmoneynodeweb,cartrecoverynodeweb,progressivenodeweb,merchantbillingnodeweb,billingnodeweb,debitcardnodeweb,ucsnodeweb,locationmgmtnodeweb,unifiedloginnodeweb,securitysettingnodeweb",
+    "middleware-enabled": false,
+    "ajax-interceptor-enabled": true
+  }
+}

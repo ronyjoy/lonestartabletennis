@@ -1,0 +1,293 @@
+{
+  "requestURI": "/contentmanager",
+
+  "i18n": {
+    "contentPath": "path:./locales",
+    "fallback": "en-US"
+  },
+
+  "ucp": {
+    "configurations": [
+      {
+        "name": "contentmanagernodeweb",
+        "mappings": [
+          {
+            "namespace": "settings",
+            "$ref": "#/settings"
+          }
+        ]
+      }
+    ]
+  },
+
+  "settings": {
+    "publishTranslationEnabledSpaces": "{\"GCS\": \"9272d33c-2a1f-4ab6-9d46-f6264457a1ce\", \"Venmo\": \"cb9f858c-16a9-4fdd-a424-b035e3a87dbb\", \"MTS\": \"e1126ae9-a8a7-4efd-a659-ed6b39b070a6\", \"Remiks\": \"dd4d03f4-f26a-4f67-b678-57c7d249db96\", \"Console\": \"e75f0acd-c713-446c-bf3c-58fa71cdeb45\"}",
+    "priorityTranslationEnabledSpaces": "{\"LIVE-TESTING\":\"031072aa-0c78-4d4f-a0d8-db388955ae53\",\"GCS\":\"9272d33c-2a1f-4ab6-9d46-f6264457a1ce\"}",
+    "changeManagementEnvList": "{\"LIVE-TESTING\":\"5e501dc9-baff-45ce-9e53-2296412b8b7f\"}",
+    "ecmHeaderToolTipLink": "{\"content\":\"https://github.paypal.com/pages/paypalcorp/ecm-docs/design/content-management/create-content/content/\",\"contentmodel\":\"https://github.paypal.com/pages/paypalcorp/ecm-docs/design/content-management/create-contentmodel/sequence-diagram/\",\"media\":\"https://github.paypal.com/pages/paypalcorp/ecm-docs/design/digital-asset-management/api-requests/create/sequence-diagram/\"}",
+    "joditDefaultVideoSize": "{\"spaces\":[{\"space_name\":\"GCS\",\"space_id\":\"9272d33c-2a1f-4ab6-9d46-f6264457a1ce\",\"environment_id\":\"928c1b1b-c15a-46cf-835f-da538c53e0fa\",\"width\":\"645\",\"height\":\"400\"},{\"space_name\":\"BRC\",\"space_id\":\"e83c0b46-288c-4bb3-a23d-06a897aff82b\",\"environment_id\":\"2d8169c7-18ed-4619-a81d-66263b8240b7\",\"width\":\"645\",\"height\":\"400\"}]}",
+    "isShowReferenceTab": "true",
+    "applyAllMarketsEnvList": "{\"spaces\":[{\"space_name\":\"DEV\",\"space_id\":\"031072aa-0c78-4d4f-a0d8-db388955ae53\",\"environment_id\":\"5e501dc9-baff-45ce-9e53-2296412b8b7f\"},{\"space_name\":\"GCS-STAGE\",\"space_id\":\"9de78f47-a9d2-417c-abfc-cfda0d7157ea\",\"environment_id\":\"20d2d202-1bbf-4d1e-9455-7b823b1eeabe\"},{\"space_name\":\"LIVE-TESTING\",\"space_id\":\"031072aa-0c78-4d4f-a0d8-db388955ae53\",\"environment_id\":\"5e501dc9-baff-45ce-9e53-2296412b8b7f\"},{\"space_name\":\"GCS-LIVE\",\"space_id\":\"9272d33c-2a1f-4ab6-9d46-f6264457a1ce\",\"environment_id\":\"928c1b1b-c15a-46cf-835f-da538c53e0fa\"},{\"space_name\":\"PPCOM-STAGE\",\"space_id\":\"02e28734-2f38-4596-b722-07c36cc04d6a\",\"environment_id\":\"7283e075-7fff-465f-841b-ae4f821a96c0\"}]}",
+    "createEntryDefaultLanguage": "en",
+    "createEntryDefaultMarket": "US",
+    "isShowTagsTab": "{\"spaces\":[{\"space_name\":\"DEV\",\"space_id\":\"031072aa-0c78-4d4f-a0d8-db388955ae53\",\"environment_id\":\"5e501dc9-baff-45ce-9e53-2296412b8b7f\"},{\"space_name\":\"VENMO\",\"space_id\":\"cb9f858c-16a9-4fdd-a424-b035e3a87dbb\",\"environment_id\":\"40378924-08df-4031-903e-7d7fd5d44d64\"},{\"space_name\":\"LEGAL\",\"space_id\":\"3f24e73f-2aff-4af6-a1ec-4a928faed745\",\"environment_id\":\"c60470b7-82f2-4f98-b21e-a447ef5fdb60\"},{\"space_name\":\"MTS\",\"space_id\":\"e1126ae9-a8a7-4efd-a659-ed6b39b070a6\",\"environment_id\":\"8ccc4833-fe15-4dc0-a35a-65f10984e138\"},{\"space_name\":\"GCS-STAGE\",\"space_id\":\"9de78f47-a9d2-417c-abfc-cfda0d7157ea\",\"environment_id\":\"20d2d202-1bbf-4d1e-9455-7b823b1eeabe\"},{\"space_name\":\"LIVE-TESTING\",\"space_id\":\"031072aa-0c78-4d4f-a0d8-db388955ae53\",\"environment_id\":\"5e501dc9-baff-45ce-9e53-2296412b8b7f\"},{\"space_name\":\"GCS-LIVE\",\"space_id\":\"9272d33c-2a1f-4ab6-9d46-f6264457a1ce\",\"environment_id\":\"928c1b1b-c15a-46cf-835f-da538c53e0fa\"}]}",
+    "liveToStageSyncWhitelistedUsers": "{\"users\":\"jspellman,siddhagupta,fmoylan,kalthomas,gllanosgaray,kbrentlinger,kcurry,twoo,drjackson,ankatipelly,gdeal,trosselli,ccisneros,udnaik,malouis,veyarram,sivparimi\"}",
+    "liveToStageSyncWhitelistedTabs": "{\"prod\":\"Content Entries,Content Model Types\"}",
+    "defaultReuseLinkSelectedList": "{\"GCS\":\"9272d33c-2a1f-4ab6-9d46-f6264457a1ce\"}",
+    "workflowEnabledSpaceEnvs": "{\"DEV\":\"5e501dc9-baff-45ce-9e53-2296412b8b7f\"}"
+  },
+
+  "services": {
+    "servicecore": {
+      "rejectUnauthorized": false,
+      "socketTimeout": 31000,
+      "connectTimeout": 5000,
+      "handshakeTimeout": 5000
+    }
+  },
+
+  "express": {
+    "view engine": "dust",
+    "view cache": true,
+    "views": "path:./public/templates",
+    "mountpath": "/contentmanager"
+  },
+
+  "dust": {
+    "helpers": [
+      "ppdustjs-filters-secure",
+      "dustjs-helpers",
+      {
+        "name": "dust-makara-helpers",
+        "arguments": {
+          "autoloadTemplateContent": false
+        }
+      }
+    ]
+  },
+
+  "juno": {
+    "appName": "contentmanagernodeweb",
+    "namespace": "contentmanagernodeweb",
+    "enableRetry": true,
+    "lifetime": 28800,
+    "connectTimeout": 3000
+  },
+
+  "view engines": {
+    "dust": {
+      "module": "makara",
+      "renderer": {
+        "method": "dust",
+        "arguments": [
+          {
+            "cache": true,
+            "helpers": "config:dust.helpers"
+          }
+        ]
+      }
+    },
+
+    "js": {
+      "module": "makara",
+      "renderer": {
+        "method": "js",
+        "arguments": [
+          {
+            "cache": true,
+            "helpers": "config:dust.helpers"
+          }
+        ]
+      }
+    }
+  },
+
+  "middleware": {
+    "sso": {
+      "enabled": true,
+      "priority": 108,
+      "module": {
+        "name": "sso-paypal",
+        "arguments": [
+          {
+            "issuer": "contentmanagernodeweb2023",
+            "protocol": "https://",
+            "entryPoint": "https://sso.paypalcorp.com/idp/SSO.saml2",
+            "exclude": ["/contentmanager/logout"],
+            "ssoKeyStore": "node_sso_2023_keystore"
+          }
+        ]
+      }
+    },
+
+    "session": {
+      "enabled": true,
+      "priority": 100,
+      "module": {
+        "name": "@infra/connect-mayfly/middleware",
+        "arguments": [
+          {
+            "name": "contentmanager.nsid",
+            "proxy": null
+          }
+        ]
+      }
+    },
+
+    "appsec": {
+      "enabled": true,
+      "priority": 110,
+      "module": {
+        "name": "lusca",
+        "arguments": [
+          {
+            "csp": {
+              "policy": {
+                "script-src": "'self' https://*.paypal.com https://*.paypalinc.com https://*.paypalobjects.com 'unsafe-inline' 'unsafe-eval'",
+                "img-src": "'self' data: https:",
+                "frame-src": "'self' https://*.paypal.com https://*.paypalinc.com https://*.paypalobjects.com https://www.youtube-nocookie.com",
+                "object-src": "'none'",
+                "font-src": "'self' data: https://*.paypal.com https://*.paypalinc.com https://*.paypalobjects.com 'unsafe-inline' 'unsafe-eval'",
+                "style-src": "'self' https://*.paypal.com https://*.paypalinc.com https://*.paypalobjects.com 'unsafe-inline' 'unsafe-eval'",
+                "form-action": "'self' https://*.paypal.com https://*.paypalcorp.com https://*.paypalinc.com",
+                "base-uri": "'self' https://*.paypal.com https://*.paypalcorp.com https://*.paypalinc.com",
+                "connect-src": "'self' https://*.paypal.com https://*.paypalcorp.com https://*.paypalinc.com https://*.paypalobjects.com"
+              },
+              "scriptNonce": true,
+              "styleNonce": false
+            },
+            "csrf": {
+              "whitelist": ["/v1/contentmanagerserv", "/v2/content"]
+            },
+            "xframe": "SAMEORIGIN",
+            "xssProtection": true
+          }
+        ]
+      }
+    },
+
+    "logger": {
+      "module": {
+        "name": "morgan",
+        "arguments": ["tiny"]
+      }
+    },
+
+    "static": {
+      "enabled": true,
+      "priority": 40,
+      "name": "serve-static",
+      "module": {
+        "arguments": ["path:./.build"]
+      }
+    },
+
+    "makara": {
+      "enabled": true,
+      "priority": 100,
+      "module": {
+        "name": "makara",
+        "arguments": [
+          {
+            "i18n": "config:i18n",
+            "specialization": "config:specialization"
+          }
+        ]
+      }
+    },
+
+    "encryptedcookies": {
+      "enabled": true,
+      "priority": 111,
+      "module": {
+        "name": "encryptedcookies-paypal",
+        "arguments": [
+          {
+            "encryptionKey": "keymaker:encrypted_crypt_key",
+            "macKey": "keymaker:encrypted_mac_key"
+          }
+        ]
+      }
+    },
+
+    "auth": {
+      "enabled": true,
+      "priority": 113,
+      "module": {
+        "name": "auth-paypal",
+        "arguments": [
+          {
+            "cookieEncryptionKey": "keymaker:encrypted_crypt_key",
+            "cookieMacKey": "keymaker:encrypted_mac_key"
+          }
+        ]
+      }
+    },
+
+    "locale": {
+      "enabled": true,
+      "priority": 114,
+      "module": {
+        "name": "locale"
+      }
+    },
+
+    "experiementation": {
+      "priority": 115,
+      "enabled": true,
+      "module": "experimentation-paypal"
+    },
+
+    "router": {
+      "module": {
+        "arguments": [
+          {
+            "directory": "path:./routes"
+          }
+        ]
+      }
+    },
+
+    "fileNotFound": {
+      "enabled": true,
+      "priority": 130,
+      "module": {
+        "name": "errorsnodewebserv/404"
+      }
+    },
+
+    "serverError": {
+      "enabled": true,
+      "priority": 140,
+      "module": {
+        "name": "path:./lib/errorHandler"
+      }
+    }
+  },
+
+  "pplogger": {
+    "enabled": true,
+    "priority": 94,
+    "module": {
+      "name": "pplogger",
+      "arguments": [
+        {
+          "type": "cal"
+        }
+      ]
+    }
+  },
+
+  "cal": {
+    "module": {
+      "arguments": [
+        {
+          "pool": {
+            "type": "cald",
+            "formatter": "pretty"
+          }
+        }
+      ]
+    }
+  }
+}

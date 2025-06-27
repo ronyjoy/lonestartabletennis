@@ -1,0 +1,41 @@
+{
+	"services": {
+		"servicecore": {
+			"socketTimeout": 15000,
+			"connectTimeout": 5000,
+			"handshakeTimeout": 5000
+		},
+		"@paypalcorp/espgopsecmserv": {
+			"rejectUnauthorized": true,
+			"socketTimeout": 15000,
+			"connectTimeout": 15000,
+			"handshakeTimeout": 15000
+		},
+		"cssearchserv": {
+			"rejectUnauthorized": true
+		},
+		"@paypalcorp/contentmanagerserv": {
+			"rejectUnauthorized": true
+		},
+		"@paypalcorp/contentidentityserv": {
+			"rejectUnauthorized": true
+		}
+	},
+	"ssl": {
+		"server_options": {
+			"requestCert": true,
+			"rejectUnauthorized": true
+		}
+	},
+	"elastic": {
+		"v2": {
+			"entries": {
+				"exploded": "/v2/tenant/gops-ecm/proxy/ecm-content-explode/_search",
+				"unexploded": "/v2/tenant/gops-ecm/proxy/ecm-content/_search"
+			},
+			"assets": "/v2/tenant/gops-ecm/proxy/ecm-content/_search",
+			"entryTemplates": "/v2/tenant/gops-ecm/proxy/ecm-content-types/_search"
+		},
+		"current": "v2"
+	}
+}

@@ -1,0 +1,162 @@
+[
+  {
+    "name": "null",
+    "label": "null",
+    "description": "Java null constant",
+    "paramsMode": "fix",
+    "minParams": 0,
+    "maxParams": -1
+  },
+  {
+    "name": "true",
+    "label": "true",
+    "description": "Java true constant",
+    "paramsMode": "fix",
+    "minParams": 0,
+    "maxParams": -1
+  },
+  {
+    "name": "false",
+    "label": "false",
+    "description": "Java false constant",
+    "paramsMode": "fix",
+    "minParams": 0,
+    "maxParams": -1
+  },
+  {
+    "name": "string",
+    "label": "string of",
+    "description": "A Java string",
+    "paramsMode": "fix",
+    "minParams": 1,
+    "maxParams": -1
+  },
+  {
+    "name": "int",
+    "label": "integer of",
+    "description": "A Java integer",
+    "paramsMode": "fix",
+    "minParams": 1,
+    "maxParams": -1
+  },
+  {
+    "name": "long",
+    "label": "long of",
+    "description": "A Java long",
+    "paramsMode": "fix",
+    "minParams": 1,
+    "maxParams": -1
+  },
+  {
+    "name": "float",
+    "label": "float of",
+    "description": "A Java float",
+    "paramsMode": "fix",
+    "minParams": 1,
+    "maxParams": -1
+  },
+  {
+    "name": "double",
+    "label": "double of",
+    "description": "A Java double",
+    "paramsMode": "fix",
+    "minParams": 1,
+    "maxParams": -1
+  },
+  {
+    "name": "isEmpty",
+    "label": "is empty",
+    "description": "Check if the value is empty",
+    "paramsMode": "fix",
+    "minParams": 1,
+    "maxParams": -1
+  },
+  {
+    "name": "isNotEmpty",
+    "label": "is not empty",
+    "description": "Check if the value is not empty",
+    "paramsMode": "fix",
+    "minParams": 1,
+    "maxParams": -1
+  },
+  {
+    "name": "equals",
+    "label": "equals",
+    "description": "Check if the two values equal",
+    "paramsMode": "fix",
+    "minParams": 2,
+    "maxParams": -1
+  },
+  {
+    "name": "notEqual",
+    "label": "not equal",
+    "description": "Check if the two values do not equal",
+    "paramsMode": "fix",
+    "minParams": 2,
+    "maxParams": -1
+  },
+  {
+    "name": "contains",
+    "label": "contains",
+    "description": "Check if value1 contains value2",
+    "paramsMode": "fix",
+    "minParams": 2,
+    "maxParams": -1
+  },
+  {
+    "name": "matches",
+    "label": "matches",
+    "description": "Check if value1 matches value2",
+    "paramsMode": "fix",
+    "minParams": 2,
+    "maxParams": -1
+  },
+  {
+    "name": "concat",
+    "label": "concat",
+    "description": "Concatenate all the values in order",
+    "paramsMode": "floor",
+    "minParams": 2,
+    "maxParams": -1
+  },
+  {
+    "name": "subString",
+    "label": "sub string",
+    "description": "Get a sub string from value1 using value2, and possible value3",
+    "paramsMode": "range",
+    "minParams": 2,
+    "maxParams": 3
+  },
+  {
+    "name": "fallover",
+    "label": "the first non-empty",
+    "description": "Get the fist non-empty values in the values",
+    "paramsMode": "floor",
+    "minParams": 2,
+    "maxParams": -1
+  },
+  {
+    "name": "switch",
+    "label": "switch",
+    "description": "A function similar to Java switch",
+    "paramsMode": "floor",
+    "minParams": 3,
+    "maxParams": -1
+  },
+  {
+    "name": "getSourceFieldValue",
+    "label": "source value of",
+    "description": "A function to get a field value from source",
+    "paramsMode": "fix",
+    "minParams": 1,
+    "maxParams": -1
+  },
+  {
+    "name": "getTargetFieldValue",
+    "label": "target value of",
+    "description": "A function to get a field value from target",
+    "paramsMode": "fix",
+    "minParams": 1,
+    "maxParams": -1
+  }
+]

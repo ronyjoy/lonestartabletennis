@@ -1,0 +1,12 @@
+[
+  {
+    "topicName":  "User.AccountChanged",
+    "clusterName":  "CONSUMER_3_PROPS_(nestar_slca/malfoy_phx)",
+    "coding": "vo"
+  },
+  {
+    "topicName":  "eserv.customer-journey.fi-events",
+    "clusterName":  "CONSUMER_1_PROPS_(geriatrix_slcb/hermione_phx)",
+    "coding": "avro"
+  }
+]

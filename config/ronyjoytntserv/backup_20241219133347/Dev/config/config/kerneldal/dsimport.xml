@@ -1,0 +1,10 @@
+<data-sources>
+    <!-- Please update dsimport file for your test case. This setting is used in functional test -->
+    <jdbc-driver action="update" name="OccJDBCDriver">
+        <data-source name="_QTOC">
+            <config-properties>
+                <property name="URL" value="jdbc:occ:1:msmaster.qa.paypal.com:10173"/>
+            </config-properties>
+        </data-source>
+    </jdbc-driver>
+</data-sources>

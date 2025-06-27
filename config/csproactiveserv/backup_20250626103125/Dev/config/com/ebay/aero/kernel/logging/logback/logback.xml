@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- encoders are assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %level %logger %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="com.paypal.raptor.samples" level="INFO"/>
+  
+  <!-- Add these loggers for SQL statements -->
+  <logger name="org.hibernate.SQL" level="DEBUG"/>
+  <logger name="org.hibernate.type.descriptor.sql" level="TRACE"/>
+  <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
+  
+  <!-- Log JPA/Repository operations -->
+  <logger name="org.springframework.data.jpa.repository" level="DEBUG"/>
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+  <logger name="graphql" level="ERROR" />
+
+</configuration>
