@@ -17,27 +17,17 @@ const Logo = ({ size = 'large', showText = true, className = '' }) => {
 
   return (
     <div className={`flex items-center justify-center ${className}`}>
-      {/* Star icon */}
-      <span className="text-blue-600 mr-3 text-5xl">⭐</span>
-      
-      {/* Logo Image - will show if logo.png exists, fallback to paddle emoji */}
+      {/* Logo Image - will show if logo.png exists, fallback to simple text */}
       <div className="relative mr-3">
         <img 
           src="/logo.png" 
           alt="Lone Star Table Tennis Academy Logo"
           className={`${sizeClasses[size]} object-contain`}
           onError={(e) => {
-            // Fallback to emoji if logo.png doesn't exist
+            // Hide image if logo.png doesn't exist
             e.target.style.display = 'none';
-            e.target.nextElementSibling.style.display = 'block';
           }}
         />
-        <span 
-          className={`${textSizes[size]} text-orange-500 hidden`}
-          style={{ display: 'none' }}
-        >
-          🏓
-        </span>
       </div>
 
       {/* Text */}
@@ -46,9 +36,6 @@ const Logo = ({ size = 'large', showText = true, className = '' }) => {
           Lone Star Table Tennis Academy
         </h1>
       )}
-
-      {/* Paddle emoji */}
-      <span className="text-orange-500 ml-3 text-3xl">🏓</span>
     </div>
   );
 };
