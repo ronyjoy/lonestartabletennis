@@ -3,7 +3,7 @@ FROM node:18-alpine as frontend-build
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm ci
+RUN npm install
 COPY frontend/ ./
 RUN npm run build
 
@@ -12,7 +12,7 @@ FROM node:18-alpine as backend
 
 WORKDIR /app
 COPY backend/package*.json ./
-RUN npm ci
+RUN npm install --production
 COPY backend/ ./
 
 # Final stage - serve both
@@ -26,14 +26,8 @@ COPY --from=backend /app ./
 # Copy frontend build
 COPY --from=frontend-build /app/frontend/dist ./public
 
-# Install serve to handle frontend
-RUN npm install -g serve
-
 # Expose port
 EXPOSE 3001
 
-# Start script that runs both frontend and backend
-COPY start.sh ./
-RUN chmod +x start.sh
-
-CMD ["./start.sh"]
+# Start both services
+CMD ["sh", "-c", "node server.js & npx serve -s public -l 8080 & wait"]
