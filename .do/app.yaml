@@ -2,7 +2,7 @@ name: lonestartabletennis
 services:
 - name: backend
   type: web
-  source_dir: /backend-starter
+  source_dir: /backend
   github:
     repo: ronyjoy/lonestartabletennis
     branch: main
@@ -34,7 +34,7 @@ services:
 
 - name: frontend
   type: static_site
-  source_dir: /frontend-starter
+  source_dir: /frontend
   github:
     repo: ronyjoy/lonestartabletennis
     branch: main

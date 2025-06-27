@@ -17,7 +17,7 @@ When you see "No component detected", click **"Edit your App Spec"** instead of 
 Click "Add Component" → "Web Service":
 ```
 Service Name: backend
-Source Directory: backend-starter
+Source Directory: backend
 Build Command: npm install
 Run Command: npm start
 HTTP Port: 3001
@@ -35,7 +35,7 @@ PORT=3001
 Click "Add Component" → "Static Site":
 ```
 Service Name: frontend
-Source Directory: frontend-starter
+Source Directory: frontend
 Build Command: npm run build
 Output Directory: dist
 Instance Size: Basic ($5/month)
