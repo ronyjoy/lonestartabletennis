@@ -1,18 +1,16 @@
-# Multi-stage build - separate frontend build from runtime
+# Multi-stage build - separate frontend build from runtime  
 FROM node:18-alpine AS frontend-build
 
 WORKDIR /app/frontend
-COPY frontend/package.json frontend/package-lock.json ./
-RUN echo "=== About to run npm install ==="
-RUN npm install
-RUN echo "=== After npm install - checking directories ==="
-RUN ls -la
-RUN ls -la node_modules/ || echo "node_modules directory not found"
-RUN ls -la node_modules/.bin/ || echo "node_modules/.bin directory not found"
-RUN npm list || echo "npm list failed"
+COPY frontend/package.json ./
+RUN rm -f package-lock.json
+RUN npm install --verbose
+RUN echo "=== Checking vite installation ==="
+RUN npm list vite
+RUN ls -la node_modules/.bin/vite
+RUN ./node_modules/.bin/vite --version
 COPY frontend/ ./
-RUN echo "=== Attempting npm run build ==="
-RUN npm run build
+RUN ./node_modules/.bin/vite build
 
 # Backend runtime image
 FROM node:18-alpine
