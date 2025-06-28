@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="16" fill="#2563eb"/>
+  
+  <!-- Table tennis paddle -->
+  <g transform="translate(8, 6)">
+    <!-- Paddle handle -->
+    <rect x="7" y="14" width="2" height="6" rx="1" fill="white"/>
+    
+    <!-- Paddle blade (circular) -->
+    <circle cx="8" cy="10" r="6" fill="white"/>
+    
+    <!-- Paddle grip detail -->
+    <rect x="7.2" y="16" width="1.6" height="1" fill="#1d4ed8"/>
+    <rect x="7.2" y="17.5" width="1.6" height="1" fill="#1d4ed8"/>
+    
+    <!-- Ball -->
+    <circle cx="4" cy="6" r="1.5" fill="#f59e0b"/>
+    <path d="M3.2 5.8 C3.6 5.4 4.4 5.4 4.8 5.8" stroke="#fbbf24" stroke-width="0.3" fill="none"/>
+    <path d="M3.2 6.2 C3.6 6.6 4.4 6.6 4.8 6.2" stroke="#fbbf24" stroke-width="0.3" fill="none"/>
+  </g>
+</svg>
