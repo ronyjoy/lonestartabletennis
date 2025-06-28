@@ -23,7 +23,10 @@ RUN npm install --production --no-audit --no-fund
 
 # Install frontend dependencies and build
 WORKDIR /app/frontend
-RUN npm install --no-audit --no-fund
+RUN npm install --include=dev --no-audit --no-fund
+# Verify vite is installed
+RUN npm list vite || echo "Vite not found in node_modules"
+RUN ls -la node_modules/.bin/ | grep vite || echo "Vite binary not found"
 COPY frontend/ ./
 RUN npm run build
 
