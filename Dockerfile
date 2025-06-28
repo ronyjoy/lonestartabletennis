@@ -42,6 +42,14 @@ RUN npm run build
 WORKDIR /app/backend
 COPY backend/src ./src/
 COPY backend/server.js ./
+COPY backend/package.json ./
+COPY backend/package-lock.json ./
+
+# Debug: Verify dotenv is installed
+RUN echo "Checking if dotenv is installed..." && \
+    ls -la node_modules/ | head -10 && \
+    ls -la node_modules/dotenv/ || echo "dotenv not found" && \
+    node -e "console.log('dotenv check:', require('dotenv'))" || echo "dotenv require failed"
 
 # Move frontend build to backend public folder
 RUN cp -r ../frontend/dist ./public
