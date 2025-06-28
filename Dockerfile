@@ -4,12 +4,14 @@ FROM node:18-alpine AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm install
-RUN echo "=== Debug vite installation ===" && \
-    ls -la node_modules/.bin/ && \
-    npm list vite && \
-    which vite || echo "vite not in PATH"
+RUN echo "=== Debug vite installation ==="
+RUN ls -la node_modules/.bin/
+RUN npm list vite
+RUN which vite || echo "vite not in PATH"
 COPY frontend/ ./
-RUN cat package.json | grep -A 5 '"scripts"'
+RUN echo "=== Package.json scripts ==="
+RUN cat package.json
+RUN echo "=== Attempting npm run build ==="
 RUN npm run build
 
 # Backend runtime image
