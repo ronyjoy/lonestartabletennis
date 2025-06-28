@@ -1516,6 +1516,9 @@ function LeaguesPage() {
     e.preventDefault()
     setMessage('')
     
+    // Debug: Log form data being submitted
+    console.log('Submitting form data:', formData)
+    
     try {
       const token = localStorage.getItem('token')
       const url = editingLeague 

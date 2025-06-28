@@ -40,6 +40,9 @@ router.post('/', async (req, res) => {
       return res.status(403).json({ message: 'Admin access required' });
     }
 
+    // Debug: Log received data
+    console.log('Received league data:', req.body);
+
     const { 
       name, 
       description, 
@@ -53,12 +56,13 @@ router.post('/', async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!name || !day_of_week || !start_time || !end_time) {
+    if (!name || day_of_week === undefined || day_of_week === null || !start_time || !end_time) {
       return res.status(400).json({ message: 'Name, day of week, start time, and end time are required' });
     }
 
     // Validate day_of_week (0-6, Sunday-Saturday)
-    if (day_of_week < 0 || day_of_week > 6) {
+    const dayOfWeekNum = parseInt(day_of_week);
+    if (isNaN(dayOfWeekNum) || dayOfWeekNum < 0 || dayOfWeekNum > 6) {
       return res.status(400).json({ message: 'Day of week must be between 0 (Sunday) and 6 (Saturday)' });
     }
 
@@ -72,7 +76,7 @@ router.post('/', async (req, res) => {
     const result = await db.query(query, [
       name,
       description || '',
-      parseInt(day_of_week),
+      dayOfWeekNum,
       start_time,
       end_time,
       parseInt(max_participants) || 16,
