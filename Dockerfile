@@ -1,14 +1,15 @@
 # Multi-stage Docker build for full-stack app
-FROM node:18-alpine as frontend-build
+FROM node:18.20.4-alpine as frontend-build
 
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm install --production=false
+RUN npm list vite
 COPY frontend/ ./
 RUN npm run build
 
 # Backend stage
-FROM node:18-alpine as backend
+FROM node:18.20.4-alpine as backend
 
 WORKDIR /app
 COPY backend/package*.json ./
@@ -16,7 +17,7 @@ RUN npm install --production
 COPY backend/ ./
 
 # Final stage - serve both
-FROM node:18-alpine
+FROM node:18.20.4-alpine
 
 WORKDIR /app
 
