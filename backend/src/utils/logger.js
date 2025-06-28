@@ -1,23 +1,9 @@
-const winston = require('winston');
-
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.errors({ stack: true }),
-    winston.format.json()
-  ),
-  defaultMeta: { service: 'tt-academy-api' },
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.simple()
-    })
-  ],
-});
-
-if (process.env.NODE_ENV === 'production') {
-  logger.add(new winston.transports.File({ filename: 'logs/error.log', level: 'error' }));
-  logger.add(new winston.transports.File({ filename: 'logs/combined.log' }));
-}
+// Simple console logger without winston dependency
+const logger = {
+  info: (message) => console.log(`[INFO] ${new Date().toISOString()} - ${message}`),
+  error: (message) => console.error(`[ERROR] ${new Date().toISOString()} - ${message}`),
+  warn: (message) => console.warn(`[WARN] ${new Date().toISOString()} - ${message}`),
+  debug: (message) => console.log(`[DEBUG] ${new Date().toISOString()} - ${message}`)
+};
 
 module.exports = logger;
