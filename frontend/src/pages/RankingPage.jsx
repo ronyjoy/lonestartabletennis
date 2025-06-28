@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Logo from '../components/Logo'
+import { API_ENDPOINTS } from '../config/api'
 
 function RankingPage() {
   const navigate = useNavigate()
@@ -34,7 +35,7 @@ function RankingPage() {
   const fetchRankings = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:3001/api/rankings', {
+      const response = await fetch(API_ENDPOINTS.SKILLS, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -42,7 +43,7 @@ function RankingPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setRankings(data.rankings)
+        setRankings(data.skills || [])
       }
     } catch (error) {
       console.error('Error fetching rankings:', error)

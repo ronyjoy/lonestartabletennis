@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import Logo from './components/Logo'
 import PublicLeagueSignup from './components/PublicLeagueSignup'
+import { API_ENDPOINTS } from './config/api'
 
 function App() {
   return (
@@ -95,8 +96,8 @@ function LoginPage() {
 
     try {
       const url = isLogin 
-        ? 'http://localhost:3001/api/auth/login'
-        : 'http://localhost:3001/api/auth/register'
+        ? API_ENDPOINTS.LOGIN
+        : API_ENDPOINTS.REGISTER
       
       const body = isLogin 
         ? { email, password }
@@ -309,7 +310,7 @@ function DashboardPage() {
       const token = localStorage.getItem('token')
       
       // Fetch skills count
-      const skillsResponse = await fetch('http://localhost:3001/api/skills', {
+      const skillsResponse = await fetch(API_ENDPOINTS.SKILLS, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -535,7 +536,7 @@ function SkillsPage() {
   const fetchStudents = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:3001/api/skills/students', {
+      const response = await fetch(API_ENDPOINTS.SKILLS_STUDENTS, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -554,8 +555,8 @@ function SkillsPage() {
     try {
       const token = localStorage.getItem('token')
       const url = studentId 
-        ? `http://localhost:3001/api/skills?studentId=${studentId}`
-        : 'http://localhost:3001/api/skills'
+        ? `${API_ENDPOINTS.SKILLS}?studentId=${studentId}`
+        : API_ENDPOINTS.SKILLS
       
       const response = await fetch(url, {
         headers: {
@@ -585,7 +586,7 @@ function SkillsPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:3001/api/skills', {
+      const response = await fetch(API_ENDPOINTS.SKILLS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -614,7 +615,7 @@ function SkillsPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`http://localhost:3001/api/skills/${skillId}`, {
+      const response = await fetch(`${API_ENDPOINTS.SKILLS}/${skillId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -904,7 +905,7 @@ function RankingPage() {
   const fetchRankings = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:3001/api/skills', {
+      const response = await fetch(API_ENDPOINTS.SKILLS, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
