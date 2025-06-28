@@ -1,24 +1,25 @@
-# Simple single-stage build
-FROM node:18.20.4-alpine
+# Use Ubuntu base to avoid npm Alpine issues
+FROM node:18-bullseye-slim
 
 WORKDIR /app
 
-# Install serve globally first
-RUN npm install -g serve
+# Install yarn and other essentials
+RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
+RUN npm install -g yarn
 
-# Copy all package files
-COPY frontend/package*.json ./frontend/
-COPY backend/package*.json ./backend/
+# Copy package files
+COPY frontend/package.json frontend/yarn.lock* ./frontend/
+COPY backend/package.json backend/package-lock.json* ./backend/
 
-# Install backend dependencies (minimal)
+# Install backend dependencies
 WORKDIR /app/backend
-RUN npm install --only=production --no-optional --no-audit
+RUN yarn install --production --frozen-lockfile --non-interactive
 
 # Install frontend dependencies and build
 WORKDIR /app/frontend
-RUN npm install --no-optional --no-audit
+RUN yarn install --frozen-lockfile --non-interactive
 COPY frontend/ ./
-RUN npm run build
+RUN yarn build
 
 # Copy backend source
 WORKDIR /app/backend
@@ -34,5 +35,5 @@ WORKDIR /app/backend
 # Expose port
 EXPOSE 3001
 
-# Start backend only (serve static files from backend)
+# Start backend
 CMD ["node", "server.js"]
