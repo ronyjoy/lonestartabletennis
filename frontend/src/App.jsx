@@ -381,13 +381,32 @@ function LoginPage() {
         )}
 
         <div className="text-center space-y-2">
-          <button 
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-blue-500 hover:text-blue-700"
-          >
-            {isLogin ? 'Need an account? Register' : 'Already have an account? Sign In'}
-          </button>
-          <br />
+          {/* Only show register toggle for non-role-specific logins or student logins */}
+          {(!expectedRole || expectedRole === 'student') && (
+            <>
+              <button 
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-blue-500 hover:text-blue-700"
+              >
+                {isLogin ? 'Need an account? Register' : 'Already have an account? Sign In'}
+              </button>
+              <br />
+            </>
+          )}
+          
+          {/* Show helpful message for coach/admin role-specific logins */}
+          {expectedRole && expectedRole !== 'student' && isLogin && (
+            <>
+              <p className="text-sm text-gray-600">
+                {expectedRole === 'coach' ? 'Coach' : 'Admin'} accounts are created by the system administrator.
+              </p>
+              <p className="text-xs text-gray-500">
+                Don't have an account? Contact the admin for access.
+              </p>
+              <br />
+            </>
+          )}
+          
           <button 
             onClick={() => navigate('/')}
             className="text-gray-500 hover:text-gray-700"
