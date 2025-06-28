@@ -22,6 +22,6 @@
   "author": "Lone Star Table Tennis Academy",
   "license": "MIT",
   "engines": {
-    "node": "18.20.4"
+    "node": ">=18.20.4"
   }
 }
