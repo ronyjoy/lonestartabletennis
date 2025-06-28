@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // Register (students only)
 router.post('/register', async (req, res) => {

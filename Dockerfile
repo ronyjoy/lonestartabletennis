@@ -33,6 +33,7 @@ COPY --from=frontend-build /app/frontend/dist ./public
 # Environment variables
 ENV PORT=3001
 ENV NODE_ENV=production
+ENV JWT_SECRET=table-tennis-academy-secret-key-2024
 
 # Expose port
 EXPOSE 3001
