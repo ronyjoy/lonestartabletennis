@@ -8,7 +8,8 @@ export const API_ENDPOINTS = {
   REGISTER: `${API_BASE_URL}/api/auth/register`,
   SKILLS: `${API_BASE_URL}/api/skills`,
   SKILLS_STUDENTS: `${API_BASE_URL}/api/skills/students`,
-  PUBLIC_LEAGUES: `${API_BASE_URL}/api/public/leagues`
+  PUBLIC_LEAGUES: `${API_BASE_URL}/api/public/leagues`,
+  LEAGUES: `${API_BASE_URL}/api/leagues`
 };
 
 export default API_BASE_URL;

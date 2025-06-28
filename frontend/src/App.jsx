@@ -1113,6 +1113,23 @@ function MatchesPage() {
 function LeaguesPage() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
+  const [leagues, setLeagues] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [editingLeague, setEditingLeague] = useState(null)
+  const [message, setMessage] = useState('')
+
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    day_of_week: 1,
+    start_time: '19:00',
+    end_time: '21:00',
+    max_participants: 16,
+    skill_level_min: 1,
+    skill_level_max: 10,
+    entry_fee: 0
+  })
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -1132,12 +1149,144 @@ function LeaguesPage() {
         return
       }
     }
+    
+    fetchLeagues()
   }, [navigate])
+
+  const fetchLeagues = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(API_ENDPOINTS.LEAGUES, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setLeagues(data.leagues)
+      }
+    } catch (error) {
+      console.error('Error fetching leagues:', error)
+      setMessage('Error fetching leagues')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setMessage('')
+    
+    try {
+      const token = localStorage.getItem('token')
+      const url = editingLeague 
+        ? `${API_ENDPOINTS.LEAGUES}/${editingLeague.id}`
+        : API_ENDPOINTS.LEAGUES
+      
+      const method = editingLeague ? 'PUT' : 'POST'
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      })
+
+      const data = await response.json()
+      
+      if (response.ok) {
+        setMessage(`League ${editingLeague ? 'updated' : 'created'} successfully!`)
+        setShowCreateForm(false)
+        setEditingLeague(null)
+        setFormData({
+          name: '',
+          description: '',
+          day_of_week: 1,
+          start_time: '19:00',
+          end_time: '21:00',
+          max_participants: 16,
+          skill_level_min: 1,
+          skill_level_max: 10,
+          entry_fee: 0
+        })
+        fetchLeagues()
+      } else {
+        setMessage(data.message || 'Error saving league')
+      }
+    } catch (error) {
+      setMessage('Error saving league')
+    }
+  }
+
+  const handleEdit = (league) => {
+    setEditingLeague(league)
+    setFormData({
+      name: league.name,
+      description: league.description || '',
+      day_of_week: league.day_of_week,
+      start_time: league.start_time,
+      end_time: league.end_time,
+      max_participants: league.max_participants,
+      skill_level_min: league.skill_level_min,
+      skill_level_max: league.skill_level_max,
+      entry_fee: league.entry_fee
+    })
+    setShowCreateForm(true)
+  }
+
+  const handleDelete = async (leagueId) => {
+    if (!confirm('Are you sure you want to delete this league?')) return
+    
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${API_ENDPOINTS.LEAGUES}/${leagueId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+      setMessage(data.message)
+      fetchLeagues()
+    } catch (error) {
+      setMessage('Error deleting league')
+    }
+  }
+
+  const handleToggleActive = async (league) => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${API_ENDPOINTS.LEAGUES}/${league.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ is_active: !league.is_active })
+      })
+
+      if (response.ok) {
+        setMessage(`League ${!league.is_active ? 'activated' : 'deactivated'} successfully!`)
+        fetchLeagues()
+      }
+    } catch (error) {
+      setMessage('Error updating league status')
+    }
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     navigate('/')
+  }
+
+  const getDayName = (dayNumber) => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    return days[dayNumber]
   }
 
   if (!user) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-600">Loading...</div></div>
@@ -1158,18 +1307,243 @@ function LeaguesPage() {
           </div>
         </div>
       </header>
+
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white p-8 rounded-lg shadow text-center">
-            <h2 className="text-2xl font-bold mb-4">League Administration</h2>
-            <p className="text-gray-600">This feature will allow admins to create and manage leagues.</p>
-            <p className="text-sm text-gray-500 mt-4">Coming soon...</p>
-            <div className="mt-6">
-              <button onClick={() => navigate('/leagues/signup')} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                View Public Signup Page
+          {message && (
+            <div className={`mb-4 p-3 rounded ${message.includes('successfully') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+              {message}
+            </div>
+          )}
+
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">League Templates</h2>
+            <div className="space-x-4">
+              <button
+                onClick={() => navigate('/league-signup')}
+                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+              >
+                View Public Page
+              </button>
+              <button
+                onClick={() => {
+                  setShowCreateForm(!showCreateForm)
+                  setEditingLeague(null)
+                  setFormData({
+                    name: '',
+                    description: '',
+                    day_of_week: 1,
+                    start_time: '19:00',
+                    end_time: '21:00',
+                    max_participants: 16,
+                    skill_level_min: 1,
+                    skill_level_max: 10,
+                    entry_fee: 0
+                  })
+                }}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
+                {showCreateForm ? 'Cancel' : 'Create New League'}
               </button>
             </div>
           </div>
+
+          {showCreateForm && (
+            <div className="bg-white p-6 rounded-lg shadow mb-6">
+              <h3 className="text-lg font-bold mb-4">{editingLeague ? 'Edit League' : 'Create New League'}</h3>
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">League Name</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Day of Week</label>
+                  <select
+                    value={formData.day_of_week}
+                    onChange={(e) => setFormData({...formData, day_of_week: parseInt(e.target.value)})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value={0}>Sunday</option>
+                    <option value={1}>Monday</option>
+                    <option value={2}>Tuesday</option>
+                    <option value={3}>Wednesday</option>
+                    <option value={4}>Thursday</option>
+                    <option value={5}>Friday</option>
+                    <option value={6}>Saturday</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Start Time</label>
+                  <input
+                    type="time"
+                    value={formData.start_time}
+                    onChange={(e) => setFormData({...formData, start_time: e.target.value})}
+                    required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">End Time</label>
+                  <input
+                    type="time"
+                    value={formData.end_time}
+                    onChange={(e) => setFormData({...formData, end_time: e.target.value})}
+                    required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Max Participants</label>
+                  <input
+                    type="number"
+                    min="4"
+                    max="50"
+                    value={formData.max_participants}
+                    onChange={(e) => setFormData({...formData, max_participants: parseInt(e.target.value)})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Entry Fee ($)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.entry_fee}
+                    onChange={(e) => setFormData({...formData, entry_fee: parseFloat(e.target.value)})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Min Skill Level</label>
+                  <select
+                    value={formData.skill_level_min}
+                    onChange={(e) => setFormData({...formData, skill_level_min: parseInt(e.target.value)})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {[1,2,3,4,5,6,7,8,9,10].map(level => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Max Skill Level</label>
+                  <select
+                    value={formData.skill_level_max}
+                    onChange={(e) => setFormData({...formData, skill_level_max: parseInt(e.target.value)})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    {[1,2,3,4,5,6,7,8,9,10].map(level => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700">Description</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    rows="3"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="League description..."
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <button
+                    type="submit"
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    {editingLeague ? 'Update League' : 'Create League'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {loading ? (
+            <div className="text-center py-8">Loading leagues...</div>
+          ) : (
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Existing Leagues ({leagues.length})</h3>
+              </div>
+              
+              {leagues.length === 0 ? (
+                <div className="p-6 text-center text-gray-600">
+                  No leagues created yet. Create your first league to get started!
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-200">
+                  {leagues.map((league) => (
+                    <div key={league.id} className="p-6">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <h4 className="text-lg font-medium text-gray-900">{league.name}</h4>
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              league.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {league.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                          <p className="text-gray-600 mt-1">{league.description}</p>
+                          <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                            <div><strong>Day:</strong> {getDayName(league.day_of_week)}</div>
+                            <div><strong>Time:</strong> {league.start_time} - {league.end_time}</div>
+                            <div><strong>Max Players:</strong> {league.max_participants}</div>
+                            <div><strong>Fee:</strong> ${league.entry_fee}</div>
+                            <div><strong>Skill Range:</strong> {league.skill_level_min}-{league.skill_level_max}</div>
+                            <div><strong>Total Instances:</strong> {league.total_instances}</div>
+                            <div><strong>Total Registrations:</strong> {league.total_registrations}</div>
+                          </div>
+                        </div>
+                        
+                        <div className="ml-4 flex space-x-2">
+                          <button
+                            onClick={() => handleEdit(league)}
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleToggleActive(league)}
+                            className={`font-bold py-1 px-3 rounded text-sm ${
+                              league.is_active 
+                                ? 'bg-orange-500 hover:bg-orange-700 text-white' 
+                                : 'bg-green-500 hover:bg-green-700 text-white'
+                            }`}
+                          >
+                            {league.is_active ? 'Deactivate' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(league.id)}
+                            className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
     </div>
