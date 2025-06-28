@@ -38,9 +38,11 @@ COPY frontend/ ./
 RUN echo "Running build..."
 RUN npm run build
 
-# Copy backend files
+# Copy backend files (excluding node_modules to preserve installed dependencies)
 WORKDIR /app/backend
-COPY backend/ ./
+COPY backend/src ./src/
+COPY backend/server.js ./
+COPY backend/.env* ./ 2>/dev/null || true
 
 # Move frontend build to backend public folder
 RUN cp -r ../frontend/dist ./public
