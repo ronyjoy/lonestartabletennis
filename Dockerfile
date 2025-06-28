@@ -14,8 +14,10 @@ RUN npm config set strict-ssl false && \
     npm config set registry http://registry.npmjs.org/
 
 # Copy package files
-COPY frontend/package.json frontend/package-lock.json* ./frontend/
-COPY backend/package.json backend/package-lock.json* ./backend/
+COPY frontend/package.json ./frontend/
+COPY frontend/package-lock.json ./frontend/
+COPY backend/package.json ./backend/
+COPY backend/package-lock.json ./backend/
 
 # Install backend dependencies
 WORKDIR /app/backend
@@ -23,11 +25,15 @@ RUN npm install --production --no-audit --no-fund
 
 # Install frontend dependencies and build
 WORKDIR /app/frontend
-RUN npm install --include=dev --no-audit --no-fund
-# Verify vite is installed
-RUN npm list vite || echo "Vite not found in node_modules"
-RUN ls -la node_modules/.bin/ | grep vite || echo "Vite binary not found"
+RUN echo "Installing frontend dependencies..."
+RUN npm ci --no-audit --no-fund
+RUN echo "Verifying vite installation..."
+RUN npm list vite
+RUN echo "Checking package.json..."
+RUN cat package.json | grep vite
+RUN echo "Copying frontend source files..."
 COPY frontend/ ./
+RUN echo "Running build..."
 RUN npm run build
 
 # Copy backend files
