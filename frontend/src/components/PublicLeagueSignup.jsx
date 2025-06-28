@@ -58,6 +58,21 @@ const PublicLeagueSignup = () => {
     return days[dayNumber];
   };
 
+  const formatLeagueDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const getDaysUntilText = (daysUntil) => {
+    if (daysUntil === 0) return "Today!";
+    if (daysUntil === 1) return "Tomorrow";
+    return `In ${daysUntil} days`;
+  };
+
   if (selectedLeague) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
@@ -161,25 +176,45 @@ const PublicLeagueSignup = () => {
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            🏓 Lone Star Table Tennis Academy
+            🏓 This Week's Leagues
           </h1>
-          <p className="text-xl text-gray-600">
-            Join our weekly leagues - No membership required!
+          <p className="text-xl text-gray-600 mb-2">
+            Sign up for leagues happening this week
+          </p>
+          <p className="text-sm text-gray-500">
+            Week of {new Date().toLocaleDateString('en-US', { 
+              month: 'long', 
+              day: 'numeric',
+              year: 'numeric',
+              weekday: 'long'
+            })}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {leagues.map(league => (
-            <div key={league.id} className="bg-white rounded-lg shadow p-6">
+            <div key={league.id} className="bg-white rounded-lg shadow p-6 relative">
+              {/* Urgency badge */}
+              {league.days_until <= 1 && (
+                <div className={`absolute top-4 right-4 px-2 py-1 rounded text-xs font-bold text-white ${
+                  league.days_until === 0 ? 'bg-red-500' : 'bg-orange-500'
+                }`}>
+                  {getDaysUntilText(league.days_until)}
+                </div>
+              )}
+              
               <h3 className="text-xl font-bold mb-3">{league.name}</h3>
               <p className="text-gray-600 mb-4">{league.description}</p>
               
               <div className="space-y-2 mb-4">
-                <p><strong>📅 When:</strong> {getDayName(league.day_of_week)}s</p>
+                <p><strong>📅 Date:</strong> {formatLeagueDate(league.league_date)}</p>
                 <p><strong>🕐 Time:</strong> {league.start_time} - {league.end_time}</p>
                 <p><strong>🎯 Skill Level:</strong> {league.skill_level_min}-{league.skill_level_max}</p>
                 <p><strong>👥 Spots:</strong> {league.actual_participants}/{league.max_participants}</p>
                 {league.entry_fee > 0 && <p><strong>💰 Fee:</strong> ${league.entry_fee}</p>}
+                <p className="text-sm text-gray-500">
+                  <strong>📍 Status:</strong> {getDaysUntilText(league.days_until)}
+                </p>
               </div>
               
               {league.actual_participants >= league.max_participants ? (

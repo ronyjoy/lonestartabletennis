@@ -41,17 +41,24 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
-        <Logo size="large" showText={true} className="mb-4" />
+        <Logo size="large" showText={true} className="mb-6" />
         <p className="text-xl text-gray-600 mb-8">
-          Welcome to the Table Tennis Academy Management System
+          Join Austin's Premier Table Tennis Community
         </p>
-        <div className="space-x-4">
+        
+        {/* Primary CTA */}
+        <div className="mb-6">
           <button 
             onClick={() => navigate('/league-signup')}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200"
           >
-            🏓 Join a League
+            🏓 Sign Up for This Week's Leagues
           </button>
+          <p className="text-sm text-gray-500 mt-2">No membership required • Drop-in friendly</p>
+        </div>
+        
+        {/* Secondary buttons */}
+        <div className="space-x-4">
           <button 
             onClick={() => navigate('/login')}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
