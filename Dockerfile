@@ -18,8 +18,12 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy backend files and install dependencies
-COPY backend/package.json backend/package-lock.json ./
-RUN npm ci --only=production
+COPY backend/package.json ./
+RUN rm -f package-lock.json
+RUN npm install --verbose
+RUN echo "=== Checking dotenv installation ==="
+RUN npm list dotenv
+RUN ls -la node_modules/dotenv/
 
 COPY backend/ ./
 
