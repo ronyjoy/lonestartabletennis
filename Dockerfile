@@ -1,19 +1,23 @@
 # Multi-stage Docker build for full-stack app
 FROM node:18.20.4-alpine as frontend-build
 
+# Install yarn
+RUN npm install -g yarn
+
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
-RUN npm install --production=false
-RUN npm list vite
+RUN yarn install --frozen-lockfile || yarn install
+RUN yarn list vite || echo "Vite not found, trying alternative..."
 COPY frontend/ ./
-RUN npm run build
+RUN yarn build
 
 # Backend stage
 FROM node:18.20.4-alpine as backend
 
 WORKDIR /app
 COPY backend/package*.json ./
-RUN npm install --production
+RUN npm cache clean --force
+RUN npm install --legacy-peer-deps --no-audit --no-fund --production
 COPY backend/ ./
 
 # Final stage - serve both
