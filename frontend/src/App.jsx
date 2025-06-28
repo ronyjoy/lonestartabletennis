@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import Logo from './components/Logo'
+import PublicLeagueSignup from './components/PublicLeagueSignup'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/leagues" element={<LeaguesPage />} />
         <Route path="/leagues/signup" element={<LeagueSignupPage />} />
+        <Route path="/league-signup" element={<PublicLeagueSignup />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </Router>
@@ -45,10 +47,16 @@ function HomePage() {
         </p>
         <div className="space-x-4">
           <button 
+            onClick={() => navigate('/league-signup')}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            🏓 Join a League
+          </button>
+          <button 
             onClick={() => navigate('/login')}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
-            Get Started
+            Member Login
           </button>
           <button 
             onClick={() => navigate('/about')}
