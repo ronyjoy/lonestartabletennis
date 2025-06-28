@@ -19,7 +19,13 @@ RUN npm config set registry https://registry.npmjs.org/ && \
 COPY frontend/ ./frontend/
 WORKDIR /app/frontend
 RUN npm install --no-audit --no-fund
-RUN npm run build
+RUN echo "=== Debugging npm run build ===" && \
+    echo "Current directory:" && pwd && \
+    echo "Files in current directory:" && ls -la && \
+    echo "Node modules vite:" && ls -la node_modules/.bin/vite || echo "vite binary not found" && \
+    echo "Package.json scripts:" && cat package.json | grep -A 10 '"scripts"' && \
+    echo "Running build..." && \
+    npm run build
 
 # Copy backend files and install dependencies
 WORKDIR /app
