@@ -3,14 +3,14 @@ FROM node:18-alpine AS frontend-build
 
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
+RUN echo "=== About to run npm install ==="
 RUN npm install
-RUN echo "=== Debug vite installation ==="
-RUN ls -la node_modules/.bin/
-RUN npm list vite
-RUN which vite || echo "vite not in PATH"
+RUN echo "=== After npm install - checking directories ==="
+RUN ls -la
+RUN ls -la node_modules/ || echo "node_modules directory not found"
+RUN ls -la node_modules/.bin/ || echo "node_modules/.bin directory not found"
+RUN npm list || echo "npm list failed"
 COPY frontend/ ./
-RUN echo "=== Package.json scripts ==="
-RUN cat package.json
 RUN echo "=== Attempting npm run build ==="
 RUN npm run build
 
