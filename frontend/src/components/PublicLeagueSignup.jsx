@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { TableTennisIcon, CalendarIcon, ClockIcon, TargetIcon, UsersIcon, DollarIcon, MapPinIcon } from './icons';
 
 const PublicLeagueSignup = () => {
   const [leagues, setLeagues] = useState([]);
@@ -175,8 +176,9 @@ const PublicLeagueSignup = () => {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            🏓 This Week's Leagues
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
+            <TableTennisIcon className="w-10 h-10 text-blue-600" />
+            This Week's Leagues
           </h1>
           <p className="text-xl text-gray-600 mb-2">
             Sign up for leagues happening this week
@@ -207,13 +209,31 @@ const PublicLeagueSignup = () => {
               <p className="text-gray-600 mb-4">{league.description}</p>
               
               <div className="space-y-2 mb-4">
-                <p><strong>📅 Date:</strong> {formatLeagueDate(league.league_date)}</p>
-                <p><strong>🕐 Time:</strong> {league.start_time} - {league.end_time}</p>
-                <p><strong>🎯 Skill Level:</strong> {league.skill_level_min}-{league.skill_level_max}</p>
-                <p><strong>👥 Spots:</strong> {league.actual_participants}/{league.max_participants}</p>
-                {league.entry_fee > 0 && <p><strong>💰 Fee:</strong> ${league.entry_fee}</p>}
-                <p className="text-sm text-gray-500">
-                  <strong>📍 Status:</strong> {getDaysUntilText(league.days_until)}
+                <p className="flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4 text-blue-600" />
+                  <strong>Date:</strong> {formatLeagueDate(league.league_date)}
+                </p>
+                <p className="flex items-center gap-2">
+                  <ClockIcon className="w-4 h-4 text-green-600" />
+                  <strong>Time:</strong> {league.start_time} - {league.end_time}
+                </p>
+                <p className="flex items-center gap-2">
+                  <TargetIcon className="w-4 h-4 text-purple-600" />
+                  <strong>Skill Level:</strong> {league.skill_level_min}-{league.skill_level_max}
+                </p>
+                <p className="flex items-center gap-2">
+                  <UsersIcon className="w-4 h-4 text-orange-600" />
+                  <strong>Spots:</strong> {league.actual_participants}/{league.max_participants}
+                </p>
+                {league.entry_fee > 0 && (
+                  <p className="flex items-center gap-2">
+                    <DollarIcon className="w-4 h-4 text-green-600" />
+                    <strong>Fee:</strong> ${league.entry_fee}
+                  </p>
+                )}
+                <p className="text-sm text-gray-500 flex items-center gap-2">
+                  <MapPinIcon className="w-4 h-4 text-gray-500" />
+                  <strong>Status:</strong> {getDaysUntilText(league.days_until)}
                 </p>
               </div>
               

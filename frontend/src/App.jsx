@@ -3,6 +3,24 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import Logo from './components/Logo'
 import PublicLeagueSignup from './components/PublicLeagueSignup'
 import { API_ENDPOINTS } from './config/api'
+import { 
+  TableTennisIcon, 
+  TrophyIcon, 
+  AcademicCapIcon, 
+  ChartBarIcon, 
+  UserIcon, 
+  UsersIcon, 
+  BriefcaseIcon, 
+  StarIcon, 
+  CalendarIcon, 
+  ClockIcon, 
+  TargetIcon, 
+  MapPinIcon, 
+  DollarIcon, 
+  TrendingUpIcon, 
+  SettingsIcon, 
+  PlayIcon 
+} from './components/icons'
 
 function App() {
   return (
@@ -81,15 +99,17 @@ function HomePage() {
           <div className="mb-12">
             <button 
               onClick={() => navigate('/league-signup')}
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200 mr-4"
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200 mr-4 inline-flex items-center gap-3"
             >
-              🏓 Join This Week's Leagues
+              <TableTennisIcon className="w-6 h-6" color="white" />
+              Join This Week's Leagues
             </button>
             <button 
               onClick={() => navigate('/login')}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200 inline-flex items-center gap-3"
             >
-              👤 Member Login
+              <UserIcon className="w-6 h-6" color="white" />
+              Member Login
             </button>
           </div>
           
@@ -109,19 +129,25 @@ function HomePage() {
           
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-6 bg-blue-50 rounded-lg">
-              <div className="text-4xl mb-4">🏓</div>
+              <div className="flex justify-center mb-4">
+                <TableTennisIcon className="w-12 h-12 text-blue-600" />
+              </div>
               <h3 className="text-xl font-bold mb-2">Weekly Leagues</h3>
               <p className="text-gray-600">Competitive and social leagues for all skill levels. Sign up weekly, no long-term commitment required.</p>
             </div>
             
             <div className="text-center p-6 bg-green-50 rounded-lg">
-              <div className="text-4xl mb-4">📚</div>
+              <div className="flex justify-center mb-4">
+                <AcademicCapIcon className="w-12 h-12 text-green-600" />
+              </div>
               <h3 className="text-xl font-bold mb-2">Professional Coaching</h3>
               <p className="text-gray-600">Learn from certified coaches who track your progress and help you improve specific skills.</p>
             </div>
             
             <div className="text-center p-6 bg-purple-50 rounded-lg">
-              <div className="text-4xl mb-4">🏆</div>
+              <div className="flex justify-center mb-4">
+                <ChartBarIcon className="w-12 h-12 text-purple-600" />
+              </div>
               <h3 className="text-xl font-bold mb-2">Skill Tracking</h3>
               <p className="text-gray-600">Monitor your improvement with our comprehensive skill rating system and performance analytics.</p>
             </div>
@@ -139,37 +165,46 @@ function HomePage() {
           
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-              <div className="text-5xl mb-4">👨‍🎓</div>
+              <div className="flex justify-center mb-4">
+                <UserIcon className="w-16 h-16 text-blue-600" />
+              </div>
               <h3 className="text-2xl font-bold mb-4 text-blue-600">Student</h3>
               <p className="text-gray-600 mb-6">Join leagues, track your skills, and improve your game with professional coaching.</p>
               <button 
                 onClick={() => navigate('/login?role=student')}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg inline-flex items-center justify-center gap-2"
               >
+                <UserIcon className="w-5 h-5" color="white" />
                 Student Login
               </button>
             </div>
             
             <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-              <div className="text-5xl mb-4">👨‍🏫</div>
+              <div className="flex justify-center mb-4">
+                <AcademicCapIcon className="w-16 h-16 text-green-600" />
+              </div>
               <h3 className="text-2xl font-bold mb-4 text-green-600">Coach</h3>
               <p className="text-gray-600 mb-6">Manage student progress, assign skill ratings, and help players reach their potential.</p>
               <button 
                 onClick={() => navigate('/login?role=coach')}
-                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg"
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg inline-flex items-center justify-center gap-2"
               >
+                <AcademicCapIcon className="w-5 h-5" color="white" />
                 Coach Login
               </button>
             </div>
             
             <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-              <div className="text-5xl mb-4">👨‍💼</div>
+              <div className="flex justify-center mb-4">
+                <BriefcaseIcon className="w-16 h-16 text-purple-600" />
+              </div>
               <h3 className="text-2xl font-bold mb-4 text-purple-600">Admin</h3>
               <p className="text-gray-600 mb-6">Manage leagues, oversee operations, and maintain the academy's systems.</p>
               <button 
                 onClick={() => navigate('/login?role=admin')}
-                className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg"
+                className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg inline-flex items-center justify-center gap-2"
               >
+                <BriefcaseIcon className="w-5 h-5" color="white" />
                 Admin Login
               </button>
             </div>
@@ -273,10 +308,10 @@ function LoginPage() {
 
   const getRoleIcon = (role) => {
     switch(role) {
-      case 'student': return '👨‍🎓'
-      case 'coach': return '👨‍🏫'
-      case 'admin': return '👨‍💼'
-      default: return '👤'
+      case 'student': return <UserIcon className="w-16 h-16 text-blue-600" />
+      case 'coach': return <AcademicCapIcon className="w-16 h-16 text-green-600" />
+      case 'admin': return <BriefcaseIcon className="w-16 h-16 text-purple-600" />
+      default: return <UserIcon className="w-16 h-16 text-gray-600" />
     }
   }
 
@@ -287,7 +322,7 @@ function LoginPage() {
           <Logo size="medium" showText={false} className="mb-4" />
           {expectedRole ? (
             <div className="mb-6">
-              <div className="text-6xl mb-2">{getRoleIcon(expectedRole)}</div>
+              <div className="flex justify-center mb-4">{getRoleIcon(expectedRole)}</div>
               <h2 className={`text-3xl font-bold ${getRoleColor(expectedRole)}`}>
                 {expectedRole.charAt(0).toUpperCase() + expectedRole.slice(1)} {isLogin ? 'Login' : 'Registration'}
               </h2>
@@ -434,19 +469,31 @@ function AboutPage() {
         </div>
         <div className="grid md:grid-cols-2 gap-8">
           <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-bold mb-4">🏆 Skill Tracking</h3>
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <ChartBarIcon className="w-6 h-6 text-purple-600" />
+              Skill Tracking
+            </h3>
             <p className="text-gray-600">Track your progress across different table tennis skills and techniques.</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-bold mb-4">🏓 League Management</h3>
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <TableTennisIcon className="w-6 h-6 text-blue-600" />
+              League Management
+            </h3>
             <p className="text-gray-600">Join leagues, compete with other players, and climb the rankings.</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-bold mb-4">📊 Match Analytics</h3>
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <TrendingUpIcon className="w-6 h-6 text-green-600" />
+              Match Analytics
+            </h3>
             <p className="text-gray-600">Analyze your match performance and identify areas for improvement.</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-xl font-bold mb-4">👥 Community</h3>
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <UsersIcon className="w-6 h-6 text-orange-600" />
+              Community
+            </h3>
             <p className="text-gray-600">Connect with other players and share your table tennis journey.</p>
           </div>
         </div>
@@ -555,7 +602,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">👨‍🎓</div>
+                          <UserIcon className="w-8 h-8 text-blue-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -575,7 +622,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">👨‍🏫</div>
+                          <AcademicCapIcon className="w-8 h-8 text-green-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -595,7 +642,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">🏆</div>
+                          <TrophyIcon className="w-8 h-8 text-purple-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -615,7 +662,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">📊</div>
+                          <ChartBarIcon className="w-8 h-8 text-gray-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -635,7 +682,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">📈</div>
+                          <TrendingUpIcon className="w-8 h-8 text-green-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -659,7 +706,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">👨‍🎓</div>
+                          <UserIcon className="w-8 h-8 text-blue-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -679,7 +726,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">📚</div>
+                          <AcademicCapIcon className="w-8 h-8 text-green-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -699,7 +746,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">⭐</div>
+                          <StarIcon className="w-8 h-8 text-yellow-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -723,7 +770,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">🏆</div>
+                          <TrophyIcon className="w-8 h-8 text-purple-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -743,7 +790,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">⭐</div>
+                          <StarIcon className="w-8 h-8 text-yellow-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -763,7 +810,7 @@ function DashboardPage() {
                     <div className="p-5">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <div className="text-2xl">🏓</div>
+                          <TableTennisIcon className="w-8 h-8 text-blue-600" />
                         </div>
                         <div className="ml-5 w-0 flex-1">
                           <dl>
@@ -787,18 +834,20 @@ function DashboardPage() {
               {/* Skills - Students view only, Coaches can manage */}
               <button 
                 onClick={() => navigate('/skills')}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
               >
-                📊 {user.role === 'coach' ? 'Manage Skills' : 'View Skills'}
+                <ChartBarIcon className="w-5 h-5" color="white" />
+                {user.role === 'coach' ? 'Manage Skills' : 'View Skills'}
               </button>
               
               {/* Matches - Admin only */}
               {user.role === 'admin' && (
                 <button 
                   onClick={() => navigate('/matches')}
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-lg"
+                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
                 >
-                  🏓 Record Match
+                  <PlayIcon className="w-5 h-5" color="white" />
+                  Record Match
                 </button>
               )}
               
@@ -806,9 +855,10 @@ function DashboardPage() {
               {user.role === 'admin' && (
                 <button 
                   onClick={() => navigate('/leagues')}
-                  className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-4 px-4 rounded-lg"
+                  className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
                 >
-                  🏆 Manage Leagues
+                  <TrophyIcon className="w-5 h-5" color="white" />
+                  Manage Leagues
                 </button>
               )}
               
@@ -816,9 +866,10 @@ function DashboardPage() {
               {user.role === 'student' && (
                 <button 
                   onClick={() => navigate('/league-signup')}
-                  className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-4 px-4 rounded-lg"
+                  className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
                 >
-                  🏓 Join Leagues
+                  <TableTennisIcon className="w-5 h-5" color="white" />
+                  Join Leagues
                 </button>
               )}
               
@@ -826,18 +877,20 @@ function DashboardPage() {
               {user.role === 'student' && (
                 <button 
                   onClick={() => navigate('/ranking')}
-                  className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-4 px-4 rounded-lg"
+                  className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
                 >
-                  🏆 View Ranking
+                  <TrophyIcon className="w-5 h-5" color="white" />
+                  View Ranking
                 </button>
               )}
               
               {/* Profile - Everyone */}
               <button 
                 onClick={() => navigate('/profile')}
-                className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-4 px-4 rounded-lg"
+                className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
               >
-                👤 Edit Profile
+                <SettingsIcon className="w-5 h-5" color="white" />
+                Edit Profile
               </button>
             </div>
             
@@ -1191,12 +1244,11 @@ function SkillsPage() {
                         <span className="text-sm text-gray-500">Rating: </span>
                         <div className="ml-2 flex items-center">
                           {[...Array(10)].map((_, i) => (
-                            <span
+                            <StarIcon
                               key={i}
-                              className={`text-lg ${i < skill.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                            >
-                              ⭐
-                            </span>
+                              className={`w-5 h-5 ${i < skill.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                              filled={i < skill.rating}
+                            />
                           ))}
                           <span className="ml-2 text-sm font-medium">{skill.rating}/10</span>
                         </div>
@@ -1309,7 +1361,10 @@ function RankingPage() {
               >
                 ← Dashboard
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">🏆 Your Ranking</h1>
+              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <TrophyIcon className="w-8 h-8 text-purple-600" />
+                Your Ranking
+              </h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.firstName}!</span>
@@ -1381,12 +1436,11 @@ function RankingPage() {
                     <div className="mt-2 flex items-center">
                       <div className="flex items-center">
                         {[...Array(10)].map((_, i) => (
-                          <span
+                          <StarIcon
                             key={i}
-                            className={`text-lg ${i < skill.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                          >
-                            ⭐
-                          </span>
+                            className={`w-5 h-5 ${i < skill.rating ? 'text-yellow-400' : 'text-gray-300'}`}
+                            filled={i < skill.rating}
+                          />
                         ))}
                         <span className="ml-2 text-sm font-medium">{skill.rating}/10</span>
                       </div>
@@ -1445,7 +1499,10 @@ function MatchesPage() {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
               <button onClick={() => navigate('/dashboard')} className="text-blue-500 hover:text-blue-700">← Dashboard</button>
-              <h1 className="text-2xl font-bold text-gray-900">🏓 Match Management</h1>
+              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <PlayIcon className="w-8 h-8 text-blue-600" />
+                Match Management
+              </h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.firstName}!</span>
@@ -1658,7 +1715,10 @@ function LeaguesPage() {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
               <button onClick={() => navigate('/dashboard')} className="text-blue-500 hover:text-blue-700">← Dashboard</button>
-              <h1 className="text-2xl font-bold text-gray-900">🏆 League Management</h1>
+              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <TrophyIcon className="w-8 h-8 text-purple-600" />
+                League Management
+              </h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.firstName}!</span>
@@ -1918,7 +1978,10 @@ function LeagueSignupPage() {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <h1 className="text-2xl font-bold text-gray-900">🏓 League Signup</h1>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <TableTennisIcon className="w-8 h-8 text-blue-600" />
+              League Signup
+            </h1>
             <button onClick={() => navigate('/')} className="text-blue-500 hover:text-blue-700">Back to Home</button>
           </div>
         </div>
