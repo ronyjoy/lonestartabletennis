@@ -9,9 +9,11 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Set npm config for SSL issues
-RUN npm config set strict-ssl false && \
-    npm config set registry http://registry.npmjs.org/
+# Set npm config for registry access
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set strict-ssl false && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000
 
 # Copy package files
 COPY frontend/package.json ./frontend/
@@ -26,11 +28,11 @@ RUN npm install --production --no-audit --no-fund
 # Install frontend dependencies and build
 WORKDIR /app/frontend
 RUN echo "Installing frontend dependencies..."
-RUN npm ci --no-audit --no-fund
+# Remove any existing lock file and install fresh
+RUN rm -f package-lock.json
+RUN npm install --no-audit --no-fund
 RUN echo "Verifying vite installation..."
 RUN npm list vite
-RUN echo "Checking package.json..."
-RUN cat package.json | grep vite
 RUN echo "Copying frontend source files..."
 COPY frontend/ ./
 RUN echo "Running build..."

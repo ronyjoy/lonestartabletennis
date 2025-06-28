@@ -19,11 +19,17 @@ router.get('/', async (req, res) => {
         lt.entry_fee,
         COALESCE(li.actual_participants, 0) as actual_participants,
         li.id as instance_id,
-        li.status
+        li.status,
+        -- Calculate days until league (0 = today, negative = past)
+        lt.day_of_week - EXTRACT(DOW FROM CURRENT_DATE) as days_until,
+        -- Calculate actual date of this week's league
+        DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '1 day' * lt.day_of_week as league_date
       FROM league_templates lt
       LEFT JOIN league_instances li ON lt.id = li.template_id 
         AND li.week_start_date = DATE_TRUNC('week', CURRENT_DATE)
       WHERE lt.is_active = true
+        -- Only show leagues that haven't happened yet this week, or today's leagues
+        AND (lt.day_of_week - EXTRACT(DOW FROM CURRENT_DATE)) >= 0
       ORDER BY lt.day_of_week, lt.start_time
     `;
     
