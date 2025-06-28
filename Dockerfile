@@ -1,40 +1,25 @@
-# Simple single-stage build
-FROM node:18-bullseye-slim
+# Multi-stage build - separate frontend build from runtime
+FROM node:18-alpine as frontend-build
 
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && \
-    apt-get install -y curl ca-certificates && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Set npm config for registry access
-RUN npm config set registry https://registry.npmjs.org/ && \
-    npm config set strict-ssl false && \
-    npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000
-
-# Copy frontend files and build
-COPY frontend/ ./frontend/
 WORKDIR /app/frontend
-RUN npm install --no-audit --no-fund
-RUN echo "=== Debugging npm run build ==="
-RUN pwd
-RUN ls -la
-RUN ls -la node_modules/.bin/ | grep vite || echo "vite binary not found"
-RUN cat package.json
-RUN echo "About to run npm run build..."
+COPY frontend/package*.json ./
+RUN npm ci --only=dev
+COPY frontend/ ./
 RUN npm run build
 
-# Copy backend files and install dependencies
-WORKDIR /app
-COPY backend/ ./backend/
-WORKDIR /app/backend
-RUN npm install --production --no-audit --no-fund
+# Backend runtime image
+FROM node:18-alpine
 
-# Move frontend build to backend public folder
-RUN cp -r ../frontend/dist ./public
+WORKDIR /app
+
+# Copy backend files and install dependencies
+COPY backend/package*.json ./
+RUN npm ci --only=production
+
+COPY backend/ ./
+
+# Copy frontend build from previous stage
+COPY --from=frontend-build /app/frontend/dist ./public
 
 # Environment variables
 ENV PORT=3001
