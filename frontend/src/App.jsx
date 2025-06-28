@@ -40,40 +40,156 @@ function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <Logo size="large" showText={true} className="mb-6" />
-        <p className="text-xl text-gray-600 mb-8">
-          Join Austin's Premier Table Tennis Community
-        </p>
-        
-        {/* Primary CTA */}
-        <div className="mb-6">
-          <button 
-            onClick={() => navigate('/league-signup')}
-            className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200"
-          >
-            🏓 Sign Up for This Week's Leagues
-          </button>
-          <p className="text-sm text-gray-500 mt-2">No membership required • Drop-in friendly</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <Logo size="small" showText={true} />
+            </div>
+            <div className="flex space-x-4">
+              <button 
+                onClick={() => navigate('/login')}
+                className="text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Login
+              </button>
+              <button 
+                onClick={() => navigate('/about')}
+                className="text-gray-600 hover:text-gray-800 font-medium"
+              >
+                About
+              </button>
+            </div>
+          </div>
         </div>
-        
-        {/* Secondary buttons */}
-        <div className="space-x-4">
-          <button 
-            onClick={() => navigate('/login')}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Member Login
-          </button>
-          <button 
-            onClick={() => navigate('/about')}
-            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Learn More
-          </button>
+      </nav>
+
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center">
+          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+            Austin's Premier <span className="text-blue-600">Table Tennis</span> Academy
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            Join our community of passionate players! From beginner lessons to competitive leagues, 
+            we offer everything you need to elevate your ping pong game.
+          </p>
+          
+          {/* Primary CTA */}
+          <div className="mb-12">
+            <button 
+              onClick={() => navigate('/league-signup')}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200 mr-4"
+            >
+              🏓 Join This Week's Leagues
+            </button>
+            <button 
+              onClick={() => navigate('/login')}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg transform hover:scale-105 transition-all duration-200"
+            >
+              👤 Member Login
+            </button>
+          </div>
+          
+          <p className="text-sm text-gray-500">
+            New to table tennis? No problem! • All skill levels welcome • Drop-in friendly
+          </p>
         </div>
       </div>
+
+      {/* Features Section */}
+      <div className="bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">What We Offer</h2>
+            <p className="text-lg text-gray-600">Everything you need for your table tennis journey</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center p-6 bg-blue-50 rounded-lg">
+              <div className="text-4xl mb-4">🏓</div>
+              <h3 className="text-xl font-bold mb-2">Weekly Leagues</h3>
+              <p className="text-gray-600">Competitive and social leagues for all skill levels. Sign up weekly, no long-term commitment required.</p>
+            </div>
+            
+            <div className="text-center p-6 bg-green-50 rounded-lg">
+              <div className="text-4xl mb-4">📚</div>
+              <h3 className="text-xl font-bold mb-2">Professional Coaching</h3>
+              <p className="text-gray-600">Learn from certified coaches who track your progress and help you improve specific skills.</p>
+            </div>
+            
+            <div className="text-center p-6 bg-purple-50 rounded-lg">
+              <div className="text-4xl mb-4">🏆</div>
+              <h3 className="text-xl font-bold mb-2">Skill Tracking</h3>
+              <p className="text-gray-600">Monitor your improvement with our comprehensive skill rating system and performance analytics.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Login Options Section */}
+      <div className="bg-gray-50 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Join Our Community</h2>
+            <p className="text-lg text-gray-600">Choose your role and get started today</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+              <div className="text-5xl mb-4">👨‍🎓</div>
+              <h3 className="text-2xl font-bold mb-4 text-blue-600">Student</h3>
+              <p className="text-gray-600 mb-6">Join leagues, track your skills, and improve your game with professional coaching.</p>
+              <button 
+                onClick={() => navigate('/login?role=student')}
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg"
+              >
+                Student Login
+              </button>
+            </div>
+            
+            <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+              <div className="text-5xl mb-4">👨‍🏫</div>
+              <h3 className="text-2xl font-bold mb-4 text-green-600">Coach</h3>
+              <p className="text-gray-600 mb-6">Manage student progress, assign skill ratings, and help players reach their potential.</p>
+              <button 
+                onClick={() => navigate('/login?role=coach')}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg"
+              >
+                Coach Login
+              </button>
+            </div>
+            
+            <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+              <div className="text-5xl mb-4">👨‍💼</div>
+              <h3 className="text-2xl font-bold mb-4 text-purple-600">Admin</h3>
+              <p className="text-gray-600 mb-6">Manage leagues, oversee operations, and maintain the academy's systems.</p>
+              <button 
+                onClick={() => navigate('/login?role=admin')}
+                className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg"
+              >
+                Admin Login
+              </button>
+            </div>
+          </div>
+          
+          <div className="text-center mt-8">
+            <p className="text-gray-600">
+              New student? <button onClick={() => navigate('/login')} className="text-blue-600 hover:text-blue-800 font-medium">Register here</button>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <Logo size="small" showText={true} className="mb-4" />
+          <p className="text-gray-400">© 2024 Lone Star Table Tennis Academy. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   )
 }
@@ -88,6 +204,16 @@ function LoginPage() {
   const [role, setRole] = useState('student')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [expectedRole, setExpectedRole] = useState(null)
+
+  useEffect(() => {
+    // Check if role was specified in URL parameters
+    const urlParams = new URLSearchParams(window.location.search)
+    const roleParam = urlParams.get('role')
+    if (roleParam) {
+      setExpectedRole(roleParam)
+    }
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -112,6 +238,12 @@ function LoginPage() {
       const data = await response.json()
 
       if (response.ok) {
+        // Check if user role matches expected role
+        if (expectedRole && data.user.role !== expectedRole) {
+          setMessage(`This login is for ${expectedRole}s only. Your account is registered as ${data.user.role}.`)
+          return
+        }
+        
         setMessage(`${isLogin ? 'Login' : 'Registration'} successful! Welcome ${data.user.firstName}!`)
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
@@ -130,17 +262,49 @@ function LoginPage() {
     }
   }
 
+  const getRoleColor = (role) => {
+    switch(role) {
+      case 'student': return 'text-blue-600'
+      case 'coach': return 'text-green-600'
+      case 'admin': return 'text-purple-600'
+      default: return 'text-gray-600'
+    }
+  }
+
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case 'student': return '👨‍🎓'
+      case 'coach': return '👨‍🏫'
+      case 'admin': return '👨‍💼'
+      default: return '👤'
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-xl">
         <div className="text-center">
           <Logo size="medium" showText={false} className="mb-4" />
-          <h2 className="text-3xl font-bold text-gray-900">
-            {isLogin ? 'Sign In' : 'Register'}
-          </h2>
-          <p className="mt-2 text-gray-600">
-            {isLogin ? 'Access your Table Tennis Academy account' : 'Create your Table Tennis Academy account'}
-          </p>
+          {expectedRole ? (
+            <div className="mb-6">
+              <div className="text-6xl mb-2">{getRoleIcon(expectedRole)}</div>
+              <h2 className={`text-3xl font-bold ${getRoleColor(expectedRole)}`}>
+                {expectedRole.charAt(0).toUpperCase() + expectedRole.slice(1)} {isLogin ? 'Login' : 'Registration'}
+              </h2>
+              <p className="mt-2 text-gray-600">
+                {isLogin ? `Sign in to your ${expectedRole} account` : `Create your ${expectedRole} account`}
+              </p>
+            </div>
+          ) : (
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-900">
+                {isLogin ? 'Sign In' : 'Register'}
+              </h2>
+              <p className="mt-2 text-gray-600">
+                {isLogin ? 'Access your Table Tennis Academy account' : 'Create your Table Tennis Academy account'}
+              </p>
+            </div>
+          )}
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {!isLogin && (
@@ -283,11 +447,7 @@ function AboutPage() {
 function DashboardPage() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
-  const [stats, setStats] = useState({
-    skillsTracked: 0,
-    matchesPlayed: 0,
-    leagueRank: 'Unranked'
-  })
+  const [stats, setStats] = useState({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -309,19 +469,15 @@ function DashboardPage() {
     try {
       const token = localStorage.getItem('token')
       
-      // Fetch skills count
-      const skillsResponse = await fetch(API_ENDPOINTS.SKILLS, {
+      const response = await fetch(API_ENDPOINTS.DASHBOARD_STATS, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
 
-      if (skillsResponse.ok) {
-        const skillsData = await skillsResponse.json()
-        setStats(prev => ({
-          ...prev,
-          skillsTracked: skillsData.skills?.length || 0
-        }))
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data.stats)
       }
     } catch (error) {
       console.error('Error fetching dashboard stats:', error)
@@ -372,67 +528,239 @@ function DashboardPage() {
           <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h2>
             
-            {/* Stats Cards */}
+            {/* Role-specific Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="text-2xl">🏆</div>
-                    </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">
-                          Skills Tracked
-                        </dt>
-                        <dd className="text-lg font-medium text-gray-900">
-                          {loading ? '...' : stats.skillsTracked}
-                        </dd>
-                      </dl>
+              {user.role === 'admin' && (
+                <>
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">👨‍🎓</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              Total Students
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.totalStudents || 0}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="text-2xl">🏓</div>
-                    </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">
-                          Matches Played
-                        </dt>
-                        <dd className="text-lg font-medium text-gray-900">
-                          {loading ? '...' : stats.matchesPlayed}
-                        </dd>
-                      </dl>
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">👨‍🏫</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              Total Coaches
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.totalCoaches || 0}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="text-2xl">🎯</div>
-                    </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">
-                          League Rank
-                        </dt>
-                        <dd className="text-lg font-medium text-gray-900">
-                          {loading ? '...' : stats.leagueRank}
-                        </dd>
-                      </dl>
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">🏆</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              Active Leagues
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.activeLeagues || 0}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">📊</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              Total Registrations
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.totalRegistrations || 0}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">📈</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              This Week's Signups
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.weeklyRegistrations || 0}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {user.role === 'coach' && (
+                <>
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">👨‍🎓</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              Students Coached
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.studentsCoached || 0}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">📚</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              Skills Assigned
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.skillsAssigned || 0}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">⭐</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              Avg Skill Rating
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.averageSkillRating || '0.0'}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {user.role === 'student' && (
+                <>
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">🏆</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              Skills Tracked
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.skillsTracked || 0}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">⭐</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              Average Rating
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.averageRating || '0.0'}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white overflow-hidden shadow rounded-lg">
+                    <div className="p-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="text-2xl">🏓</div>
+                        </div>
+                        <div className="ml-5 w-0 flex-1">
+                          <dl>
+                            <dt className="text-sm font-medium text-gray-500 truncate">
+                              League Registrations
+                            </dt>
+                            <dd className="text-lg font-medium text-gray-900">
+                              {loading ? '...' : stats.leagueRegistrations || 0}
+                            </dd>
+                          </dl>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Role-based Quick Actions */}
@@ -462,6 +790,16 @@ function DashboardPage() {
                   className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-4 px-4 rounded-lg"
                 >
                   🏆 Manage Leagues
+                </button>
+              )}
+              
+              {/* League Signup - Students only */}
+              {user.role === 'student' && (
+                <button 
+                  onClick={() => navigate('/league-signup')}
+                  className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-4 px-4 rounded-lg"
+                >
+                  🏓 Join Leagues
                 </button>
               )}
               
