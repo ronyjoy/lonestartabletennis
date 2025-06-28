@@ -138,3 +138,35 @@ export const PlayIcon = ({ className = "w-8 h-8", color = "currentColor" }) => (
     <polygon points="5,3 19,12 5,21" />
   </svg>
 );
+
+// Plus Icon
+export const PlusIcon = ({ className = "w-8 h-8", color = "currentColor" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+// Trash Icon
+export const TrashIcon = ({ className = "w-8 h-8", color = "currentColor" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+    <polyline points="3,6 5,6 21,6" />
+    <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2" />
+  </svg>
+);
+
+// Eye Icon
+export const EyeIcon = ({ className = "w-8 h-8", color = "currentColor" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+// Trending Down Icon
+export const TrendingDownIcon = ({ className = "w-8 h-8", color = "currentColor" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+    <polyline points="23,18 13.5,8.5 8.5,13.5 1,6" />
+    <polyline points="17,18 23,18 23,12" />
+  </svg>
+);

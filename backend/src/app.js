@@ -5,7 +5,7 @@ const path = require('path');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
-const skillRoutes = require('./routes/skills');
+const skillRoutes = require('./routes/skills-enhanced');
 const commentRoutes = require('./routes/comments');
 const leagueRoutes = require('./routes/leagues');
 const matchRoutes = require('./routes/matches');
