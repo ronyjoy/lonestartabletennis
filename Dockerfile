@@ -20,11 +20,11 @@ COPY frontend/ ./frontend/
 WORKDIR /app/frontend
 RUN npm install --no-audit --no-fund
 RUN echo "=== Debugging npm run build ==="
-RUN echo "Current directory:" && pwd
-RUN echo "Files in current directory:" && ls -la
-RUN echo "Node modules vite:" && ls -la node_modules/.bin/vite || echo "vite binary not found"
-RUN echo "Package.json scripts:" && cat package.json | grep -A 10 '"scripts"'
-RUN echo "Running build..." 
+RUN pwd
+RUN ls -la
+RUN ls -la node_modules/.bin/ | grep vite || echo "vite binary not found"
+RUN cat package.json
+RUN echo "About to run npm run build..."
 RUN npm run build
 
 # Copy backend files and install dependencies
