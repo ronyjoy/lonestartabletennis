@@ -164,6 +164,38 @@ router.post('/:leagueId/register', async (req, res) => {
   }
 });
 
+// Get current week's registrations for a league (public endpoint)
+router.get('/:leagueId/players', async (req, res) => {
+  try {
+    const { leagueId } = req.params;
+    
+    const query = `
+      SELECT 
+        plr.first_name,
+        plr.last_name,
+        plr.skill_level,
+        plr.registration_date,
+        -- Only show first letter of last name for privacy
+        CONCAT(plr.first_name, ' ', LEFT(plr.last_name, 1), '.') as display_name
+      FROM public_league_registrations plr
+      JOIN league_instances li ON plr.league_instance_id = li.id
+      JOIN league_templates lt ON li.template_id = lt.id
+      WHERE lt.id = $1 
+        AND li.week_start_date = DATE_TRUNC('week', CURRENT_DATE)
+      ORDER BY plr.registration_date ASC
+    `;
+    
+    const result = await db.query(query, [leagueId]);
+    res.json({ 
+      players: result.rows,
+      total_registered: result.rows.length 
+    });
+  } catch (error) {
+    console.error('Error fetching league players:', error);
+    res.status(500).json({ message: 'Error fetching league players' });
+  }
+});
+
 // Get registrations for admin (protected route - add auth middleware)
 router.get('/:leagueId/registrations', async (req, res) => {
   try {

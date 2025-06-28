@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { TableTennisIcon, CalendarIcon, ClockIcon, TargetIcon, UsersIcon, DollarIcon, MapPinIcon } from './icons';
+import { TableTennisIcon, CalendarIcon, ClockIcon, TargetIcon, UsersIcon, DollarIcon, MapPinIcon, EyeIcon, StarIcon } from './icons';
 
 const PublicLeagueSignup = () => {
   const [leagues, setLeagues] = useState([]);
   const [selectedLeague, setSelectedLeague] = useState(null);
+  const [expandedLeague, setExpandedLeague] = useState(null);
+  const [leaguePlayers, setLeaguePlayers] = useState({});
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -26,6 +28,29 @@ const PublicLeagueSignup = () => {
       setLeagues(response.data);
     } catch (error) {
       console.error('Error fetching leagues:', error);
+    }
+  };
+
+  const fetchLeaguePlayers = async (leagueId) => {
+    try {
+      const response = await axios.get(`/api/public/leagues/${leagueId}/players`);
+      setLeaguePlayers(prev => ({
+        ...prev,
+        [leagueId]: response.data
+      }));
+    } catch (error) {
+      console.error('Error fetching league players:', error);
+    }
+  };
+
+  const toggleLeagueExpansion = (leagueId) => {
+    if (expandedLeague === leagueId) {
+      setExpandedLeague(null);
+    } else {
+      setExpandedLeague(leagueId);
+      if (!leaguePlayers[leagueId]) {
+        fetchLeaguePlayers(leagueId);
+      }
     }
   };
 
@@ -249,17 +274,65 @@ const PublicLeagueSignup = () => {
                 </p>
               </div>
               
-              {league.actual_participants >= league.max_participants ? (
-                <button disabled className="w-full bg-gray-400 text-white font-bold py-2 px-4 rounded">
-                  League Full
-                </button>
-              ) : (
-                <button
-                  onClick={() => setSelectedLeague(league)}
-                  className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Sign Up
-                </button>
+              <div className="space-y-2">
+                {/* View Players Button */}
+                {league.actual_participants > 0 && (
+                  <button
+                    onClick={() => toggleLeagueExpansion(league.id)}
+                    className="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded inline-flex items-center justify-center gap-2"
+                  >
+                    <EyeIcon className="w-4 h-4" />
+                    {expandedLeague === league.id ? 'Hide' : 'View'} Players ({league.actual_participants})
+                  </button>
+                )}
+                
+                {/* Sign Up Button */}
+                {league.actual_participants >= league.max_participants ? (
+                  <button disabled className="w-full bg-gray-400 text-white font-bold py-2 px-4 rounded">
+                    League Full
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setSelectedLeague(league)}
+                    className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Sign Up
+                  </button>
+                )}
+              </div>
+              
+              {/* Expanded Players List */}
+              {expandedLeague === league.id && (
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+                  <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                    <UsersIcon className="w-4 h-4 text-gray-600" />
+                    Registered Players
+                  </h4>
+                  {leaguePlayers[league.id] ? (
+                    leaguePlayers[league.id].players.length > 0 ? (
+                      <div className="space-y-2">
+                        {leaguePlayers[league.id].players.map((player, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-medium text-blue-600">
+                                {index + 1}
+                              </div>
+                              <span className="text-sm font-medium text-gray-900">{player.display_name}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <StarIcon className="w-4 h-4 text-yellow-500" />
+                              <span className="text-xs text-gray-600">{player.skill_level}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">No players registered yet.</p>
+                    )
+                  ) : (
+                    <p className="text-sm text-gray-500">Loading players...</p>
+                  )}
+                </div>
               )}
             </div>
           ))}
