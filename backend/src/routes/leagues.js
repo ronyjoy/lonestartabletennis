@@ -137,7 +137,7 @@ router.put('/:id', async (req, res) => {
     const result = await db.query(query, [
       name,
       description,
-      day_of_week ? parseInt(day_of_week) : null,
+      day_of_week !== undefined && day_of_week !== null ? parseInt(day_of_week) : null,
       start_time,
       end_time,
       max_participants ? parseInt(max_participants) : null,

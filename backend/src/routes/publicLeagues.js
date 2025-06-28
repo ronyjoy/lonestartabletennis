@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../config/database');
 const router = express.Router();
 
-// Get all active leagues with current week instances
+// Get all active leagues for this week (future only)
 router.get('/', async (req, res) => {
   try {
     const query = `
@@ -20,16 +20,16 @@ router.get('/', async (req, res) => {
         COALESCE(li.actual_participants, 0) as actual_participants,
         li.id as instance_id,
         li.status,
-        -- Calculate days until league (0 = today, negative = past)
+        -- Calculate days until league (only future leagues)
         lt.day_of_week - EXTRACT(DOW FROM CURRENT_DATE) as days_until,
-        -- Calculate actual date of this week's league
+        -- Calculate actual date for this week
         DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '1 day' * lt.day_of_week as league_date
       FROM league_templates lt
       LEFT JOIN league_instances li ON lt.id = li.template_id 
         AND li.week_start_date = DATE_TRUNC('week', CURRENT_DATE)
       WHERE lt.is_active = true
-        -- Only show leagues that haven't happened yet this week, or today's leagues
-        AND (lt.day_of_week - EXTRACT(DOW FROM CURRENT_DATE)) >= 0
+        -- Only show leagues that haven't happened yet this week (today or future)
+        AND lt.day_of_week >= EXTRACT(DOW FROM CURRENT_DATE)
       ORDER BY lt.day_of_week, lt.start_time
     `;
     
