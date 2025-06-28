@@ -1,36 +1,38 @@
-# Multi-stage Docker build for full-stack app
-FROM node:18.20.4-alpine as frontend-build
-
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm cache clean --force
-RUN npm install --legacy-peer-deps --no-audit --no-fund
-RUN npm list vite
-COPY frontend/ ./
-RUN npm run build
-
-# Backend stage
-FROM node:18.20.4-alpine as backend
-
-WORKDIR /app
-COPY backend/package*.json ./
-RUN npm cache clean --force
-RUN npm install --legacy-peer-deps --no-audit --no-fund --production
-COPY backend/ ./
-
-# Final stage - serve both
+# Simple single-stage build
 FROM node:18.20.4-alpine
 
 WORKDIR /app
 
-# Copy backend
-COPY --from=backend /app ./
+# Install serve globally first
+RUN npm install -g serve
 
-# Copy frontend build
-COPY --from=frontend-build /app/frontend/dist ./public
+# Copy all package files
+COPY frontend/package*.json ./frontend/
+COPY backend/package*.json ./backend/
+
+# Install backend dependencies (minimal)
+WORKDIR /app/backend
+RUN npm install --only=production --no-optional --no-audit
+
+# Install frontend dependencies and build
+WORKDIR /app/frontend
+RUN npm install --no-optional --no-audit
+COPY frontend/ ./
+RUN npm run build
+
+# Copy backend source
+WORKDIR /app/backend
+COPY backend/ ./
+
+# Move frontend build to public
+WORKDIR /app
+RUN cp -r frontend/dist backend/public
+
+# Final working directory
+WORKDIR /app/backend
 
 # Expose port
 EXPOSE 3001
 
-# Start both services
-CMD ["sh", "-c", "node server.js & npx serve -s public -l 8080 & wait"]
+# Start backend only (serve static files from backend)
+CMD ["node", "server.js"]

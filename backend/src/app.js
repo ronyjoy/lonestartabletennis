@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 // Simplified without extra dependencies
 
 const authRoutes = require('./routes/auth');
@@ -41,14 +42,21 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/leagues', leagueRoutes);
 app.use('/api/matches', matchRoutes);
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    error: {
-      code: 'NOT_FOUND',
-      message: 'Route not found'
-    }
-  });
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Serve React app for all non-API routes
+app.get('*', (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({
+      error: {
+        code: 'NOT_FOUND',
+        message: 'API route not found'
+      }
+    });
+  } else {
+    res.sendFile(path.join(__dirname, '../public/index.html'));
+  }
 });
 
 // Global error handler
