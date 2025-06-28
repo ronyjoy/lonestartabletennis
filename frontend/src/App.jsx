@@ -934,8 +934,8 @@ function SkillsPage() {
       const parsedUser = JSON.parse(userData)
       setUser(parsedUser)
       
-      // If user is a coach, fetch students list
-      if (parsedUser.role === 'coach') {
+      // If user is a coach or admin, fetch students list
+      if (parsedUser.role === 'coach' || parsedUser.role === 'admin') {
         fetchStudents()
       }
     }
@@ -989,7 +989,7 @@ function SkillsPage() {
     e.preventDefault()
     setMessage('')
 
-    if (user.role === 'coach' && !newSkill.studentId) {
+    if ((user.role === 'coach' || user.role === 'admin') && !newSkill.studentId) {
       setMessage('Please select a student')
       return
     }
@@ -1102,7 +1102,7 @@ function SkillsPage() {
           {/* Coach/Admin Controls */}
           {(user.role === 'coach' || user.role === 'admin') && (
             <>
-              {user.role === 'coach' && students.length > 0 && (
+              {(user.role === 'coach' || user.role === 'admin') && students.length > 0 && (
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Select Student</label>
                   <select
@@ -1138,7 +1138,7 @@ function SkillsPage() {
           {user.role === 'student' && (
             <div className="mb-6 p-4 bg-blue-50 rounded-lg">
               <p className="text-blue-800">
-                <strong>Note:</strong> Only coaches can add or modify your skills. The skills shown below have been assigned by your coaches.
+                <strong>Note:</strong> Only coaches and admins can add or modify your skills. The skills shown below have been assigned by your coaches or admins.
               </p>
             </div>
           )}
@@ -1148,7 +1148,7 @@ function SkillsPage() {
             <div className="bg-white p-6 rounded-lg shadow mb-6">
               <h3 className="text-lg font-bold mb-4">Add New Skill</h3>
               <form onSubmit={addSkill} className="space-y-4">
-                {user.role === 'coach' && (
+                {(user.role === 'coach' || user.role === 'admin') && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Student</label>
                     <select
