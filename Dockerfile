@@ -1,9 +1,9 @@
 # Multi-stage build - separate frontend build from runtime
-FROM node:18-alpine as frontend-build
+FROM node:18-alpine AS frontend-build
 
 WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm ci --only=dev
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
@@ -13,7 +13,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy backend files and install dependencies
-COPY backend/package*.json ./
+COPY backend/package.json backend/package-lock.json ./
 RUN npm ci --only=production
 
 COPY backend/ ./
