@@ -2,7 +2,7 @@ const express = require('express');
 const db = require('../config/database');
 const router = express.Router();
 
-// Get all active leagues for this week (future only)
+// Get all active leagues for this week (Monday to Sunday, future only)
 router.get('/', async (req, res) => {
   try {
     const query = `
@@ -20,17 +20,30 @@ router.get('/', async (req, res) => {
         COALESCE(li.actual_participants, 0) as actual_participants,
         li.id as instance_id,
         li.status,
-        -- Calculate days until league (only future leagues)
-        lt.day_of_week - EXTRACT(DOW FROM CURRENT_DATE) as days_until,
-        -- Calculate actual date for this week
-        DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '1 day' * lt.day_of_week as league_date
+        -- Calculate days until league (adjusted for Monday-Sunday week)
+        CASE 
+          WHEN lt.day_of_week = 0 THEN 7 - EXTRACT(ISODOW FROM CURRENT_DATE) -- Sunday becomes day 7
+          ELSE lt.day_of_week - EXTRACT(ISODOW FROM CURRENT_DATE) -- Monday=1, Tuesday=2, etc.
+        END as days_until,
+        -- Calculate actual date for this week (Monday-based week)
+        CASE 
+          WHEN lt.day_of_week = 0 THEN 
+            DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '6 days' -- Sunday is last day of week
+          ELSE 
+            DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '1 day' * (lt.day_of_week - 1) -- Monday=0 offset, Tuesday=1, etc.
+        END as league_date
       FROM league_templates lt
       LEFT JOIN league_instances li ON lt.id = li.template_id 
         AND li.week_start_date = DATE_TRUNC('week', CURRENT_DATE)
       WHERE lt.is_active = true
         -- Only show leagues that haven't happened yet this week (today or future)
-        AND lt.day_of_week >= EXTRACT(DOW FROM CURRENT_DATE)
-      ORDER BY lt.day_of_week, lt.start_time
+        AND (
+          (lt.day_of_week = 0 AND EXTRACT(ISODOW FROM CURRENT_DATE) <= 7) OR -- Sunday
+          (lt.day_of_week > 0 AND lt.day_of_week >= EXTRACT(ISODOW FROM CURRENT_DATE)) -- Monday-Saturday
+        )
+      ORDER BY 
+        CASE WHEN lt.day_of_week = 0 THEN 7 ELSE lt.day_of_week END, -- Sort Sunday last
+        lt.start_time
     `;
     
     const result = await db.query(query);
@@ -53,7 +66,7 @@ router.post('/:leagueId/register', async (req, res) => {
     try {
       await client.query('BEGIN');
 
-      // Get current week's instance or create it
+      // Get current week's instance or create it (Monday-based week)
       let instanceQuery = `
         SELECT li.*, lt.max_participants, lt.skill_level_min, lt.skill_level_max
         FROM league_instances li
@@ -64,10 +77,10 @@ router.post('/:leagueId/register', async (req, res) => {
       let instanceResult = await client.query(instanceQuery, [leagueId]);
       
       if (instanceResult.rows.length === 0) {
-        // Create new instance for this week
+        // Create new instance for this week (Monday-based)
         const createInstanceQuery = `
           INSERT INTO league_instances (template_id, week_start_date, registration_deadline)
-          VALUES ($1, DATE_TRUNC('week', CURRENT_DATE), CURRENT_DATE + INTERVAL '7 days')
+          VALUES ($1, DATE_TRUNC('week', CURRENT_DATE), DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '7 days')
           RETURNING *
         `;
         

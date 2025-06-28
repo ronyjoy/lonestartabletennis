@@ -184,12 +184,24 @@ const PublicLeagueSignup = () => {
             Sign up for leagues happening this week
           </p>
           <p className="text-sm text-gray-500">
-            Week of {new Date().toLocaleDateString('en-US', { 
-              month: 'long', 
-              day: 'numeric',
-              year: 'numeric',
-              weekday: 'long'
-            })}
+            {(() => {
+              const today = new Date();
+              const dayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, etc.
+              const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Calculate days to get to Monday
+              const monday = new Date(today);
+              monday.setDate(today.getDate() + daysToMonday);
+              const sunday = new Date(monday);
+              sunday.setDate(monday.getDate() + 6);
+              
+              return `Week of ${monday.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+              })} - ${sunday.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+              })} (Monday - Sunday)`;
+            })()}
           </p>
         </div>
 
