@@ -532,10 +532,26 @@ function DashboardPage() {
   // Function to get role-specific icon
   const getRoleIcon = (role) => {
     switch(role) {
-      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
-      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
-      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
-      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+      case 'student': return (
+        <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          S
+        </div>
+      )
+      case 'coach': return (
+        <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          C
+        </div>
+      )
+      case 'admin': return (
+        <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          A
+        </div>
+      )
+      default: return (
+        <div className="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          U
+        </div>
+      )
     }
   }
 
@@ -630,7 +646,7 @@ function DashboardPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
+          <div className="bg-white shadow-sm border border-gray-200 rounded-xl p-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h2>
             
             {/* Role-specific Stats Cards */}
@@ -919,10 +935,26 @@ function SkillsPage() {
   // Function to get role-specific icon
   const getRoleIcon = (role) => {
     switch(role) {
-      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
-      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
-      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
-      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+      case 'student': return (
+        <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          S
+        </div>
+      )
+      case 'coach': return (
+        <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          C
+        </div>
+      )
+      case 'admin': return (
+        <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          A
+        </div>
+      )
+      default: return (
+        <div className="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          U
+        </div>
+      )
     }
   }
 
@@ -1312,10 +1344,26 @@ function MatchesPage() {
   // Function to get role-specific icon
   const getRoleIcon = (role) => {
     switch(role) {
-      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
-      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
-      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
-      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+      case 'student': return (
+        <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          S
+        </div>
+      )
+      case 'coach': return (
+        <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          C
+        </div>
+      )
+      case 'admin': return (
+        <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          A
+        </div>
+      )
+      default: return (
+        <div className="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          U
+        </div>
+      )
     }
   }
 
@@ -1408,10 +1456,26 @@ function LeaguesPage() {
   // Function to get role-specific icon
   const getRoleIcon = (role) => {
     switch(role) {
-      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
-      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
-      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
-      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+      case 'student': return (
+        <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          S
+        </div>
+      )
+      case 'coach': return (
+        <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          C
+        </div>
+      )
+      case 'admin': return (
+        <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          A
+        </div>
+      )
+      default: return (
+        <div className="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          U
+        </div>
+      )
     }
   }
 
@@ -1915,10 +1979,26 @@ function ProfilePage() {
   // Function to get role-specific icon
   const getRoleIcon = (role) => {
     switch(role) {
-      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
-      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
-      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
-      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+      case 'student': return (
+        <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          S
+        </div>
+      )
+      case 'coach': return (
+        <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          C
+        </div>
+      )
+      case 'admin': return (
+        <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          A
+        </div>
+      )
+      default: return (
+        <div className="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          U
+        </div>
+      )
     }
   }
 
