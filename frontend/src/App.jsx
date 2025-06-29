@@ -3061,14 +3061,31 @@ function LeagueSignupsManagement() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {Object.entries(results[group.id] || {}).map(([matchKey, match]) => {
                             const isCompleted = match.score1 !== '' && match.score2 !== ''
+                            const score1 = parseInt(match.score1) || 0
+                            const score2 = parseInt(match.score2) || 0
+                            const player1Wins = isCompleted && score1 > score2
+                            const player2Wins = isCompleted && score2 > score1
+                            const isTie = isCompleted && score1 === score2
+                            
                             return (
                               <div key={matchKey} className={`p-4 rounded-lg border-2 ${
-                                isCompleted ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white'
+                                isCompleted ? 'border-gray-300 bg-gray-50' : 'border-gray-200 bg-white'
                               }`}>
                                 <div className="flex items-center justify-between">
-                                  <div className="flex-1">
-                                    <div className="text-sm font-medium text-gray-900">
+                                  <div className={`flex-1 p-2 rounded-lg ${
+                                    player1Wins ? 'bg-green-100 border-2 border-green-300' :
+                                    player2Wins ? 'bg-red-100 border-2 border-red-300' :
+                                    isTie ? 'bg-yellow-100 border-2 border-yellow-300' :
+                                    'bg-white border-2 border-transparent'
+                                  }`}>
+                                    <div className={`text-sm font-medium flex items-center ${
+                                      player1Wins ? 'text-green-800' :
+                                      player2Wins ? 'text-red-800' :
+                                      'text-gray-900'
+                                    }`}>
                                       {match.player1.first_name} {match.player1.last_name}
+                                      {player1Wins && <span className="ml-2 text-green-600">🏆</span>}
+                                      {player2Wins && <span className="ml-2 text-red-500">❌</span>}
                                     </div>
                                   </div>
                                   <div className="flex items-center space-x-2 mx-4">
@@ -3078,7 +3095,11 @@ function LeagueSignupsManagement() {
                                       max="11"
                                       value={match.score1}
                                       onChange={(e) => updateResult(group.id, matchKey, 'score1', e.target.value)}
-                                      className="w-12 px-2 py-1 text-center border border-gray-300 rounded text-sm"
+                                      className={`w-12 px-2 py-1 text-center border-2 rounded text-sm font-bold ${
+                                        player1Wins ? 'border-green-400 bg-green-50 text-green-800' :
+                                        player2Wins ? 'border-red-300 bg-red-50 text-red-700' :
+                                        'border-gray-300 bg-white text-gray-900'
+                                      }`}
                                     />
                                     <span className="text-gray-500 font-bold">-</span>
                                     <input
@@ -3087,20 +3108,41 @@ function LeagueSignupsManagement() {
                                       max="11"
                                       value={match.score2}
                                       onChange={(e) => updateResult(group.id, matchKey, 'score2', e.target.value)}
-                                      className="w-12 px-2 py-1 text-center border border-gray-300 rounded text-sm"
+                                      className={`w-12 px-2 py-1 text-center border-2 rounded text-sm font-bold ${
+                                        player2Wins ? 'border-green-400 bg-green-50 text-green-800' :
+                                        player1Wins ? 'border-red-300 bg-red-50 text-red-700' :
+                                        'border-gray-300 bg-white text-gray-900'
+                                      }`}
                                     />
                                   </div>
-                                  <div className="flex-1 text-right">
-                                    <div className="text-sm font-medium text-gray-900">
+                                  <div className={`flex-1 text-right p-2 rounded-lg ${
+                                    player2Wins ? 'bg-green-100 border-2 border-green-300' :
+                                    player1Wins ? 'bg-red-100 border-2 border-red-300' :
+                                    isTie ? 'bg-yellow-100 border-2 border-yellow-300' :
+                                    'bg-white border-2 border-transparent'
+                                  }`}>
+                                    <div className={`text-sm font-medium flex items-center justify-end ${
+                                      player2Wins ? 'text-green-800' :
+                                      player1Wins ? 'text-red-800' :
+                                      'text-gray-900'
+                                    }`}>
+                                      {player1Wins && <span className="mr-2 text-red-500">❌</span>}
+                                      {player2Wins && <span className="mr-2 text-green-600">🏆</span>}
                                       {match.player2.first_name} {match.player2.last_name}
                                     </div>
                                   </div>
                                 </div>
                                 {isCompleted && (
-                                  <div className="mt-2 text-center">
-                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                      ✓ Complete
-                                    </span>
+                                  <div className="mt-3 text-center">
+                                    {isTie ? (
+                                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        🤝 Tie Game
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        ✓ {player1Wins ? match.player1.first_name : match.player2.first_name} Wins
+                                      </span>
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -3200,13 +3242,20 @@ function LeagueSignupsManagement() {
 
                               {/* Player 1 */}
                               <div className={`mb-4 p-4 rounded-lg border-2 transition-all ${
-                                winner?.id === match.player1.id ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 bg-white'
+                                winner?.id === match.player1.id ? 'border-green-400 bg-green-100' : 
+                                isCompleted && winner?.id !== match.player1.id ? 'border-red-400 bg-red-100' :
+                                'border-gray-200 bg-white'
                               }`}>
                                 <div className="flex items-center justify-between">
                                   <div className="flex-1">
-                                    <div className="font-bold text-gray-900 flex items-center">
+                                    <div className={`font-bold flex items-center ${
+                                      winner?.id === match.player1.id ? 'text-green-800' :
+                                      isCompleted && winner?.id !== match.player1.id ? 'text-red-800' :
+                                      'text-gray-900'
+                                    }`}>
                                       {match.player1.first_name} {match.player1.last_name}
-                                      {winner?.id === match.player1.id && <span className="ml-2 text-yellow-500">👑</span>}
+                                      {winner?.id === match.player1.id && <span className="ml-2 text-green-600">🏆</span>}
+                                      {isCompleted && winner?.id !== match.player1.id && <span className="ml-2 text-red-500">❌</span>}
                                     </div>
                                     <div className="text-xs text-gray-500 mt-1">
                                       {match.player1.groupName} • {match.player1.position === 1 ? '1st' : '2nd'} place
@@ -3219,7 +3268,11 @@ function LeagueSignupsManagement() {
                                       max="11"
                                       value={result.score1}
                                       onChange={(e) => updateEliminationResult(round, matchKey, 'score1', e.target.value)}
-                                      className="w-14 h-14 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                                      className={`w-14 h-14 text-center text-xl font-bold border-2 rounded-lg focus:outline-none ${
+                                        winner?.id === match.player1.id ? 'border-green-500 bg-green-50 text-green-800 focus:border-green-600' :
+                                        isCompleted && winner?.id !== match.player1.id ? 'border-red-400 bg-red-50 text-red-700 focus:border-red-500' :
+                                        'border-gray-300 bg-white text-gray-900 focus:border-purple-500'
+                                      }`}
                                       placeholder="0"
                                     />
                                   </div>
@@ -3228,18 +3281,27 @@ function LeagueSignupsManagement() {
 
                               {/* VS Divider */}
                               <div className="text-center my-2">
-                                <span className="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-sm font-bold">VS</span>
+                                <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                                  isCompleted ? 'bg-gray-300 text-gray-700' : 'bg-gray-200 text-gray-600'
+                                }`}>VS</span>
                               </div>
 
                               {/* Player 2 */}
                               <div className={`mb-4 p-4 rounded-lg border-2 transition-all ${
-                                winner?.id === match.player2.id ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 bg-white'
+                                winner?.id === match.player2.id ? 'border-green-400 bg-green-100' :
+                                isCompleted && winner?.id !== match.player2.id ? 'border-red-400 bg-red-100' :
+                                'border-gray-200 bg-white'
                               }`}>
                                 <div className="flex items-center justify-between">
                                   <div className="flex-1">
-                                    <div className="font-bold text-gray-900 flex items-center">
+                                    <div className={`font-bold flex items-center ${
+                                      winner?.id === match.player2.id ? 'text-green-800' :
+                                      isCompleted && winner?.id !== match.player2.id ? 'text-red-800' :
+                                      'text-gray-900'
+                                    }`}>
                                       {match.player2.first_name} {match.player2.last_name}
-                                      {winner?.id === match.player2.id && <span className="ml-2 text-yellow-500">👑</span>}
+                                      {winner?.id === match.player2.id && <span className="ml-2 text-green-600">🏆</span>}
+                                      {isCompleted && winner?.id !== match.player2.id && <span className="ml-2 text-red-500">❌</span>}
                                     </div>
                                     <div className="text-xs text-gray-500 mt-1">
                                       {match.player2.groupName} • {match.player2.position === 1 ? '1st' : '2nd'} place
@@ -3252,7 +3314,11 @@ function LeagueSignupsManagement() {
                                       max="11"
                                       value={result.score2}
                                       onChange={(e) => updateEliminationResult(round, matchKey, 'score2', e.target.value)}
-                                      className="w-14 h-14 text-center text-xl font-bold border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                                      className={`w-14 h-14 text-center text-xl font-bold border-2 rounded-lg focus:outline-none ${
+                                        winner?.id === match.player2.id ? 'border-green-500 bg-green-50 text-green-800 focus:border-green-600' :
+                                        isCompleted && winner?.id !== match.player2.id ? 'border-red-400 bg-red-50 text-red-700 focus:border-red-500' :
+                                        'border-gray-300 bg-white text-gray-900 focus:border-purple-500'
+                                      }`}
                                       placeholder="0"
                                     />
                                   </div>
