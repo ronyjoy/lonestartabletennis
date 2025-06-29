@@ -35,7 +35,10 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    req.user = userResult.rows[0];
+    req.user = {
+      ...userResult.rows[0],
+      userId: userResult.rows[0].id  // Add userId for compatibility
+    };
     req.userId = userResult.rows[0].id;
     next();
   } catch (error) {

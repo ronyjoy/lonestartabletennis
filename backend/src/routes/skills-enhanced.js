@@ -361,6 +361,7 @@ router.post('/', auth, async (req, res) => {
     }
 
     const { skillName, rating, notes, studentId } = req.body;
+    console.log('User object:', req.user);
     console.log('Creating skill rating:', { skillName, rating, notes, studentId, coachId: req.user.userId });
 
     // Validation
