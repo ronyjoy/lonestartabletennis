@@ -18,6 +18,8 @@ const SkillsRedesigned = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [studentSkills, setStudentSkills] = useState([]);
   const [skillHistory, setSkillHistory] = useState([]);
@@ -54,6 +56,19 @@ const SkillsRedesigned = () => {
     }
   }, [navigate]);
 
+  // Filter students based on search term
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredStudents(students);
+    } else {
+      const filtered = students.filter(student => 
+        `${student.first_name} ${student.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.email.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredStudents(filtered);
+    }
+  }, [searchTerm, students]);
+
   const fetchStudents = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -64,6 +79,7 @@ const SkillsRedesigned = () => {
       if (response.ok) {
         const data = await response.json();
         setStudents(data.students);
+        setFilteredStudents(data.students);
         if (data.students.length > 0) {
           // Auto-select first student
           setSelectedStudent(data.students[0]);
@@ -304,9 +320,38 @@ const SkillsRedesigned = () => {
 
           {/* Student Selection */}
           <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Select Student</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-900">Select Student</h2>
+              <div className="text-sm text-gray-500">
+                {filteredStudents.length} of {students.length} students
+              </div>
+            </div>
+            
+            {/* Search Box */}
+            <div className="mb-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search students by name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {students.map(student => (
+              {filteredStudents.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-gray-500">
+                  {searchTerm ? `No students found matching "${searchTerm}"` : 'No students available'}
+                </div>
+              ) : (
+                filteredStudents.map(student => (
                 <button
                   key={student.id}
                   onClick={() => {
@@ -332,7 +377,8 @@ const SkillsRedesigned = () => {
                     </div>
                   </div>
                 </button>
-              ))}
+                ))
+              )}
             </div>
           </div>
 

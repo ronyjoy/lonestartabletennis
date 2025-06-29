@@ -701,69 +701,6 @@ function DashboardPage() {
                 </>
               )}
 
-              {user.role === 'coach' && (
-                <>
-                  <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="p-5">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                          <UserIcon className="w-8 h-8 text-blue-600" />
-                        </div>
-                        <div className="ml-5 w-0 flex-1">
-                          <dl>
-                            <dt className="text-sm font-medium text-gray-500 truncate">
-                              Students Coached
-                            </dt>
-                            <dd className="text-lg font-medium text-gray-900">
-                              {loading ? '...' : stats.studentsCoached || 0}
-                            </dd>
-                          </dl>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="p-5">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                          <AcademicCapIcon className="w-8 h-8 text-green-600" />
-                        </div>
-                        <div className="ml-5 w-0 flex-1">
-                          <dl>
-                            <dt className="text-sm font-medium text-gray-500 truncate">
-                              Skills Assigned
-                            </dt>
-                            <dd className="text-lg font-medium text-gray-900">
-                              {loading ? '...' : stats.skillsAssigned || 0}
-                            </dd>
-                          </dl>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="p-5">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                          <StarIcon className="w-8 h-8 text-yellow-600" />
-                        </div>
-                        <div className="ml-5 w-0 flex-1">
-                          <dl>
-                            <dt className="text-sm font-medium text-gray-500 truncate">
-                              Avg Skill Rating
-                            </dt>
-                            <dd className="text-lg font-medium text-gray-900">
-                              {loading ? '...' : stats.averageSkillRating || '0.0'}
-                            </dd>
-                          </dl>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
 
               {user.role === 'student' && (
                 <>
@@ -838,7 +775,7 @@ function DashboardPage() {
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
               >
                 <ChartBarIcon className="w-5 h-5" color="white" />
-                {user.role === 'coach' ? 'Manage Skills' : 'View Skills'}
+{user.role === 'coach' ? 'Manage Students' : 'View Skills'}
               </button>
               
               {/* Matches - Admin only */}
