@@ -32,7 +32,6 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/skills" element={<SkillsRedesigned />} />
-        <Route path="/ranking" element={<RankingPage />} />
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/leagues" element={<LeaguesPage />} />
         <Route path="/leagues/signup" element={<LeagueSignupPage />} />
@@ -775,7 +774,7 @@ function DashboardPage() {
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
               >
                 <ChartBarIcon className="w-5 h-5" color="white" />
-{user.role === 'coach' ? 'Manage Students' : 'View Skills'}
+{user.role === 'coach' ? 'Manage Students' : 'Skill Metrics'}
               </button>
               
               {/* Matches - Admin only */}
@@ -811,16 +810,6 @@ function DashboardPage() {
                 </button>
               )}
               
-              {/* Ranking - Students only */}
-              {user.role === 'student' && (
-                <button 
-                  onClick={() => navigate('/ranking')}
-                  className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
-                >
-                  <TrophyIcon className="w-5 h-5" color="white" />
-                  View Ranking
-                </button>
-              )}
               
               {/* Profile - Everyone */}
               <button 
@@ -1219,183 +1208,6 @@ function SkillsPage() {
   )
 }
 
-// Ranking Page - Students only
-function RankingPage() {
-  const navigate = useNavigate()
-  const [user, setUser] = useState(null)
-  const [rankings, setRankings] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const token = localStorage.getItem('token')
-    const userData = localStorage.getItem('user')
-    
-    if (!token) {
-      navigate('/login')
-      return
-    }
-    
-    if (userData) {
-      const parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
-      
-      // Only students can view rankings
-      if (parsedUser.role !== 'student') {
-        navigate('/dashboard')
-        return
-      }
-    }
-
-    fetchRankings()
-  }, [navigate])
-
-  const fetchRankings = async () => {
-    try {
-      const token = localStorage.getItem('token')
-      const response = await fetch(API_ENDPOINTS.SKILLS, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setRankings(data.skills || [])
-      }
-    } catch (error) {
-      console.error('Error fetching rankings:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    navigate('/')
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Loading...</div>
-      </div>
-    )
-  }
-
-  const averageRating = rankings.length > 0 
-    ? (rankings.reduce((sum, skill) => sum + skill.rating, 0) / rankings.length).toFixed(1)
-    : 0
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => navigate('/dashboard')}
-                className="text-blue-500 hover:text-blue-700"
-              >
-                ← Dashboard
-              </button>
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <TrophyIcon className="w-8 h-8 text-purple-600" />
-                Your Ranking
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user.firstName}!</span>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white shadow rounded-lg mb-6">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Your Performance Summary</h2>
-            </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">{rankings.length}</div>
-                  <div className="text-sm text-gray-600">Skills Evaluated</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">{averageRating}</div>
-                  <div className="text-sm text-gray-600">Average Rating</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600">
-                    {averageRating >= 8 ? 'Advanced' : averageRating >= 6 ? 'Intermediate' : averageRating >= 4 ? 'Beginner' : 'Starting'}
-                  </div>
-                  <div className="text-sm text-gray-600">Level</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Skill Breakdown</h2>
-            </div>
-            {loading ? (
-              <div className="p-6 text-center text-gray-600">Loading...</div>
-            ) : rankings.length === 0 ? (
-              <div className="p-6 text-center text-gray-600">
-                No skills assigned yet. Your coaches will add skills here!
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {rankings.map((skill) => (
-                  <div key={skill.id} className="p-6">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-medium text-gray-900">{skill.skill_name}</h3>
-                      <span className={`text-sm font-medium px-2 py-1 rounded ${
-                        skill.rating >= 8 ? 'bg-green-100 text-green-800' :
-                        skill.rating >= 6 ? 'bg-yellow-100 text-yellow-800' :
-                        skill.rating >= 4 ? 'bg-orange-100 text-orange-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {skill.rating >= 8 ? 'Excellent' :
-                         skill.rating >= 6 ? 'Good' :
-                         skill.rating >= 4 ? 'Fair' :
-                         'Needs Work'}
-                      </span>
-                    </div>
-                    <div className="mt-2 flex items-center">
-                      <div className="flex items-center">
-                        {[...Array(10)].map((_, i) => (
-                          <StarIcon
-                            key={i}
-                            className={`w-5 h-5 ${i < skill.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                            filled={i < skill.rating}
-                          />
-                        ))}
-                        <span className="ml-2 text-sm font-medium">{skill.rating}/10</span>
-                      </div>
-                    </div>
-                    {skill.notes && (
-                      <p className="mt-2 text-sm text-gray-600">{skill.notes}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
-    </div>
-  )
-}
 
 // Placeholder pages for admin functions
 function MatchesPage() {

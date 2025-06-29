@@ -199,7 +199,7 @@ const SkillsRedesigned = () => {
                 </button>
                 <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                   <ChartBarIcon className="w-8 h-8 text-blue-600" />
-                  My Skills
+                  Skill Metrics
                 </h1>
               </div>
               <div className="flex items-center space-x-4">
@@ -222,6 +222,41 @@ const SkillsRedesigned = () => {
               </div>
             ) : (
               <>
+                {/* Performance Summary */}
+                <div className="bg-white shadow rounded-lg mb-6">
+                  <div className="px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-xl font-bold text-gray-900">Your Performance Summary</h2>
+                  </div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-blue-600">{studentSkills.length}</div>
+                        <div className="text-sm text-gray-600">Skills Evaluated</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-green-600">
+                          {studentSkills.length > 0 
+                            ? (studentSkills.reduce((sum, skill) => sum + parseFloat(skill.rating), 0) / studentSkills.length).toFixed(1)
+                            : '0.0'
+                          }
+                        </div>
+                        <div className="text-sm text-gray-600">Average Rating</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-purple-600">
+                          {(() => {
+                            const avgRating = studentSkills.length > 0 
+                              ? (studentSkills.reduce((sum, skill) => sum + parseFloat(skill.rating), 0) / studentSkills.length)
+                              : 0;
+                            return avgRating >= 8 ? 'Advanced' : avgRating >= 6 ? 'Intermediate' : avgRating >= 4 ? 'Beginner' : 'Starting';
+                          })()}
+                        </div>
+                        <div className="text-sm text-gray-600">Level</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Progress Chart */}
                 <div className="mb-6">
                   <SkillProgressChart 
