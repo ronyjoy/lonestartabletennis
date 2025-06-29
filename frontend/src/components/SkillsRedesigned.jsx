@@ -438,82 +438,54 @@ const SkillsRedesigned = () => {
 // Skill Card Component
 const SkillCard = ({ skillName, currentRating, onUpdate }) => {
   const [rating, setRating] = useState(currentRating);
-  const [isEditing, setIsEditing] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
 
   useEffect(() => {
     setRating(currentRating);
   }, [currentRating]);
 
-  const handleSave = () => {
-    onUpdate(skillName, rating, ''); // No notes for individual skills
-    setIsEditing(false);
+  const handleStarClick = (starIndex) => {
+    const newRating = starIndex + 1;
+    setRating(newRating);
+    onUpdate(skillName, newRating, ''); // Save immediately when star is clicked
   };
 
-  const handleCancel = () => {
-    setRating(currentRating);
-    setIsEditing(false);
+  const handleStarHover = (starIndex) => {
+    setHoverRating(starIndex + 1);
   };
+
+  const handleMouseLeave = () => {
+    setHoverRating(0);
+  };
+
+  const displayRating = hoverRating || rating;
 
   return (
     <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
       <h3 className="font-semibold text-gray-900 mb-3">{skillName}</h3>
       
-      {isEditing ? (
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Rating: {rating}/10
-            </label>
-            <input
-              type="range"
-              min="1"
-              max="10"
-              value={rating}
-              onChange={(e) => setRating(parseInt(e.target.value))}
-              className="w-full"
-            />
-          </div>
-          
-          
-          <div className="flex space-x-2">
-            <button
-              onClick={handleSave}
-              className="flex-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
-            >
-              Save
-            </button>
-            <button
-              onClick={handleCancel}
-              className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
-            >
-              Cancel
-            </button>
+      <div className="space-y-3">
+        <div className="flex items-center">
+          <div className="flex items-center" onMouseLeave={handleMouseLeave}>
+            {[...Array(10)].map((_, i) => (
+              <StarIcon
+                key={i}
+                className={`w-5 h-5 cursor-pointer transition-colors hover:scale-110 ${
+                  i < displayRating ? 'text-yellow-400 hover:text-yellow-500' : 'text-gray-300 hover:text-yellow-200'
+                }`}
+                filled={i < displayRating}
+                onClick={() => handleStarClick(i)}
+                onMouseEnter={() => handleStarHover(i)}
+              />
+            ))}
+            <span className="ml-2 text-sm font-medium">{displayRating}/10</span>
           </div>
         </div>
-      ) : (
-        <div className="space-y-3">
-          <div className="flex items-center">
-            <div className="flex items-center">
-              {[...Array(10)].map((_, i) => (
-                <StarIcon
-                  key={i}
-                  className={`w-4 h-4 ${i < rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                  filled={i < rating}
-                />
-              ))}
-              <span className="ml-2 text-sm font-medium">{rating}/10</span>
-            </div>
-          </div>
-          
-          
-          <button
-            onClick={() => setIsEditing(true)}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
-          >
-            {rating > 0 ? 'Update Rating' : 'Add Rating'}
-          </button>
+        
+        <div className="text-xs text-gray-500">
+          {rating === 0 ? 'Click stars to rate this skill' : 'Click stars to update rating'}
         </div>
-      )}
+      </div>
     </div>
   );
 };
