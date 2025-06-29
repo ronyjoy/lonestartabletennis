@@ -2757,6 +2757,10 @@ function LeagueSignupsManagement() {
           [match1Key]: { player1: group1Players[0], player2: group2Players[1], score1: '', score2: '' },
           [match2Key]: { player1: group2Players[0], player2: group1Players[1], score1: '', score2: '' }
         }
+
+        // Create placeholder for finals (will be populated when semifinals are completed)
+        matches.finals = {}
+        results.finals = {}
       }
     } else if (advancingPlayers.length === 6) {
       // Three groups: need to handle bye system
@@ -2791,6 +2795,37 @@ function LeagueSignupsManagement() {
             score2: '' 
           }
         }
+
+        // Create semifinals with bye players
+        const semifinal1Key = `bye1-${firstRoundKey}`
+        const semifinal2Key = `bye2-tbd`
+        
+        matches.semifinals = {
+          [semifinal1Key]: {
+            player1: playersWithByes[0],
+            player2: null, // Will be filled by quarterfinal winner
+            score1: '',
+            score2: '',
+            round: 'Semifinal 1',
+            waitingFor: firstRoundKey
+          },
+          [semifinal2Key]: {
+            player1: playersWithByes[1],
+            player2: playersInFirstRound.length >= 4 ? playersInFirstRound[2] : null,
+            score1: '',
+            score2: '',
+            round: 'Semifinal 2'
+          }
+        }
+
+        results.semifinals = {
+          [semifinal1Key]: { player1: playersWithByes[0], player2: null, score1: '', score2: '' },
+          [semifinal2Key]: { player1: playersWithByes[1], player2: playersInFirstRound.length >= 4 ? playersInFirstRound[2] : null, score1: '', score2: '' }
+        }
+
+        // Create placeholder for finals
+        matches.finals = {}
+        results.finals = {}
       }
       
       setMessage(`Elimination tournament created! ${playersWithByes.map(p => `${p.first_name} ${p.last_name}`).join(' and ')} received byes to semifinals.`)
@@ -2801,17 +2836,84 @@ function LeagueSignupsManagement() {
     setShowElimination(true)
   }
 
+  // Function to check and auto-generate finals when semifinals are completed
+  const checkAndGenerateFinals = (currentResults = null) => {
+    if (!eliminationMatches.semifinals) return
+
+    const resultsToCheck = currentResults || eliminationResults
+    const semifinalResults = resultsToCheck.semifinals || {}
+    const semifinalMatches = Object.entries(semifinalResults)
+    
+    // Check if both semifinals are completed
+    const completedSemifinals = semifinalMatches.filter(([_, match]) => 
+      match.score1 !== '' && match.score2 !== ''
+    )
+
+    if (completedSemifinals.length === 2) {
+      // Get winners from semifinals
+      const winners = completedSemifinals.map(([matchKey, match]) => {
+        const score1 = parseInt(match.score1) || 0
+        const score2 = parseInt(match.score2) || 0
+        return score1 > score2 ? match.player1 : match.player2
+      })
+
+      if (winners.length === 2 && winners[0] && winners[1]) {
+        const finalsKey = `${winners[0].id}-${winners[1].id}`
+        
+        // Check if finals already exist
+        if (!eliminationMatches.finals || Object.keys(eliminationMatches.finals).length === 0) {
+          const newMatches = {
+            ...eliminationMatches,
+            finals: {
+              [finalsKey]: {
+                player1: winners[0],
+                player2: winners[1],
+                score1: '',
+                score2: '',
+                round: 'Finals'
+              }
+            }
+          }
+
+          const newResults = {
+            ...resultsToCheck,
+            finals: {
+              [finalsKey]: {
+                player1: winners[0],
+                player2: winners[1],
+                score1: '',
+                score2: ''
+              }
+            }
+          }
+
+          setEliminationMatches(newMatches)
+          setEliminationResults(newResults)
+          setMessage('Finals match created! Winners from both semifinals will compete for the championship.')
+        }
+      }
+    }
+  }
+
   const updateEliminationResult = async (round, matchKey, field, value) => {
-    setEliminationResults(prev => ({
-      ...prev,
+    const newResults = {
+      ...eliminationResults,
       [round]: {
-        ...prev[round],
+        ...eliminationResults[round],
         [matchKey]: {
-          ...prev[round][matchKey],
+          ...eliminationResults[round][matchKey],
           [field]: value
         }
       }
-    }))
+    }
+    
+    setEliminationResults(newResults)
+    
+    // Check if we need to generate finals after this update
+    if (round === 'semifinals') {
+      // Use the updated results directly instead of relying on state
+      checkAndGenerateFinals(newResults)
+    }
     
     // Auto-save elimination results
     try {
@@ -2824,16 +2926,7 @@ function LeagueSignupsManagement() {
         },
         body: JSON.stringify({
           league_instance_id: selectedLeague.instance_id,
-          elimination_results: {
-            ...eliminationResults,
-            [round]: {
-              ...eliminationResults[round],
-              [matchKey]: {
-                ...eliminationResults[round][matchKey],
-                [field]: value
-              }
-            }
-          }
+          elimination_results: newResults
         })
       })
     } catch (error) {
@@ -3163,7 +3256,7 @@ function LeagueSignupsManagement() {
                     className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
                   >
                     <PlayIcon className="w-5 h-5" />
-                    <span>Start Tournament</span>
+                    <span>Start League Event</span>
                   </button>
                 ) : (
                   <>
@@ -3359,12 +3452,47 @@ function LeagueSignupsManagement() {
                   ))}
 
                   {/* Championship Banner */}
-                  {Object.keys(eliminationMatches).length > 0 && (
-                    <div className="mt-8 text-center p-6 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl border-2 border-yellow-300">
-                      <div className="text-2xl font-bold text-yellow-800 mb-2">🏆 Tournament Champion</div>
-                      <div className="text-yellow-700">Winner advances to claim the championship title!</div>
-                    </div>
-                  )}
+                  {Object.keys(eliminationMatches).length > 0 && (() => {
+                    // Check if finals are completed
+                    const finalsResults = eliminationResults.finals || {}
+                    const finalsMatch = Object.values(finalsResults)[0]
+                    const isFinalsCompleted = finalsMatch && finalsMatch.score1 !== '' && finalsMatch.score2 !== ''
+                    
+                    if (isFinalsCompleted) {
+                      const score1 = parseInt(finalsMatch.score1) || 0
+                      const score2 = parseInt(finalsMatch.score2) || 0
+                      const champion = score1 > score2 ? finalsMatch.player1 : finalsMatch.player2
+                      const runnerUp = score1 > score2 ? finalsMatch.player2 : finalsMatch.player1
+                      
+                      return (
+                        <div className="mt-8 text-center p-8 bg-gradient-to-r from-yellow-200 to-yellow-300 rounded-xl border-4 border-yellow-400 shadow-lg">
+                          <div className="text-4xl font-bold text-yellow-900 mb-4">
+                            🏆 TOURNAMENT CHAMPION 🏆
+                          </div>
+                          <div className="text-3xl font-bold text-yellow-800 mb-2">
+                            {champion.first_name} {champion.last_name}
+                          </div>
+                          <div className="text-lg text-yellow-700 mb-4">
+                            Defeated {runnerUp.first_name} {runnerUp.last_name} ({score1}-{score2})
+                          </div>
+                          <div className="text-yellow-600">
+                            🥇 Congratulations on winning the tournament! 🥇
+                          </div>
+                        </div>
+                      )
+                    } else {
+                      return (
+                        <div className="mt-8 text-center p-6 bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-xl border-2 border-yellow-300">
+                          <div className="text-2xl font-bold text-yellow-800 mb-2">🏆 Tournament Champion</div>
+                          <div className="text-yellow-700">
+                            {Object.keys(eliminationMatches.finals || {}).length > 0 
+                              ? 'Finals match in progress...' 
+                              : 'Winner advances to claim the championship title!'}
+                          </div>
+                        </div>
+                      )
+                    }
+                  })()}
                 </div>
               </div>
             </div>
