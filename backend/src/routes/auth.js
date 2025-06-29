@@ -153,9 +153,19 @@ router.get('/dashboard-stats', authenticateToken, async (req, res) => {
       
     } else if (role === 'coach') {
       // Coach stats: total students, skills assigned, average skill ratings
-      const studentsQuery = 'SELECT COUNT(DISTINCT user_id) as count FROM skills WHERE created_by = $1';
-      const skillsQuery = 'SELECT COUNT(*) as count FROM skills WHERE created_by = $1';
-      const avgRatingQuery = 'SELECT AVG(rating) as avg FROM skills WHERE created_by = $1';
+      const studentsQuery = `
+        SELECT COUNT(DISTINCT s.user_id) as count 
+        FROM skills s 
+        JOIN skill_ratings sr ON s.id = sr.skill_id 
+        WHERE sr.coach_id = $1
+      `;
+      const skillsQuery = `
+        SELECT COUNT(DISTINCT s.id) as count 
+        FROM skills s 
+        JOIN skill_ratings sr ON s.id = sr.skill_id 
+        WHERE sr.coach_id = $1
+      `;
+      const avgRatingQuery = 'SELECT AVG(rating) as avg FROM skill_ratings WHERE coach_id = $1';
       
       const [students, skills, avgRating] = await Promise.all([
         db.query(studentsQuery, [userId]),
@@ -171,7 +181,14 @@ router.get('/dashboard-stats', authenticateToken, async (req, res) => {
       
     } else if (role === 'student') {
       // Student stats: skills tracked, average rating, league registrations
-      const skillsQuery = 'SELECT COUNT(*) as count, AVG(rating) as avg FROM skills WHERE user_id = $1';
+      const skillsQuery = `
+        SELECT 
+          COUNT(DISTINCT s.id) as count, 
+          AVG(sr.rating) as avg 
+        FROM skills s 
+        JOIN skill_ratings sr ON s.id = sr.skill_id 
+        WHERE s.user_id = $1
+      `;
       const registrationsQuery = 'SELECT COUNT(*) as count FROM public_league_registrations WHERE email = $2';
       
       const userEmail = req.user.email;
