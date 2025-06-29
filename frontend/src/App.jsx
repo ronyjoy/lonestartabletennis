@@ -518,6 +518,26 @@ function DashboardPage() {
   const [user, setUser] = useState(null)
   const [stats, setStats] = useState({})
   const [loading, setLoading] = useState(true)
+  const [greeting, setGreeting] = useState('')
+
+  // Function to get time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour >= 5 && hour < 12) return 'Good morning'
+    if (hour >= 12 && hour < 17) return 'Good afternoon'
+    if (hour >= 17 && hour < 22) return 'Good evening'
+    return 'Good night'
+  }
+
+  // Function to get role-specific icon
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
+      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
+      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
+      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+    }
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -532,6 +552,14 @@ function DashboardPage() {
       setUser(JSON.parse(userData))
       fetchDashboardStats()
     }
+    
+    // Set initial greeting and update every minute
+    setGreeting(getTimeBasedGreeting())
+    const greetingInterval = setInterval(() => {
+      setGreeting(getTimeBasedGreeting())
+    }, 60000) // Update every minute
+    
+    return () => clearInterval(greetingInterval)
   }, [navigate])
 
   const fetchDashboardStats = async () => {
@@ -579,10 +607,18 @@ function DashboardPage() {
               <Logo size="small" showText={false} />
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user.firstName}!</span>
+              <div className="flex items-center space-x-2 text-gray-700">
+                {getRoleIcon(user.role)}
+                <span className="font-medium">
+                  {greeting}, {user.firstName}!
+                </span>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
+                  {user.role}
+                </span>
+              </div>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >
                 Logout
               </button>
@@ -870,6 +906,25 @@ function SkillsPage() {
   const [newSkill, setNewSkill] = useState({ skillName: '', rating: 5, notes: '', studentId: '' })
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
+  
+  // Function to get time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour >= 5 && hour < 12) return 'Good morning'
+    if (hour >= 12 && hour < 17) return 'Good afternoon'
+    if (hour >= 17 && hour < 22) return 'Good evening'
+    return 'Good night'
+  }
+
+  // Function to get role-specific icon
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
+      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
+      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
+      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+    }
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -1027,7 +1082,15 @@ function SkillsPage() {
         <h1 className="text-2xl font-bold text-gray-900">Skills Tracking</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user.firstName}!</span>
+              <div className="flex items-center space-x-2 text-gray-700">
+                {getRoleIcon(user.role)}
+                <span className="font-medium">
+                  {getTimeBasedGreeting()}, {user.firstName}!
+                </span>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
+                  {user.role}
+                </span>
+              </div>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
@@ -1236,6 +1299,25 @@ function SkillsPage() {
 function MatchesPage() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
+  
+  // Function to get time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour >= 5 && hour < 12) return 'Good morning'
+    if (hour >= 12 && hour < 17) return 'Good afternoon'
+    if (hour >= 17 && hour < 22) return 'Good evening'
+    return 'Good night'
+  }
+
+  // Function to get role-specific icon
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
+      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
+      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
+      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+    }
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -1278,7 +1360,15 @@ function MatchesPage() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user.firstName}!</span>
+              <div className="flex items-center space-x-2 text-gray-700">
+                {getRoleIcon(user.role)}
+                <span className="font-medium">
+                  {getTimeBasedGreeting()}, {user.firstName}!
+                </span>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
+                  {user.role}
+                </span>
+              </div>
               <button onClick={handleLogout} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button>
             </div>
           </div>
@@ -1305,6 +1395,25 @@ function LeaguesPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingLeague, setEditingLeague] = useState(null)
   const [message, setMessage] = useState('')
+  
+  // Function to get time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour >= 5 && hour < 12) return 'Good morning'
+    if (hour >= 12 && hour < 17) return 'Good afternoon'
+    if (hour >= 17 && hour < 22) return 'Good evening'
+    return 'Good night'
+  }
+
+  // Function to get role-specific icon
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
+      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
+      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
+      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+    }
+  }
 
   const [formData, setFormData] = useState({
     name: '',
@@ -1494,7 +1603,15 @@ function LeaguesPage() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user.firstName}!</span>
+              <div className="flex items-center space-x-2 text-gray-700">
+                {getRoleIcon(user.role)}
+                <span className="font-medium">
+                  {getTimeBasedGreeting()}, {user.firstName}!
+                </span>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
+                  {user.role}
+                </span>
+              </div>
               <button onClick={handleLogout} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button>
             </div>
           </div>
@@ -1785,6 +1902,25 @@ function ProfilePage() {
   })
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  
+  // Function to get time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour >= 5 && hour < 12) return 'Good morning'
+    if (hour >= 12 && hour < 17) return 'Good afternoon'
+    if (hour >= 17 && hour < 22) return 'Good evening'
+    return 'Good night'
+  }
+
+  // Function to get role-specific icon
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
+      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
+      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
+      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+    }
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -1873,7 +2009,15 @@ function ProfilePage() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user.firstName}!</span>
+              <div className="flex items-center space-x-2 text-gray-700">
+                {getRoleIcon(user.role)}
+                <span className="font-medium">
+                  {getTimeBasedGreeting()}, {user.firstName}!
+                </span>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
+                  {user.role}
+                </span>
+              </div>
               <button onClick={handleLogout} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button>
             </div>
           </div>

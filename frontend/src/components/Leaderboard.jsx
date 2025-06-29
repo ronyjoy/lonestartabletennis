@@ -5,6 +5,8 @@ import {
   TrophyIcon,
   StarIcon,
   UserIcon,
+  AcademicCapIcon,
+  BriefcaseIcon,
   ChartBarIcon,
   TargetIcon
 } from './icons';
@@ -15,6 +17,25 @@ const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  
+  // Function to get time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour >= 5 && hour < 12) return 'Good morning'
+    if (hour >= 12 && hour < 17) return 'Good afternoon'
+    if (hour >= 17 && hour < 22) return 'Good evening'
+    return 'Good night'
+  }
+
+  // Function to get role-specific icon
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case 'student': return <UserIcon className="w-5 h-5 text-blue-600" />
+      case 'coach': return <AcademicCapIcon className="w-5 h-5 text-green-600" />
+      case 'admin': return <BriefcaseIcon className="w-5 h-5 text-purple-600" />
+      default: return <UserIcon className="w-5 h-5 text-gray-600" />
+    }
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -101,7 +122,15 @@ const Leaderboard = () => {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user.firstName}!</span>
+              <div className="flex items-center space-x-2 text-gray-700">
+                {getRoleIcon(user.role)}
+                <span className="font-medium">
+                  {getTimeBasedGreeting()}, {user.firstName}!
+                </span>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
+                  {user.role}
+                </span>
+              </div>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
