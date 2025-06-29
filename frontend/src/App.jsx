@@ -4,6 +4,7 @@ import Logo from './components/Logo'
 import PublicLeagueSignup from './components/PublicLeagueSignup'
 import SkillsRedesigned from './components/SkillsRedesigned'
 import BadgeSystem from './components/BadgeSystem'
+import Leaderboard from './components/Leaderboard'
 import { API_ENDPOINTS } from './config/api'
 import { 
   TableTennisIcon, 
@@ -33,6 +34,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/skills" element={<SkillsRedesigned />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/leagues" element={<LeaguesPage />} />
         <Route path="/leagues/signup" element={<LeagueSignupPage />} />
@@ -810,6 +812,15 @@ function DashboardPage() {
                   Join Leagues
                 </button>
               )}
+              
+              {/* Leaderboard - All roles */}
+              <button 
+                onClick={() => navigate('/leaderboard')}
+                className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
+              >
+                <TrophyIcon className="w-5 h-5" color="white" />
+                Leaderboard
+              </button>
               
               
               {/* Profile - Everyone */}

@@ -365,6 +365,50 @@ router.get('/stats', auth, async (req, res) => {
   }
 });
 
+// Get leaderboard - students ranked by average rating
+router.get('/leaderboard', auth, async (req, res) => {
+  try {
+    // Students, coaches, and admins can view leaderboard
+    if (req.user.role !== 'student' && req.user.role !== 'coach' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        error: {
+          code: 'INSUFFICIENT_PERMISSIONS',
+          message: 'Access denied'
+        }
+      });
+    }
+
+    const query = `
+      SELECT 
+        u.id,
+        u.first_name,
+        u.last_name,
+        u.email,
+        COUNT(DISTINCT sr.skill_id) as skills_count,
+        ROUND(AVG(sr.rating)::numeric, 1) as avg_rating
+      FROM users u
+      INNER JOIN skills s ON u.id = s.user_id
+      INNER JOIN skill_ratings sr ON s.id = sr.skill_id
+      WHERE u.role = 'student'
+      GROUP BY u.id, u.first_name, u.last_name, u.email
+      HAVING COUNT(DISTINCT sr.skill_id) > 0
+      ORDER BY AVG(sr.rating) DESC, COUNT(DISTINCT sr.skill_id) DESC, u.first_name, u.last_name
+    `;
+    
+    const result = await db.query(query);
+    
+    res.json({ leaderboard: result.rows });
+  } catch (error) {
+    console.error('Get leaderboard error:', error);
+    res.status(500).json({
+      error: {
+        code: 'GET_LEADERBOARD_FAILED',
+        message: 'Failed to fetch leaderboard'
+      }
+    });
+  }
+});
+
 // Get students list for coaches/admins
 router.get('/students', auth, async (req, res) => {
   try {
