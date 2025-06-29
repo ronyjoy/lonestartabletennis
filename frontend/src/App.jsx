@@ -1777,6 +1777,14 @@ function LeagueSignupPage() {
 function ProfilePage() {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -1791,6 +1799,58 @@ function ProfilePage() {
       setUser(JSON.parse(userData))
     }
   }, [navigate])
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault()
+    setMessage('')
+    
+    // Validation
+    if (passwordData.newPassword.length < 6) {
+      setMessage('New password must be at least 6 characters long')
+      return
+    }
+    
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setMessage('New passwords do not match')
+      return
+    }
+    
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      setMessage('New password must be different from current password')
+      return
+    }
+    
+    try {
+      setLoading(true)
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${API_ENDPOINTS.AUTH}/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        setMessage('Password changed successfully!')
+        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+        setShowPasswordForm(false)
+        setTimeout(() => setMessage(''), 5000)
+      } else {
+        setMessage(data.error?.message || 'Failed to change password')
+      }
+    } catch (error) {
+      setMessage('Error connecting to server')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -1807,7 +1867,10 @@ function ProfilePage() {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
               <button onClick={() => navigate('/dashboard')} className="text-blue-500 hover:text-blue-700">← Dashboard</button>
-              <h1 className="text-2xl font-bold text-gray-900">👤 Profile</h1>
+              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <UserIcon className="w-8 h-8 text-blue-600" />
+                Profile Settings
+              </h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.firstName}!</span>
@@ -1816,18 +1879,175 @@ function ProfilePage() {
           </div>
         </div>
       </header>
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
+          {message && (
+            <div className={`mb-6 p-4 rounded-lg ${
+              message.includes('successfully') 
+                ? 'bg-green-100 text-green-700 border border-green-200' 
+                : 'bg-red-100 text-red-700 border border-red-200'
+            }`}>
+              <div className="flex items-center">
+                <span className="mr-2">{message.includes('successfully') ? '✅' : '❌'}</span>
+                {message}
+              </div>
+            </div>
+          )}
+          
+          {/* Profile Information */}
+          <div className="bg-white p-8 rounded-lg shadow mb-6">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900">Profile Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+                  <UserIcon className="w-6 h-6 text-gray-400 mr-3" />
+                  <div>
+                    <p className="text-sm text-gray-500">Full Name</p>
+                    <p className="font-medium text-gray-900">{user.firstName} {user.lastName}</p>
+                  </div>
+                </div>
+                <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+                  <span className="w-6 h-6 text-gray-400 mr-3">📧</span>
+                  <div>
+                    <p className="text-sm text-gray-500">Email Address</p>
+                    <p className="font-medium text-gray-900">{user.email}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+                  <span className="w-6 h-6 text-gray-400 mr-3">
+                    {user.role === 'student' ? '🎓' : user.role === 'coach' ? '👨‍🏫' : '👑'}
+                  </span>
+                  <div>
+                    <p className="text-sm text-gray-500">Role</p>
+                    <p className="font-medium text-gray-900">
+                      {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+                  <span className="w-6 h-6 text-gray-400 mr-3">🆔</span>
+                  <div>
+                    <p className="text-sm text-gray-500">User ID</p>
+                    <p className="font-medium text-gray-900">#{user.id}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Password Change Section */}
           <div className="bg-white p-8 rounded-lg shadow">
-            <h2 className="text-2xl font-bold mb-6">User Profile</h2>
-            <div className="space-y-4">
-              <div><strong>Name:</strong> {user.firstName} {user.lastName}</div>
-              <div><strong>Email:</strong> {user.email}</div>
-              <div><strong>Role:</strong> {user.role.charAt(0).toUpperCase() + user.role.slice(1)}</div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Security Settings</h2>
+              {!showPasswordForm && (
+                <button
+                  onClick={() => setShowPasswordForm(true)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg inline-flex items-center gap-2 transition-colors"
+                >
+                  <span>🔐</span>
+                  Change Password
+                </button>
+              )}
             </div>
-            <div className="mt-6">
-              <p className="text-sm text-gray-500">Profile editing feature coming soon...</p>
-            </div>
+            
+            {showPasswordForm ? (
+              <form onSubmit={handlePasswordChange} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Current Password
+                    </label>
+                    <input
+                      type="password"
+                      value={passwordData.currentPassword}
+                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter your current password"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      required
+                      minLength="6"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter new password (min 6 chars)"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirm New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Confirm your new password"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4 pt-4">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white font-bold py-3 px-6 rounded-lg inline-flex items-center gap-2 transition-colors"
+                  >
+                    {loading ? (
+                      <>
+                        <span className="animate-spin">⏳</span>
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <span>✅</span>
+                        Update Password
+                      </>
+                    )}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordForm(false)
+                      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+                      setMessage('')
+                    }}
+                    className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg inline-flex items-center gap-2 transition-colors"
+                  >
+                    <span>❌</span>
+                    Cancel
+                  </button>
+                </div>
+                
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2">Password Requirements:</h4>
+                  <ul className="text-sm text-blue-700 space-y-1">
+                    <li>• Minimum 6 characters long</li>
+                    <li>• Must be different from your current password</li>
+                    <li>• Should be unique and not easily guessable</li>
+                  </ul>
+                </div>
+              </form>
+            ) : (
+              <div className="text-center py-8">
+                <span className="text-6xl mb-4 block">🔐</span>
+                <p className="text-gray-600 mb-4">Keep your account secure by regularly updating your password.</p>
+                <p className="text-sm text-gray-500">Last password change: Not tracked (for privacy)</p>
+              </div>
+            )}
           </div>
         </div>
       </main>

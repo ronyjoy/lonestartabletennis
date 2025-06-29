@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/api/auth/login`,
   REGISTER: `${API_BASE_URL}/api/auth/register`,
   DASHBOARD_STATS: `${API_BASE_URL}/api/auth/dashboard-stats`,
+  AUTH: `${API_BASE_URL}/api/auth`,
   SKILLS: `${API_BASE_URL}/api/skills`,
   SKILLS_STUDENTS: `${API_BASE_URL}/api/skills/students`,
   PUBLIC_LEAGUES: `${API_BASE_URL}/api/public/leagues`,
