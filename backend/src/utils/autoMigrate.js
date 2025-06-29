@@ -42,8 +42,12 @@ async function runLeagueEventMigrations() {
               status VARCHAR(50) DEFAULT 'active',
               grouping_method VARCHAR(20) DEFAULT 'middle',
               total_groups INTEGER DEFAULT 1,
+              matches_data JSONB,
+              elimination_matches JSONB,
+              elimination_results JSONB,
               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              UNIQUE(league_instance_id, event_date)
           );
 
           -- League Groups 

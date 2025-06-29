@@ -2386,10 +2386,46 @@ function LeagueSignupsManagement() {
         const data = await response.json()
         setSignups(data)
         generateGroups(data)
+        
+        // Check if there's an existing league event for today
+        await loadExistingLeagueEvent(leagueId)
       }
     } catch (error) {
       console.error('Error fetching signups:', error)
       setMessage('Error fetching signups')
+    }
+  }
+
+  const loadExistingLeagueEvent = async (leagueId) => {
+    try {
+      const token = localStorage.getItem('token')
+      const eventDate = new Date().toISOString().split('T')[0]
+      
+      const response = await fetch(`/api/league-events/by-date?league_instance_id=${selectedLeague.instance_id}&event_date=${eventDate}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      
+      if (response.ok) {
+        const existingEvent = await response.json()
+        if (existingEvent && existingEvent.matches) {
+          // Load existing results
+          setResults(existingEvent.matches)
+          setShowResults(true)
+          setMessage(`Loaded existing league event for ${new Date().toLocaleDateString()}`)
+          
+          // Load elimination results if they exist
+          if (existingEvent.elimination_results) {
+            setEliminationResults(existingEvent.elimination_results)
+            if (existingEvent.elimination_matches) {
+              setEliminationMatches(existingEvent.elimination_matches)
+              setShowElimination(true)
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading existing league event:', error)
+      // Don't show error message as this is optional
     }
   }
 
@@ -2467,10 +2503,12 @@ function LeagueSignupsManagement() {
     setResults(newResults)
     setShowResults(true)
     
-    // Create league event in database
+    // Create or update league event in database (using date as unique identifier)
     try {
       const token = localStorage.getItem('token')
-      await fetch('/api/league-events', {
+      const eventDate = new Date().toISOString().split('T')[0] // Today's date
+      
+      await fetch('/api/league-events/create-or-update', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2478,16 +2516,18 @@ function LeagueSignupsManagement() {
         },
         body: JSON.stringify({
           league_instance_id: selectedLeague.instance_id,
-          event_date: new Date().toISOString().split('T')[0], // Today's date
-          event_name: `${selectedLeague.name} Tournament - ${new Date().toLocaleDateString()}`,
+          event_date: eventDate,
+          event_name: `${selectedLeague.name} - ${new Date().toLocaleDateString()}`,
           grouping_method: groupingMethod,
           groups: groups,
           matches: newResults
         })
       })
+      
+      setMessage('League event initialized. Results will auto-save as you enter scores.')
     } catch (error) {
-      console.error('Error creating league event:', error)
-      setMessage('Tournament created locally, but database save failed')
+      console.error('Error creating/updating league event:', error)
+      setMessage('Event created locally, but database save failed')
     }
   }
 
@@ -2504,10 +2544,12 @@ function LeagueSignupsManagement() {
       }
     }))
     
-    // Auto-save to database
+    // Auto-save to database using date-based identifier
     try {
       const token = localStorage.getItem('token')
-      await fetch('/api/league-events/auto-save', {
+      const eventDate = new Date().toISOString().split('T')[0]
+      
+      await fetch('/api/league-events/auto-save-by-date', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -2515,6 +2557,7 @@ function LeagueSignupsManagement() {
         },
         body: JSON.stringify({
           league_instance_id: selectedLeague.instance_id,
+          event_date: eventDate,
           results: {
             ...results,
             [groupId]: {
@@ -2915,10 +2958,12 @@ function LeagueSignupsManagement() {
       checkAndGenerateFinals(newResults)
     }
     
-    // Auto-save elimination results
+    // Auto-save elimination results using date-based identifier
     try {
       const token = localStorage.getItem('token')
-      await fetch('/api/league-events/auto-save-elimination', {
+      const eventDate = new Date().toISOString().split('T')[0]
+      
+      await fetch('/api/league-events/auto-save-elimination-by-date', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -2926,7 +2971,9 @@ function LeagueSignupsManagement() {
         },
         body: JSON.stringify({
           league_instance_id: selectedLeague.instance_id,
-          elimination_results: newResults
+          event_date: eventDate,
+          elimination_results: newResults,
+          elimination_matches: eliminationMatches
         })
       })
     } catch (error) {
@@ -3039,6 +3086,29 @@ function LeagueSignupsManagement() {
                   ? 'Higher rated players go to Group 1, lower rated to Group 2'
                   : 'Balanced groups with even distribution of skill levels'
                 }
+              </div>
+            </div>
+          )}
+
+          {/* League Event Status */}
+          {selectedLeague && (
+            <div className="bg-white shadow rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {selectedLeague.name} - {new Date().toLocaleDateString()}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {showResults ? 'Event in progress - Results auto-save as you enter scores' : 'Ready to start league event'}
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    showResults ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {showResults ? '🟢 Active' : '⏳ Pending'}
+                  </span>
+                </div>
               </div>
             </div>
           )}

@@ -7,8 +7,12 @@ CREATE TABLE IF NOT EXISTS league_events (
     status VARCHAR(50) DEFAULT 'active', -- active, completed, cancelled
     grouping_method VARCHAR(20) DEFAULT 'middle', -- middle, snake
     total_groups INTEGER DEFAULT 1,
+    matches_data JSONB, -- Store match results as JSON
+    elimination_matches JSONB, -- Store elimination bracket structure
+    elimination_results JSONB, -- Store elimination results
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(league_instance_id, event_date) -- One event per league per date
 );
 
 -- League Groups (generated groups for each event)
