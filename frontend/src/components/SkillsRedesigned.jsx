@@ -206,7 +206,12 @@ const SkillsRedesigned = () => {
                     )}
 
                     <div className="text-xs text-gray-400">
-                      <p>Coach: {skill.coach_first_name} {skill.coach_last_name}</p>
+                      <p>
+                        {skill.coach_count 
+                          ? `Rated by ${skill.coach_count} coach${skill.coach_count > 1 ? 'es' : ''} (avg)`
+                          : `Coach: ${skill.coach_first_name} ${skill.coach_last_name}`
+                        }
+                      </p>
                       <p>Updated: {new Date(skill.rating_created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
