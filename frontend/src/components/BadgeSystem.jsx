@@ -148,7 +148,7 @@ const BadgeSystem = ({ studentId, currentUser, isManageView = false }) => {
     return AVAILABLE_BADGES[selectedCategory].filter(badge => !assignedBadgeIds.includes(badge.id));
   };
 
-  const canManageBadges = currentUser.role === 'coach' || currentUser.role === 'admin';
+  const canManageBadges = currentUser.role === 'coach'; // Only coaches can manage badges
 
   if (loading) {
     return (

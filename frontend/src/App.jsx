@@ -769,13 +769,13 @@ function DashboardPage() {
 
             {/* Role-based Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Skills - Students view only, Coaches can manage */}
+              {/* Skills - Students view only, Coaches can manage, Admins can view */}
               <button 
                 onClick={() => navigate('/skills')}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
               >
                 <ChartBarIcon className="w-5 h-5" color="white" />
-{user.role === 'coach' ? 'Manage Students' : 'Skill Metrics'}
+                {user.role === 'coach' ? 'Manage Students' : user.role === 'admin' ? 'View Skill Metrics' : 'Skill Metrics'}
               </button>
               
               {/* Matches - Admin only */}
@@ -837,9 +837,9 @@ function DashboardPage() {
             <div className="mt-6 p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-blue-800">
                 <strong>Your Role:</strong> {user.role.charAt(0).toUpperCase() + user.role.slice(1)} 
-                {user.role === 'student' && " - You can view skills assigned by coaches and see your ranking"}
-                {user.role === 'coach' && " - You can manage student skills and rankings"}
-                {user.role === 'admin' && " - You have full access to manage matches, leagues, and all features"}
+                {user.role === 'student' && " - You can view skills assigned by coaches and see your performance"}
+                {user.role === 'coach' && " - You can manage student skills, assign badges, and add comments"}
+                {user.role === 'admin' && " - You can manage leagues and view skill metrics overview"}
               </p>
             </div>
           </div>

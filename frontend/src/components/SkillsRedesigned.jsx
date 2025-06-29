@@ -342,7 +342,7 @@ const SkillsRedesigned = () => {
               </button>
               <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                 <ChartBarIcon className="w-8 h-8 text-blue-600" />
-                Skills Management
+                {user.role === 'admin' ? 'Skill Metrics Overview' : 'Skills Management'}
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -442,6 +442,7 @@ const SkillsRedesigned = () => {
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-lg font-bold text-gray-900 mb-4">
                 Skills for {selectedStudent.first_name} {selectedStudent.last_name}
+                {user.role === 'admin' && <span className="text-sm text-gray-500 ml-2">(View Only)</span>}
               </h2>
               
               {loading ? (
@@ -451,7 +452,14 @@ const SkillsRedesigned = () => {
                   {commonSkills.map(skillName => {
                     const currentRating = getSkillRating(skillName);
                     
-                    return (
+                    return user.role === 'admin' ? (
+                      <SkillViewCard
+                        key={skillName}
+                        skillName={skillName}
+                        currentRating={currentRating}
+                        studentSkills={studentSkills}
+                      />
+                    ) : (
                       <SkillCard
                         key={skillName}
                         skillName={skillName}
@@ -465,13 +473,24 @@ const SkillsRedesigned = () => {
             </div>
           )}
 
-          {/* Badge Management Section - Only show when student is selected */}
-          {selectedStudent && (
+          {/* Badge Management Section - Only show when student is selected and user is coach */}
+          {selectedStudent && user.role === 'coach' && (
             <div className="mt-6">
               <BadgeSystem 
                 studentId={selectedStudent.id} 
                 currentUser={user}
                 isManageView={true}
+              />
+            </div>
+          )}
+
+          {/* Badge View Section - For admins, show badges in view-only mode */}
+          {selectedStudent && user.role === 'admin' && (
+            <div className="mt-6">
+              <BadgeSystem 
+                studentId={selectedStudent.id} 
+                currentUser={user}
+                isManageView={false}
               />
             </div>
           )}
@@ -487,6 +506,46 @@ const SkillsRedesigned = () => {
           )}
         </div>
       </main>
+    </div>
+  );
+};
+
+// Skill View Card Component (for admins - view only)
+const SkillViewCard = ({ skillName, currentRating, studentSkills }) => {
+  const skillData = studentSkills.find(skill => skill.skill_name === skillName);
+  
+  return (
+    <div className="border rounded-lg p-4 bg-gray-50">
+      <h3 className="font-semibold text-gray-900 mb-3">{skillName}</h3>
+      
+      <div className="space-y-3">
+        <div className="flex items-center">
+          <div className="flex items-center">
+            {[...Array(10)].map((_, i) => (
+              <StarIcon
+                key={i}
+                className={`w-5 h-5 ${
+                  i < currentRating ? 'text-yellow-400' : 'text-gray-300'
+                }`}
+                filled={i < currentRating}
+              />
+            ))}
+            <span className="ml-2 text-sm font-medium">{currentRating}/10</span>
+          </div>
+        </div>
+        
+        {skillData && (
+          <div className="text-xs text-gray-500">
+            <p>Coach: {skillData.coach_first_name} {skillData.coach_last_name}</p>
+            <p>Last Updated: {new Date(skillData.rating_created_at).toLocaleDateString()}</p>
+            {skillData.notes && <p className="mt-1 text-gray-600">Notes: {skillData.notes}</p>}
+          </div>
+        )}
+        
+        <div className="text-xs text-gray-400">
+          View only - Contact coach to update ratings
+        </div>
+      </div>
     </div>
   );
 };

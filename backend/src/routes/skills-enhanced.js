@@ -406,11 +406,11 @@ router.get('/students', auth, async (req, res) => {
 // Add new skill rating
 router.post('/', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'coach' && req.user.role !== 'admin') {
+    if (req.user.role !== 'coach') {
       return res.status(403).json({
         error: {
           code: 'INSUFFICIENT_PERMISSIONS',
-          message: 'Only coaches and admins can add skill ratings'
+          message: 'Only coaches can add skill ratings'
         }
       });
     }
@@ -537,11 +537,11 @@ router.post('/', auth, async (req, res) => {
 // Delete a skill rating
 router.delete('/rating/:ratingId', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'coach' && req.user.role !== 'admin') {
+    if (req.user.role !== 'coach') {
       return res.status(403).json({
         error: {
           code: 'INSUFFICIENT_PERMISSIONS',
-          message: 'Only coaches and admins can delete skill ratings'
+          message: 'Only coaches can delete skill ratings'
         }
       });
     }
@@ -731,11 +731,11 @@ router.get('/comments/:studentId', auth, async (req, res) => {
 // Add or update student comment
 router.post('/comments/:studentId', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'coach' && req.user.role !== 'admin') {
+    if (req.user.role !== 'coach') {
       return res.status(403).json({
         error: {
           code: 'INSUFFICIENT_PERMISSIONS',
-          message: 'Only coaches and admins can add student comments'
+          message: 'Only coaches can add student comments'
         }
       });
     }
@@ -817,11 +817,11 @@ router.post('/comments/:studentId', auth, async (req, res) => {
 // Delete student comment
 router.delete('/comments/:commentId', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'coach' && req.user.role !== 'admin') {
+    if (req.user.role !== 'coach') {
       return res.status(403).json({
         error: {
           code: 'INSUFFICIENT_PERMISSIONS',
-          message: 'Only coaches and admins can delete comments'
+          message: 'Only coaches can delete comments'
         }
       });
     }
@@ -925,11 +925,11 @@ router.get('/badges/:studentId', auth, async (req, res) => {
 // Assign badge to student
 router.post('/badges/:studentId', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'coach' && req.user.role !== 'admin') {
+    if (req.user.role !== 'coach') {
       return res.status(403).json({
         error: {
           code: 'INSUFFICIENT_PERMISSIONS',
-          message: 'Only coaches and admins can assign badges'
+          message: 'Only coaches can assign badges'
         }
       });
     }
@@ -1007,11 +1007,11 @@ router.post('/badges/:studentId', auth, async (req, res) => {
 // Remove badge from student
 router.delete('/badges/:studentId/:badgeId', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'coach' && req.user.role !== 'admin') {
+    if (req.user.role !== 'coach') {
       return res.status(403).json({
         error: {
           code: 'INSUFFICIENT_PERMISSIONS',
-          message: 'Only coaches and admins can remove badges'
+          message: 'Only coaches can remove badges'
         }
       });
     }

@@ -113,7 +113,7 @@ const StudentComments = ({ studentId, currentUser }) => {
     }
   };
 
-  const canAddComment = currentUser.role === 'coach' || currentUser.role === 'admin';
+  const canAddComment = currentUser.role === 'coach'; // Only coaches can add comments
   const isOwnComment = (comment) => comment.coach_id === currentUser.id;
 
   if (loading) {
@@ -130,6 +130,7 @@ const StudentComments = ({ studentId, currentUser }) => {
         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
           <UserIcon className="w-6 h-6 text-blue-600" />
           {currentUser.role === 'student' ? 'Feedback from Coaches' : `Comments for ${student?.first_name} ${student?.last_name}`}
+          {currentUser.role === 'admin' && <span className="text-sm text-gray-500 ml-2">(View Only)</span>}
         </h3>
       </div>
 
