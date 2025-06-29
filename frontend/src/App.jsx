@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import Logo from './components/Logo'
 import PublicLeagueSignup from './components/PublicLeagueSignup'
-import SkillsEnhanced from './components/SkillsEnhanced'
+import SkillsRedesigned from './components/SkillsRedesigned'
 import { API_ENDPOINTS } from './config/api'
 import { 
   TableTennisIcon, 
@@ -31,7 +31,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/skills" element={<SkillsEnhanced />} />
+        <Route path="/skills" element={<SkillsRedesigned />} />
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/matches" element={<MatchesPage />} />
         <Route path="/leagues" element={<LeaguesPage />} />
