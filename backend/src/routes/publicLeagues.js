@@ -106,16 +106,18 @@ router.post('/:leagueId/register', async (req, res) => {
         throw new Error('League is full');
       }
       
-      // Check if email already registered for this week's instance
-      const existingQuery = `
-        SELECT id FROM public_league_registrations 
-        WHERE league_instance_id = $1 AND email = $2
-      `;
-      
-      const existing = await client.query(existingQuery, [instance.id, email]);
-      
-      if (existing.rows.length > 0) {
-        throw new Error('Email already registered for this league');
+      // Check if email already registered for this week's instance (only if email provided)
+      if (email && email.trim()) {
+        const existingQuery = `
+          SELECT id FROM public_league_registrations 
+          WHERE league_instance_id = $1 AND email = $2
+        `;
+        
+        const existing = await client.query(existingQuery, [instance.id, email]);
+        
+        if (existing.rows.length > 0) {
+          throw new Error('Email already registered for this league');
+        }
       }
       
       // Register the user
