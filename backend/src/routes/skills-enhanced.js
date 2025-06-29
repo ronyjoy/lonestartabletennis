@@ -603,6 +603,7 @@ router.delete('/skill/:skillId', auth, async (req, res) => {
 router.get('/comments/:studentId', auth, async (req, res) => {
   try {
     const { studentId } = req.params;
+    console.log('Get comments request:', { studentId, userRole: req.user.role, userId: req.user.userId });
     
     // Verify student exists
     const studentCheck = await db.query(
@@ -681,7 +682,10 @@ router.get('/comments/:studentId', auth, async (req, res) => {
       params = [studentId];
     }
 
+    console.log('Executing query:', query);
+    console.log('Query params:', params);
     const result = await db.query(query, params);
+    console.log('Comments query result:', result.rows);
     
     res.json({ 
       student: studentCheck.rows[0],

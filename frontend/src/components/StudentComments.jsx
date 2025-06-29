@@ -27,16 +27,20 @@ const StudentComments = ({ studentId, currentUser }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
+      console.log('Fetching comments for studentId:', studentId);
       const response = await fetch(`${API_ENDPOINTS.SKILLS}/comments/${studentId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
+      console.log('Comments response status:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('Comments data received:', data);
         setComments(data.comments || []);
         setStudent(data.student);
       } else {
-        console.error('Failed to fetch comments');
+        const errorData = await response.json();
+        console.error('Failed to fetch comments:', response.status, errorData);
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
