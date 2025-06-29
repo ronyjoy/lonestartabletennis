@@ -103,33 +103,51 @@ router.get('/', auth, async (req, res) => {
     
     if (studentId) {
       // Get skills for a specific student (coaches/admins viewing student)
-      let query = `
-        SELECT 
-          skill_id,
-          skill_name,
-          student_first_name,
-          student_last_name,
-          coach_id,
-          coach_first_name,
-          coach_last_name,
-          rating,
-          notes,
-          rating_created_at,
-          rating_rank
-        FROM current_skill_ratings 
-        WHERE user_id = $1 
-        ${showHistory === 'true' ? '' : 'AND rating_rank = 1'}
-      `;
+      let query, queryParams;
       
-      let queryParams = [studentId];
-      
-      // If user is a coach, only show their own ratings
-      if (req.user.role === 'coach') {
-        query += ' AND coach_id = $2';
-        queryParams.push(req.user.userId);
+      if (req.user.role === 'admin') {
+        // Admins get all ratings for proper average calculation
+        query = `
+          SELECT 
+            skill_id,
+            skill_name,
+            student_first_name,
+            student_last_name,
+            coach_id,
+            coach_first_name,
+            coach_last_name,
+            rating,
+            notes,
+            rating_created_at,
+            rating_rank
+          FROM current_skill_ratings 
+          WHERE user_id = $1 
+          ${showHistory === 'true' ? '' : 'AND rating_rank = 1'}
+          ORDER BY skill_name, coach_first_name, rating_created_at DESC
+        `;
+        queryParams = [studentId];
+      } else {
+        // Coaches only see their own ratings
+        query = `
+          SELECT 
+            skill_id,
+            skill_name,
+            student_first_name,
+            student_last_name,
+            coach_id,
+            coach_first_name,
+            coach_last_name,
+            rating,
+            notes,
+            rating_created_at,
+            rating_rank
+          FROM current_skill_ratings 
+          WHERE user_id = $1 AND coach_id = $2
+          ${showHistory === 'true' ? '' : 'AND rating_rank = 1'}
+          ORDER BY skill_name, coach_first_name, rating_created_at DESC
+        `;
+        queryParams = [studentId, req.user.userId];
       }
-      
-      query += ' ORDER BY skill_name, coach_first_name, rating_created_at DESC';
       
       const result = await db.query(query, queryParams);
       return res.json({ skills: result.rows });

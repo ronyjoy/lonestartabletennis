@@ -170,8 +170,18 @@ const SkillsRedesigned = () => {
   };
 
   const getSkillRating = (skillName) => {
-    const skill = studentSkills.find(s => s.skill_name === skillName);
-    return skill ? skill.rating : 0;
+    if (user.role === 'admin') {
+      // For admins, calculate average across all coaches for this skill
+      const skillRatings = studentSkills.filter(s => s.skill_name === skillName);
+      if (skillRatings.length === 0) return 0;
+      
+      const sum = skillRatings.reduce((total, skill) => total + parseFloat(skill.rating), 0);
+      return Math.round((sum / skillRatings.length) * 10) / 10; // Round to 1 decimal
+    } else {
+      // For coaches, find their specific rating
+      const skill = studentSkills.find(s => s.skill_name === skillName);
+      return skill ? parseFloat(skill.rating) : 0;
+    }
   };
 
 
@@ -521,7 +531,39 @@ const SkillsRedesigned = () => {
 
 // Skill View Card Component (for admins - view only)
 const SkillViewCard = ({ skillName, currentRating, studentSkills }) => {
-  const skillData = studentSkills.find(skill => skill.skill_name === skillName);
+  // For admins, we want to show the average rating and all coaches who rated this skill
+  const skillRatings = studentSkills.filter(skill => skill.skill_name === skillName);
+  const hasRatings = skillRatings.length > 0;
+  
+  // Calculate average rating and get coach info
+  let avgRating = 0;
+  let coachInfo = [];
+  let latestUpdate = null;
+  let allNotes = [];
+  
+  if (hasRatings) {
+    // Calculate average from all coach ratings
+    const ratings = skillRatings.map(skill => parseFloat(skill.rating));
+    avgRating = ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
+    
+    // Get unique coaches and their info
+    const coaches = skillRatings.reduce((acc, skill) => {
+      const coachKey = `${skill.coach_first_name} ${skill.coach_last_name}`;
+      if (!acc[coachKey]) {
+        acc[coachKey] = {
+          name: coachKey,
+          rating: skill.rating,
+          updated: skill.rating_created_at,
+          notes: skill.notes
+        };
+      }
+      return acc;
+    }, {});
+    
+    coachInfo = Object.values(coaches);
+    latestUpdate = Math.max(...skillRatings.map(skill => new Date(skill.rating_created_at)));
+    allNotes = skillRatings.filter(skill => skill.notes).map(skill => ({ coach: `${skill.coach_first_name} ${skill.coach_last_name}`, notes: skill.notes }));
+  }
   
   return (
     <div className="border rounded-lg p-4 bg-gray-50 relative">
@@ -537,46 +579,77 @@ const SkillViewCard = ({ skillName, currentRating, studentSkills }) => {
       <div className="space-y-3">
         <div className="flex items-center">
           <div className="flex items-center">
-            {/* Non-interactive stars */}
+            {/* Non-interactive stars showing average */}
             {[...Array(10)].map((_, i) => (
               <StarIcon
                 key={i}
                 className={`w-5 h-5 pointer-events-none ${
-                  i < currentRating ? 'text-yellow-400' : 'text-gray-300'
+                  i < Math.floor(avgRating) ? 'text-yellow-400' : 'text-gray-300'
                 }`}
-                filled={i < currentRating}
+                filled={i < Math.floor(avgRating)}
               />
             ))}
             <span className="ml-2 text-sm font-medium text-gray-700">
-              {currentRating > 0 ? `${currentRating}/10` : 'Not Rated'}
+              {hasRatings ? `${avgRating.toFixed(1)}/10` : 'Not Rated'}
+              {coachInfo.length > 1 && (
+                <span className="text-xs text-gray-500 ml-1">(avg)</span>
+              )}
             </span>
           </div>
         </div>
         
-        {skillData ? (
-          <div className="text-xs text-gray-500 space-y-1">
+        {hasRatings ? (
+          <div className="text-xs text-gray-500 space-y-2">
+            {/* Show coach count */}
             <p className="flex items-center gap-1">
-              <span className="font-medium">Coach:</span> 
-              {skillData.coach_first_name} {skillData.coach_last_name}
+              <span className="font-medium">
+                {coachInfo.length === 1 ? 'Coach:' : `Coaches (${coachInfo.length}):`}
+              </span>
+              {coachInfo.length === 1 ? (
+                coachInfo[0].name
+              ) : (
+                <span>{coachInfo.map(coach => coach.name).join(', ')}</span>
+              )}
             </p>
+            
+            {/* Show individual ratings if multiple coaches */}
+            {coachInfo.length > 1 && (
+              <div className="bg-white p-2 rounded border">
+                <p className="font-medium text-gray-600 mb-1">Individual Ratings:</p>
+                {coachInfo.map((coach, idx) => (
+                  <p key={idx} className="text-xs text-gray-500">
+                    {coach.name}: {coach.rating}/10
+                  </p>
+                ))}
+              </div>
+            )}
+            
             <p className="flex items-center gap-1">
-              <span className="font-medium">Updated:</span> 
-              {new Date(skillData.rating_created_at).toLocaleDateString()}
+              <span className="font-medium">Last Updated:</span> 
+              {new Date(latestUpdate).toLocaleDateString()}
             </p>
-            {skillData.notes && (
-              <p className="mt-2 p-2 bg-white rounded border text-gray-600">
-                <span className="font-medium">Notes:</span> {skillData.notes}
-              </p>
+            
+            {/* Show notes from coaches */}
+            {allNotes.length > 0 && (
+              <div className="mt-2">
+                <p className="font-medium text-gray-600 mb-1">Coach Notes:</p>
+                {allNotes.map((noteInfo, idx) => (
+                  <div key={idx} className="bg-white p-2 rounded border mb-1">
+                    <p className="text-xs font-medium text-gray-600">{noteInfo.coach}:</p>
+                    <p className="text-xs text-gray-500">{noteInfo.notes}</p>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         ) : (
           <div className="text-xs text-gray-400 italic">
-            No rating assigned yet
+            No ratings assigned yet
           </div>
         )}
         
         <div className="text-xs text-gray-400 border-t pt-2 mt-3">
-          🔒 Read-only view • Contact coach to update ratings
+          🔒 Read-only view • Contact coaches to update ratings
         </div>
       </div>
     </div>
