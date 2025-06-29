@@ -2478,6 +2478,66 @@ function LeagueSignupsManagement() {
     }))
   }
 
+  const calculateStandings = (groupId) => {
+    const groupResults = results[groupId] || {}
+    const group = groups.find(g => g.id === groupId)
+    if (!group) return []
+
+    // Initialize player stats
+    const playerStats = {}
+    group.players.forEach(player => {
+      playerStats[player.id] = {
+        player,
+        wins: 0,
+        losses: 0,
+        gamesWon: 0,
+        gamesLost: 0,
+        points: 0
+      }
+    })
+
+    // Calculate stats from match results
+    Object.entries(groupResults).forEach(([matchKey, match]) => {
+      const score1 = parseInt(match.score1) || 0
+      const score2 = parseInt(match.score2) || 0
+      
+      // Only count if both scores are entered
+      if (match.score1 !== '' && match.score2 !== '') {
+        const player1Id = match.player1.id
+        const player2Id = match.player2.id
+        
+        playerStats[player1Id].gamesWon += score1
+        playerStats[player1Id].gamesLost += score2
+        playerStats[player2Id].gamesWon += score2
+        playerStats[player2Id].gamesLost += score1
+        
+        // Determine match winner (best of 3, 5, 7, etc. - for now simple highest score wins)
+        if (score1 > score2) {
+          playerStats[player1Id].wins += 1
+          playerStats[player2Id].losses += 1
+          playerStats[player1Id].points += 2 // 2 points for win
+        } else if (score2 > score1) {
+          playerStats[player2Id].wins += 1
+          playerStats[player1Id].losses += 1
+          playerStats[player2Id].points += 2 // 2 points for win
+        } else if (score1 === score2 && score1 > 0) {
+          // Tie game - 1 point each
+          playerStats[player1Id].points += 1
+          playerStats[player2Id].points += 1
+        }
+      }
+    })
+
+    // Sort by points (wins), then by games won/lost ratio
+    return Object.values(playerStats).sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points
+      if (b.wins !== a.wins) return b.wins - a.wins
+      const aRatio = a.gamesLost === 0 ? a.gamesWon : a.gamesWon / a.gamesLost
+      const bRatio = b.gamesLost === 0 ? b.gamesWon : b.gamesWon / b.gamesLost
+      return bRatio - aRatio
+    })
+  }
+
   const printResults = () => {
     const printWindow = window.open('', '_blank')
     const printContent = generatePrintableResults()
@@ -2511,6 +2571,33 @@ function LeagueSignupsManagement() {
     
     groups.forEach(group => {
       html += `<h2>${group.name} (${group.players.length} players)</h2>`
+      
+      // Add standings table
+      const standings = calculateStandings(group.id)
+      if (standings.length > 0 && standings.some(s => s.wins > 0 || s.losses > 0)) {
+        html += '<h3>Final Standings</h3>'
+        html += '<table style="margin-bottom: 20px;">'
+        html += '<tr><th>Rank</th><th>Player</th><th>Wins</th><th>Losses</th><th>Points</th><th>Games W-L</th></tr>'
+        
+        standings.forEach((standing, index) => {
+          const rankDisplay = index === 0 ? '🥇 1st' : index === 1 ? '🥈 2nd' : `${index + 1}${getOrdinalSuffix(index + 1)}`
+          html += `
+            <tr>
+              <td style="text-align: center; font-weight: bold;">${rankDisplay}</td>
+              <td>${standing.player.first_name} ${standing.player.last_name}</td>
+              <td style="text-align: center;">${standing.wins}</td>
+              <td style="text-align: center;">${standing.losses}</td>
+              <td style="text-align: center;">${standing.points}</td>
+              <td style="text-align: center;">${standing.gamesWon}-${standing.gamesLost}</td>
+            </tr>
+          `
+        })
+        
+        html += '</table>'
+      }
+      
+      // Add match results table
+      html += '<h3>Match Results</h3>'
       html += '<table>'
       html += '<tr><th>Player 1</th><th>Score</th><th>Player 2</th><th>Score</th></tr>'
       
@@ -2530,6 +2617,15 @@ function LeagueSignupsManagement() {
     })
     
     return html
+  }
+
+  const getOrdinalSuffix = (num) => {
+    const j = num % 10
+    const k = num % 100
+    if (j === 1 && k !== 11) return 'st'
+    if (j === 2 && k !== 12) return 'nd'
+    if (j === 3 && k !== 13) return 'rd'
+    return 'th'
   }
 
   if (!user) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-600">Loading...</div></div>
@@ -2710,6 +2806,89 @@ function LeagueSignupsManagement() {
                   Print Results
                 </button>
               </div>
+
+              {/* Live Standings */}
+              {groups.map(group => {
+                const standings = calculateStandings(group.id)
+                const hasResults = standings.some(s => s.wins > 0 || s.losses > 0)
+                
+                return hasResults && (
+                  <div key={`standings-${group.id}`} className="bg-white shadow rounded-lg p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">
+                      {group.name} - Current Standings
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Rank
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Player
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Wins
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Losses
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Points
+                            </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Games W-L
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {standings.map((standing, index) => (
+                            <tr key={standing.player.id} className={index < 2 ? 'bg-yellow-50' : ''}>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                {index === 0 ? (
+                                  <span className="text-2xl">🥇</span>
+                                ) : index === 1 ? (
+                                  <span className="text-2xl">🥈</span>
+                                ) : index === 2 ? (
+                                  <span className="text-2xl">🥉</span>
+                                ) : (
+                                  <span className="text-lg font-bold text-gray-600">{index + 1}</span>
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {standing.player.first_name} {standing.player.last_name}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  Rating: {standing.player.skill_level}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  {standing.wins}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                  {standing.losses}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {standing.points}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-600">
+                                {standing.gamesWon}-{standing.gamesLost}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )
+              })}
 
               {groups.map(group => (
                 <div key={group.id} className="bg-white shadow rounded-lg p-6">
