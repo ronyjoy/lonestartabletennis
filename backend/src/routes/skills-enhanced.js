@@ -4,6 +4,36 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// Ensure student_comments table exists
+const initializeStudentCommentsTable = async () => {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS student_comments (
+        id SERIAL PRIMARY KEY,
+        student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        coach_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        comment TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        
+        -- Ensure one comment per coach per student
+        UNIQUE(student_id, coach_id)
+      )
+    `);
+    
+    // Create indexes if they don't exist
+    await db.query('CREATE INDEX IF NOT EXISTS idx_student_comments_student_id ON student_comments(student_id)');
+    await db.query('CREATE INDEX IF NOT EXISTS idx_student_comments_coach_id ON student_comments(coach_id)');
+    
+    console.log('✅ student_comments table initialized');
+  } catch (error) {
+    console.error('Failed to initialize student_comments table:', error);
+  }
+};
+
+// Initialize table on module load
+initializeStudentCommentsTable();
+
 // Get skills with ratings history based on user role
 router.get('/', auth, async (req, res) => {
   try {
