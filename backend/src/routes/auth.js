@@ -189,12 +189,12 @@ router.get('/dashboard-stats', authenticateToken, async (req, res) => {
         JOIN skill_ratings sr ON s.id = sr.skill_id 
         WHERE s.user_id = $1
       `;
-      const registrationsQuery = 'SELECT COUNT(*) as count FROM public_league_registrations WHERE email = $2';
+      const registrationsQuery = 'SELECT COUNT(*) as count FROM public_league_registrations WHERE email = $1';
       
       const userEmail = req.user.email;
       const [skills, registrations] = await Promise.all([
         db.query(skillsQuery, [userId]),
-        db.query(registrationsQuery, [userId, userEmail])
+        db.query(registrationsQuery, [userEmail])
       ]);
       
       stats = {
