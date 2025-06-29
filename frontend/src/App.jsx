@@ -1541,8 +1541,8 @@ function LeaguesPage() {
     start_time: '19:00',
     end_time: '21:00',
     max_participants: 16,
-    skill_level_min: 1,
-    skill_level_max: 10,
+    skill_level_min: 0,
+    skill_level_max: 3000,
     entry_fee: 0
   })
 
@@ -1626,8 +1626,8 @@ function LeaguesPage() {
           start_time: '19:00',
           end_time: '21:00',
           max_participants: 16,
-          skill_level_min: 1,
-          skill_level_max: 10,
+          skill_level_min: 0,
+          skill_level_max: 3000,
           entry_fee: 0
         })
         fetchLeagues()
@@ -1757,8 +1757,8 @@ function LeaguesPage() {
                     start_time: '19:00',
                     end_time: '21:00',
                     max_participants: 16,
-                    skill_level_min: 1,
-                    skill_level_max: 10,
+                    skill_level_min: 0,
+                    skill_level_max: 3000,
                     entry_fee: 0
                   })
                 }}
@@ -1848,29 +1848,31 @@ function LeaguesPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Min Skill Level</label>
-                  <select
+                  <label className="block text-sm font-medium text-gray-700">Min USATT Rating</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="3000"
+                    step="1"
                     value={formData.skill_level_min}
-                    onChange={(e) => setFormData({...formData, skill_level_min: parseInt(e.target.value)})}
+                    onChange={(e) => setFormData({...formData, skill_level_min: parseInt(e.target.value) || 0})}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {[1,2,3,4,5,6,7,8,9,10].map(level => (
-                      <option key={level} value={level}>{level}</option>
-                    ))}
-                  </select>
+                    placeholder="Enter minimum rating (0-3000)"
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Max Skill Level</label>
-                  <select
+                  <label className="block text-sm font-medium text-gray-700">Max USATT Rating</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="3000"
+                    step="1"
                     value={formData.skill_level_max}
-                    onChange={(e) => setFormData({...formData, skill_level_max: parseInt(e.target.value)})}
+                    onChange={(e) => setFormData({...formData, skill_level_max: parseInt(e.target.value) || 0})}
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {[1,2,3,4,5,6,7,8,9,10].map(level => (
-                      <option key={level} value={level}>{level}</option>
-                    ))}
-                  </select>
+                    placeholder="Enter maximum rating (0-3000)"
+                  />
                 </div>
 
                 <div className="md:col-span-2">
@@ -1928,7 +1930,7 @@ function LeaguesPage() {
                             <div><strong>Time:</strong> {league.start_time} - {league.end_time}</div>
                             <div><strong>Max Players:</strong> {league.max_participants}</div>
                             <div><strong>Fee:</strong> ${league.entry_fee}</div>
-                            <div><strong>Skill Range:</strong> {league.skill_level_min}-{league.skill_level_max}</div>
+                            <div><strong>USATT Rating:</strong> {league.skill_level_min}-{league.skill_level_max}</div>
                             <div><strong>Total Instances:</strong> {league.total_instances}</div>
                             <div><strong>Total Registrations:</strong> {league.total_registrations}</div>
                           </div>
