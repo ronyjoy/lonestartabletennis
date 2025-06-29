@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_ENDPOINTS } from '../config/api';
 import SkillProgressChart from './SkillProgressChart';
+import StudentComments from './StudentComments';
 import { 
   ChartBarIcon, 
   StarIcon, 
@@ -151,10 +152,6 @@ const SkillsRedesigned = () => {
     return skill ? skill.rating : 0;
   };
 
-  const getSkillNotes = (skillName) => {
-    const skill = studentSkills.find(s => s.skill_name === skillName);
-    return skill ? skill.notes || '' : '';
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -252,6 +249,14 @@ const SkillsRedesigned = () => {
                     </div>
                   </div>
                 ))}
+                </div>
+
+                {/* Student Comments Section */}
+                <div className="mt-6">
+                  <StudentComments 
+                    studentId={user.userId} 
+                    currentUser={user}
+                  />
                 </div>
               </>
             )}
@@ -354,20 +359,28 @@ const SkillsRedesigned = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {commonSkills.map(skillName => {
                     const currentRating = getSkillRating(skillName);
-                    const currentNotes = getSkillNotes(skillName);
                     
                     return (
                       <SkillCard
                         key={skillName}
                         skillName={skillName}
                         currentRating={currentRating}
-                        currentNotes={currentNotes}
                         onUpdate={addOrUpdateSkillRating}
                       />
                     );
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Student Comments Section - Only show when student is selected */}
+          {selectedStudent && (
+            <div className="mt-6">
+              <StudentComments 
+                studentId={selectedStudent.id} 
+                currentUser={user}
+              />
             </div>
           )}
         </div>
@@ -377,24 +390,21 @@ const SkillsRedesigned = () => {
 };
 
 // Skill Card Component
-const SkillCard = ({ skillName, currentRating, currentNotes, onUpdate }) => {
+const SkillCard = ({ skillName, currentRating, onUpdate }) => {
   const [rating, setRating] = useState(currentRating);
-  const [notes, setNotes] = useState(currentNotes);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     setRating(currentRating);
-    setNotes(currentNotes);
-  }, [currentRating, currentNotes]);
+  }, [currentRating]);
 
   const handleSave = () => {
-    onUpdate(skillName, rating, notes);
+    onUpdate(skillName, rating, ''); // No notes for individual skills
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     setRating(currentRating);
-    setNotes(currentNotes);
     setIsEditing(false);
   };
 
@@ -418,16 +428,6 @@ const SkillCard = ({ skillName, currentRating, currentNotes, onUpdate }) => {
             />
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
-              rows="2"
-              placeholder="Add notes..."
-            />
-          </div>
           
           <div className="flex space-x-2">
             <button
@@ -459,9 +459,6 @@ const SkillCard = ({ skillName, currentRating, currentNotes, onUpdate }) => {
             </div>
           </div>
           
-          {notes && (
-            <p className="text-sm text-gray-600">{notes}</p>
-          )}
           
           <button
             onClick={() => setIsEditing(true)}

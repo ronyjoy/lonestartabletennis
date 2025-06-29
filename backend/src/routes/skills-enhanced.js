@@ -568,4 +568,237 @@ router.delete('/skill/:skillId', auth, async (req, res) => {
   }
 });
 
+// Get student comments (coaches see their own comments, students see all comments about them)
+router.get('/comments/:studentId', auth, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    
+    // Verify student exists
+    const studentCheck = await db.query(
+      'SELECT id, first_name, last_name FROM users WHERE id = $1 AND role = $2',
+      [studentId, 'student']
+    );
+
+    if (studentCheck.rows.length === 0) {
+      return res.status(404).json({
+        error: {
+          code: 'STUDENT_NOT_FOUND',
+          message: 'Student not found'
+        }
+      });
+    }
+
+    let query, params;
+
+    if (req.user.role === 'student') {
+      // Students can only see comments about themselves
+      if (parseInt(studentId) !== req.user.userId) {
+        return res.status(403).json({
+          error: {
+            code: 'FORBIDDEN',
+            message: 'Students can only view their own comments'
+          }
+        });
+      }
+      
+      // Get all comments about this student
+      query = `
+        SELECT 
+          sc.id,
+          sc.comment,
+          sc.created_at,
+          sc.updated_at,
+          u.first_name as coach_first_name,
+          u.last_name as coach_last_name
+        FROM student_comments sc
+        JOIN users u ON sc.coach_id = u.id
+        WHERE sc.student_id = $1
+        ORDER BY sc.created_at DESC
+      `;
+      params = [studentId];
+    } else if (req.user.role === 'coach') {
+      // Coaches only see their own comments about the student
+      query = `
+        SELECT 
+          sc.id,
+          sc.comment,
+          sc.created_at,
+          sc.updated_at,
+          u.first_name as coach_first_name,
+          u.last_name as coach_last_name
+        FROM student_comments sc
+        JOIN users u ON sc.coach_id = u.id
+        WHERE sc.student_id = $1 AND sc.coach_id = $2
+        ORDER BY sc.created_at DESC
+      `;
+      params = [studentId, req.user.userId];
+    } else {
+      // Admins see all comments about the student
+      query = `
+        SELECT 
+          sc.id,
+          sc.comment,
+          sc.created_at,
+          sc.updated_at,
+          u.first_name as coach_first_name,
+          u.last_name as coach_last_name
+        FROM student_comments sc
+        JOIN users u ON sc.coach_id = u.id
+        WHERE sc.student_id = $1
+        ORDER BY sc.created_at DESC
+      `;
+      params = [studentId];
+    }
+
+    const result = await db.query(query, params);
+    
+    res.json({ 
+      student: studentCheck.rows[0],
+      comments: result.rows 
+    });
+
+  } catch (error) {
+    console.error('Get student comments error:', error);
+    res.status(500).json({
+      error: {
+        code: 'GET_COMMENTS_FAILED',
+        message: 'Failed to fetch student comments'
+      }
+    });
+  }
+});
+
+// Add or update student comment
+router.post('/comments/:studentId', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'coach' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        error: {
+          code: 'INSUFFICIENT_PERMISSIONS',
+          message: 'Only coaches and admins can add student comments'
+        }
+      });
+    }
+
+    const { studentId } = req.params;
+    const { comment } = req.body;
+
+    if (!comment || comment.trim() === '') {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Comment is required'
+        }
+      });
+    }
+
+    // Verify student exists
+    const studentCheck = await db.query(
+      'SELECT id FROM users WHERE id = $1 AND role = $2',
+      [studentId, 'student']
+    );
+
+    if (studentCheck.rows.length === 0) {
+      return res.status(404).json({
+        error: {
+          code: 'STUDENT_NOT_FOUND',
+          message: 'Student not found'
+        }
+      });
+    }
+
+    // Check if coach already has a comment for this student
+    const existingComment = await db.query(
+      'SELECT id FROM student_comments WHERE student_id = $1 AND coach_id = $2',
+      [studentId, req.user.userId]
+    );
+
+    let result;
+    if (existingComment.rows.length > 0) {
+      // Update existing comment
+      result = await db.query(
+        `UPDATE student_comments 
+         SET comment = $1, updated_at = CURRENT_TIMESTAMP 
+         WHERE student_id = $2 AND coach_id = $3
+         RETURNING id, created_at, updated_at`,
+        [comment.trim(), studentId, req.user.userId]
+      );
+    } else {
+      // Create new comment
+      result = await db.query(
+        `INSERT INTO student_comments (student_id, coach_id, comment) 
+         VALUES ($1, $2, $3) 
+         RETURNING id, created_at, updated_at`,
+        [studentId, req.user.userId, comment.trim()]
+      );
+    }
+
+    res.status(201).json({
+      message: 'Comment saved successfully',
+      comment: {
+        id: result.rows[0].id,
+        comment: comment.trim(),
+        created_at: result.rows[0].created_at,
+        updated_at: result.rows[0].updated_at
+      }
+    });
+
+  } catch (error) {
+    console.error('Add student comment error:', error);
+    res.status(500).json({
+      error: {
+        code: 'ADD_COMMENT_FAILED',
+        message: 'Failed to add student comment'
+      }
+    });
+  }
+});
+
+// Delete student comment
+router.delete('/comments/:commentId', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'coach' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        error: {
+          code: 'INSUFFICIENT_PERMISSIONS',
+          message: 'Only coaches and admins can delete comments'
+        }
+      });
+    }
+
+    const { commentId } = req.params;
+
+    let query = 'DELETE FROM student_comments WHERE id = $1';
+    let params = [commentId];
+
+    // Coaches can only delete their own comments
+    if (req.user.role === 'coach') {
+      query += ' AND coach_id = $2';
+      params.push(req.user.userId);
+    }
+
+    const result = await db.query(query + ' RETURNING id', params);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: {
+          code: 'COMMENT_NOT_FOUND',
+          message: 'Comment not found or insufficient permissions'
+        }
+      });
+    }
+
+    res.json({ message: 'Comment deleted successfully' });
+
+  } catch (error) {
+    console.error('Delete student comment error:', error);
+    res.status(500).json({
+      error: {
+        code: 'DELETE_COMMENT_FAILED',
+        message: 'Failed to delete comment'
+      }
+    });
+  }
+});
+
 module.exports = router;
