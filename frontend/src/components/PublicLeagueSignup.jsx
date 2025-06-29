@@ -157,7 +157,7 @@ const PublicLeagueSignup = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                USATT Rating (0-3000: Beginner &lt;1200, Advanced ≥1200)
+                USATT Rating (0-3000)
               </label>
               <input
                 type="number"
@@ -170,7 +170,7 @@ const PublicLeagueSignup = () => {
                 placeholder="Enter your USATT rating (0-3000)"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Don't have a USATT rating? Estimate: Beginner 0-800, Intermediate 800-1500, Advanced 1500+
+                Rating Guide: Beginner 0-1200, Intermediate 1200-1600, Advanced 1600+
               </p>
             </div>
             
