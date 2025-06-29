@@ -826,7 +826,7 @@ function DashboardPage() {
             {user.role === 'student' && (
               <div className="mt-6">
                 <BadgeSystem 
-                  studentId={user.userId} 
+                  studentId={user.id} 
                   currentUser={user}
                   isManageView={false}
                 />

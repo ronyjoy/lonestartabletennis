@@ -17,8 +17,13 @@ const StudentComments = ({ studentId, currentUser }) => {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    console.log('StudentComments component mounted with:', { studentId, currentUser });
     if (studentId) {
+      console.log('About to fetch comments...');
       fetchComments();
+    } else {
+      console.log('No studentId provided, not fetching comments');
+      setLoading(false);
     }
   }, [studentId]);
 
@@ -109,7 +114,7 @@ const StudentComments = ({ studentId, currentUser }) => {
   };
 
   const canAddComment = currentUser.role === 'coach' || currentUser.role === 'admin';
-  const isOwnComment = (comment) => comment.coach_id === currentUser.userId;
+  const isOwnComment = (comment) => comment.coach_id === currentUser.id;
 
   if (loading) {
     return (

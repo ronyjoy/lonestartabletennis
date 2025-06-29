@@ -48,7 +48,7 @@ const SkillsRedesigned = () => {
       
       if (parsedUser.role === 'student') {
         // For students, fetch their own skills and history
-        fetchStudentSkills(parsedUser.userId);
+        fetchStudentSkills(parsedUser.id);
         fetchSkillHistory();
       } else {
         // For coaches/admins, fetch students list
@@ -306,7 +306,7 @@ const SkillsRedesigned = () => {
                 {/* Student Badges Section */}
                 <div className="mt-6">
                   <BadgeSystem 
-                    studentId={user.userId} 
+                    studentId={user.id} 
                     currentUser={user}
                     isManageView={false}
                   />
@@ -315,7 +315,7 @@ const SkillsRedesigned = () => {
                 {/* Student Comments Section */}
                 <div className="mt-6">
                   <StudentComments 
-                    studentId={user.userId} 
+                    studentId={user.id} 
                     currentUser={user}
                   />
                 </div>

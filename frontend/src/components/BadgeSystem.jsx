@@ -47,8 +47,13 @@ const BadgeSystem = ({ studentId, currentUser, isManageView = false }) => {
   const [selectedCategory, setSelectedCategory] = useState('Skill Development');
 
   useEffect(() => {
+    console.log('BadgeSystem component mounted with:', { studentId, currentUser });
     if (studentId) {
+      console.log('About to fetch badges...');
       fetchStudentBadges();
+    } else {
+      console.log('No studentId provided, not fetching badges');
+      setLoading(false);
     }
   }, [studentId]);
 
