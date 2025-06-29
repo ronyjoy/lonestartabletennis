@@ -47,6 +47,12 @@ router.get('/', async (req, res) => {
     `;
     
     const result = await db.query(query);
+    console.log('League data being returned:', result.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      actual_participants: row.actual_participants,
+      instance_id: row.instance_id
+    })));
     res.json(result.rows);
   } catch (error) {
     console.error('Error fetching leagues:', error);
@@ -128,7 +134,7 @@ router.post('/:leagueId/register', async (req, res) => {
         RETURNING *
       `;
       
-      await client.query(registerQuery, [
+      const registerResult = await client.query(registerQuery, [
         instance.id,
         firstName,
         lastName,
@@ -154,7 +160,7 @@ router.post('/:leagueId/register', async (req, res) => {
       
       res.json({ 
         message: 'Registration successful!',
-        registrationId: registerQuery.rows?.[0]?.id 
+        registrationId: registerResult.rows?.[0]?.id 
       });
       
     } catch (error) {
@@ -175,12 +181,41 @@ router.get('/:leagueId/players', async (req, res) => {
   try {
     const { leagueId } = req.params;
     
-    const query = `
+    console.log(`Fetching players for league ${leagueId}`);
+    
+    // First, let's check what week we're looking for
+    const weekQuery = `SELECT DATE_TRUNC('week', CURRENT_DATE) as current_week`;
+    const weekResult = await db.query(weekQuery);
+    console.log('Current week start:', weekResult.rows[0].current_week);
+    
+    // Get all registrations for this league to debug
+    const debugQuery = `
+      SELECT 
+        plr.id,
+        plr.first_name,
+        plr.last_name,
+        plr.league_instance_id,
+        li.week_start_date,
+        lt.id as template_id,
+        lt.name as league_name
+      FROM public_league_registrations plr
+      JOIN league_instances li ON plr.league_instance_id = li.id
+      JOIN league_templates lt ON li.template_id = lt.id
+      WHERE lt.id = $1
+      ORDER BY plr.registration_date DESC
+    `;
+    
+    const debugResult = await db.query(debugQuery, [leagueId]);
+    console.log(`All registrations for league ${leagueId}:`, debugResult.rows);
+    
+    // Try to get players for current week first
+    let query = `
       SELECT 
         plr.first_name,
         plr.last_name,
         plr.skill_level,
         plr.registration_date,
+        li.week_start_date,
         -- Only show first letter of last name for privacy
         CONCAT(plr.first_name, ' ', LEFT(plr.last_name, 1), '.') as display_name
       FROM public_league_registrations plr
@@ -191,7 +226,39 @@ router.get('/:leagueId/players', async (req, res) => {
       ORDER BY plr.registration_date ASC
     `;
     
-    const result = await db.query(query, [leagueId]);
+    let result = await db.query(query, [leagueId]);
+    console.log(`Players found for current week:`, result.rows);
+    
+    // If no players found for current week, get players from most recent instance
+    if (result.rows.length === 0) {
+      console.log('No players found for current week, trying most recent instance...');
+      query = `
+        SELECT 
+          plr.first_name,
+          plr.last_name,
+          plr.skill_level,
+          plr.registration_date,
+          li.week_start_date,
+          -- Only show first letter of last name for privacy
+          CONCAT(plr.first_name, ' ', LEFT(plr.last_name, 1), '.') as display_name
+        FROM public_league_registrations plr
+        JOIN league_instances li ON plr.league_instance_id = li.id
+        JOIN league_templates lt ON li.template_id = lt.id
+        WHERE lt.id = $1 
+          AND li.id = (
+            SELECT li2.id 
+            FROM league_instances li2 
+            WHERE li2.template_id = $1 
+            ORDER BY li2.week_start_date DESC 
+            LIMIT 1
+          )
+        ORDER BY plr.registration_date ASC
+      `;
+      
+      result = await db.query(query, [leagueId]);
+      console.log(`Players found for most recent instance:`, result.rows);
+    }
+    
     res.json({ 
       players: result.rows,
       total_registered: result.rows.length 
