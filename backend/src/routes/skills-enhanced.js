@@ -48,7 +48,7 @@ router.get('/', auth, async (req, res) => {
     
     if (studentId) {
       // Get skills for a specific student (coaches/admins viewing student)
-      const query = `
+      let query = `
         SELECT 
           skill_id,
           skill_name,
@@ -64,15 +64,24 @@ router.get('/', auth, async (req, res) => {
         FROM current_skill_ratings 
         WHERE user_id = $1 
         ${showHistory === 'true' ? '' : 'AND rating_rank = 1'}
-        ORDER BY skill_name, coach_first_name, rating_created_at DESC
       `;
       
-      const result = await db.query(query, [studentId]);
+      let queryParams = [studentId];
+      
+      // If user is a coach, only show their own ratings
+      if (req.user.role === 'coach') {
+        query += ' AND coach_id = $2';
+        queryParams.push(req.user.userId);
+      }
+      
+      query += ' ORDER BY skill_name, coach_first_name, rating_created_at DESC';
+      
+      const result = await db.query(query, queryParams);
       return res.json({ skills: result.rows });
     }
     
     // Default: Get all skills overview (coaches/admins)
-    const query = `
+    let query = `
       SELECT 
         skill_id,
         skill_name,
@@ -90,10 +99,19 @@ router.get('/', auth, async (req, res) => {
         (SELECT AVG(rating) FROM skill_ratings sr3 WHERE sr3.skill_id = current_skill_ratings.skill_id) as avg_rating
       FROM current_skill_ratings 
       WHERE rating_rank = 1
-      ORDER BY student_first_name, student_last_name, skill_name, coach_first_name
     `;
     
-    const result = await db.query(query);
+    let queryParams = [];
+    
+    // If user is a coach, only show their own ratings
+    if (req.user.role === 'coach') {
+      query += ' AND coach_id = $1';
+      queryParams.push(req.user.userId);
+    }
+    
+    query += ' ORDER BY student_first_name, student_last_name, skill_name, coach_first_name';
+    
+    const result = await db.query(query, queryParams);
     res.json({ skills: result.rows });
     
   } catch (error) {
@@ -138,18 +156,39 @@ router.get('/stats', auth, async (req, res) => {
         WHERE user_id = $1 AND rating_rank = 1
       `;
       params = [studentId];
+      
+      // If user is a coach, only show their own ratings for this student
+      if (req.user.role === 'coach') {
+        query = query.replace('WHERE user_id = $1 AND rating_rank = 1', 'WHERE user_id = $1 AND rating_rank = 1 AND coach_id = $2');
+        params.push(req.user.userId);
+      }
     } else {
-      // Overall stats (admins)
-      query = `
-        SELECT 
-          COUNT(DISTINCT skill_id) as total_skills,
-          COUNT(DISTINCT user_id) as total_students,
-          COUNT(DISTINCT coach_id) as total_coaches,
-          ROUND(AVG(rating)::numeric, 1) as avg_rating
-        FROM current_skill_ratings 
-        WHERE rating_rank = 1
-      `;
-      params = [];
+      // Overall stats (admins or coaches viewing their overall stats)
+      if (req.user.role === 'coach') {
+        // Coach stats - only their ratings
+        query = `
+          SELECT 
+            COUNT(DISTINCT skill_id) as total_skills,
+            COUNT(DISTINCT user_id) as total_students,
+            1 as total_coaches,
+            ROUND(AVG(rating)::numeric, 1) as avg_rating
+          FROM current_skill_ratings 
+          WHERE rating_rank = 1 AND coach_id = $1
+        `;
+        params = [req.user.userId];
+      } else {
+        // Admin stats - all ratings
+        query = `
+          SELECT 
+            COUNT(DISTINCT skill_id) as total_skills,
+            COUNT(DISTINCT user_id) as total_students,
+            COUNT(DISTINCT coach_id) as total_coaches,
+            ROUND(AVG(rating)::numeric, 1) as avg_rating
+          FROM current_skill_ratings 
+          WHERE rating_rank = 1
+        `;
+        params = [];
+      }
     }
     
     const result = await db.query(query, params);
