@@ -5,8 +5,7 @@ import {
   AcademicCapIcon, 
   ClockIcon,
   PlusIcon,
-  TrashIcon,
-  EditIcon
+  TrashIcon
 } from './icons';
 
 const StudentComments = ({ studentId, currentUser }) => {
@@ -28,6 +27,10 @@ const StudentComments = ({ studentId, currentUser }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       console.log('Fetching comments for studentId:', studentId);
+      console.log('Current user:', currentUser);
+      console.log('Token exists:', !!token);
+      console.log('API URL:', `${API_ENDPOINTS.SKILLS}/comments/${studentId}`);
+      
       const response = await fetch(`${API_ENDPOINTS.SKILLS}/comments/${studentId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });

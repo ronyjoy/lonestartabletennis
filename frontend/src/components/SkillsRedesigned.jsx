@@ -303,6 +303,15 @@ const SkillsRedesigned = () => {
                 ))}
                 </div>
 
+                {/* Student Badges Section */}
+                <div className="mt-6">
+                  <BadgeSystem 
+                    studentId={user.userId} 
+                    currentUser={user}
+                    isManageView={false}
+                  />
+                </div>
+
                 {/* Student Comments Section */}
                 <div className="mt-6">
                   <StudentComments 

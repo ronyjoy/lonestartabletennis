@@ -56,16 +56,28 @@ const BadgeSystem = ({ studentId, currentUser, isManageView = false }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
+      console.log('Fetching badges for studentId:', studentId);
+      console.log('Current user:', currentUser);
+      console.log('Token exists:', !!token);
+      console.log('API URL:', `${API_ENDPOINTS.SKILLS}/badges/${studentId}`);
+      
       const response = await fetch(`${API_ENDPOINTS.SKILLS}/badges/${studentId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
+      console.log('Badge response status:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('Badge data received:', data);
         setStudentBadges(data.badges || []);
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to fetch badges:', response.status, errorData);
+        setMessage('Failed to load badges');
       }
     } catch (error) {
       console.error('Error fetching student badges:', error);
+      setMessage('Error loading badges');
     } finally {
       setLoading(false);
     }
