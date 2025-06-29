@@ -128,8 +128,7 @@ router.put('/:id', async (req, res) => {
         skill_level_min = COALESCE($7, skill_level_min),
         skill_level_max = COALESCE($8, skill_level_max),
         entry_fee = COALESCE($9, entry_fee),
-        is_active = COALESCE($10, is_active),
-        updated_at = CURRENT_TIMESTAMP
+        is_active = COALESCE($10, is_active)
       WHERE id = $11
       RETURNING *
     `;
@@ -185,7 +184,7 @@ router.delete('/:id', async (req, res) => {
       // Don't delete, just deactivate if there are registrations
       const deactivateQuery = `
         UPDATE league_templates 
-        SET is_active = false, updated_at = CURRENT_TIMESTAMP
+        SET is_active = false
         WHERE id = $1
         RETURNING *
       `;
