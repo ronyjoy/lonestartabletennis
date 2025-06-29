@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import Logo from './components/Logo'
 import PublicLeagueSignup from './components/PublicLeagueSignup'
 import SkillsRedesigned from './components/SkillsRedesigned'
+import BadgeSystem from './components/BadgeSystem'
 import { API_ENDPOINTS } from './config/api'
 import { 
   TableTennisIcon, 
@@ -820,6 +821,17 @@ function DashboardPage() {
                 Edit Profile
               </button>
             </div>
+            
+            {/* Student Badges */}
+            {user.role === 'student' && (
+              <div className="mt-6">
+                <BadgeSystem 
+                  studentId={user.userId} 
+                  currentUser={user}
+                  isManageView={false}
+                />
+              </div>
+            )}
             
             {/* Role indicator */}
             <div className="mt-6 p-4 bg-blue-50 rounded-lg">

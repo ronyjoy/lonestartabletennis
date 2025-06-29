@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { API_ENDPOINTS } from '../config/api';
 import SkillProgressChart from './SkillProgressChart';
 import StudentComments from './StudentComments';
+import BadgeSystem from './BadgeSystem';
 import { 
   ChartBarIcon, 
   StarIcon, 
@@ -452,6 +453,17 @@ const SkillsRedesigned = () => {
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Badge Management Section - Only show when student is selected */}
+          {selectedStudent && (
+            <div className="mt-6">
+              <BadgeSystem 
+                studentId={selectedStudent.id} 
+                currentUser={user}
+                isManageView={true}
+              />
             </div>
           )}
 

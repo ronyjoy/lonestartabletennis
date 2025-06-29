@@ -4,6 +4,30 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+// Ensure student_badges table exists
+const initializeStudentBadgesTable = async () => {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS student_badges (
+        id SERIAL PRIMARY KEY,
+        student_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        badge_id VARCHAR(100) NOT NULL,
+        coach_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(student_id, badge_id)
+      )
+    `);
+    
+    // Create indexes if they don't exist
+    await db.query('CREATE INDEX IF NOT EXISTS idx_student_badges_student_id ON student_badges(student_id)');
+    await db.query('CREATE INDEX IF NOT EXISTS idx_student_badges_coach_id ON student_badges(coach_id)');
+    
+    console.log('✅ student_badges table initialized');
+  } catch (error) {
+    console.error('Failed to initialize student_badges table:', error);
+  }
+};
+
 // Ensure student_comments table exists
 const initializeStudentCommentsTable = async () => {
   try {
@@ -31,7 +55,8 @@ const initializeStudentCommentsTable = async () => {
   }
 };
 
-// Initialize table on module load
+// Initialize tables on module load
+initializeStudentBadgesTable();
 initializeStudentCommentsTable();
 
 // Get skills with ratings history based on user role
@@ -831,6 +856,196 @@ router.delete('/comments/:commentId', auth, async (req, res) => {
       error: {
         code: 'DELETE_COMMENT_FAILED',
         message: 'Failed to delete comment'
+      }
+    });
+  }
+});
+
+// Get student badges
+router.get('/badges/:studentId', auth, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    
+    // Verify student exists
+    const studentCheck = await db.query(
+      'SELECT id, first_name, last_name FROM users WHERE id = $1 AND role = $2',
+      [studentId, 'student']
+    );
+
+    if (studentCheck.rows.length === 0) {
+      return res.status(404).json({
+        error: {
+          code: 'STUDENT_NOT_FOUND',
+          message: 'Student not found'
+        }
+      });
+    }
+
+    // Check permissions
+    if (req.user.role === 'student' && parseInt(studentId) !== req.user.userId) {
+      return res.status(403).json({
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Students can only view their own badges'
+        }
+      });
+    }
+
+    const query = `
+      SELECT 
+        sb.id,
+        sb.badge_id,
+        sb.created_at,
+        u.first_name as coach_first_name,
+        u.last_name as coach_last_name
+      FROM student_badges sb
+      JOIN users u ON sb.coach_id = u.id
+      WHERE sb.student_id = $1
+      ORDER BY sb.created_at DESC
+    `;
+
+    const result = await db.query(query, [studentId]);
+    
+    res.json({ 
+      student: studentCheck.rows[0],
+      badges: result.rows 
+    });
+
+  } catch (error) {
+    console.error('Get student badges error:', error);
+    res.status(500).json({
+      error: {
+        code: 'GET_BADGES_FAILED',
+        message: 'Failed to fetch student badges'
+      }
+    });
+  }
+});
+
+// Assign badge to student
+router.post('/badges/:studentId', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'coach' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        error: {
+          code: 'INSUFFICIENT_PERMISSIONS',
+          message: 'Only coaches and admins can assign badges'
+        }
+      });
+    }
+
+    const { studentId } = req.params;
+    const { badgeId } = req.body;
+
+    if (!badgeId) {
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Badge ID is required'
+        }
+      });
+    }
+
+    // Verify student exists
+    const studentCheck = await db.query(
+      'SELECT id FROM users WHERE id = $1 AND role = $2',
+      [studentId, 'student']
+    );
+
+    if (studentCheck.rows.length === 0) {
+      return res.status(404).json({
+        error: {
+          code: 'STUDENT_NOT_FOUND',
+          message: 'Student not found'
+        }
+      });
+    }
+
+    // Check if badge already assigned to this student
+    const existingBadge = await db.query(
+      'SELECT id FROM student_badges WHERE student_id = $1 AND badge_id = $2',
+      [studentId, badgeId]
+    );
+
+    if (existingBadge.rows.length > 0) {
+      return res.status(409).json({
+        error: {
+          code: 'BADGE_ALREADY_ASSIGNED',
+          message: 'This badge is already assigned to the student'
+        }
+      });
+    }
+
+    // Assign the badge
+    const result = await db.query(
+      `INSERT INTO student_badges (student_id, badge_id, coach_id) 
+       VALUES ($1, $2, $3) 
+       RETURNING id, created_at`,
+      [studentId, badgeId, req.user.userId]
+    );
+
+    res.status(201).json({
+      message: 'Badge assigned successfully',
+      badge: {
+        id: result.rows[0].id,
+        badge_id: badgeId,
+        created_at: result.rows[0].created_at
+      }
+    });
+
+  } catch (error) {
+    console.error('Assign badge error:', error);
+    res.status(500).json({
+      error: {
+        code: 'ASSIGN_BADGE_FAILED',
+        message: 'Failed to assign badge'
+      }
+    });
+  }
+});
+
+// Remove badge from student
+router.delete('/badges/:studentId/:badgeId', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'coach' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        error: {
+          code: 'INSUFFICIENT_PERMISSIONS',
+          message: 'Only coaches and admins can remove badges'
+        }
+      });
+    }
+
+    const { studentId, badgeId } = req.params;
+
+    let query = 'DELETE FROM student_badges WHERE student_id = $1 AND badge_id = $2';
+    let params = [studentId, badgeId];
+
+    // Coaches can only remove badges they assigned
+    if (req.user.role === 'coach') {
+      query += ' AND coach_id = $3';
+      params.push(req.user.userId);
+    }
+
+    const result = await db.query(query + ' RETURNING id', params);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: {
+          code: 'BADGE_NOT_FOUND',
+          message: 'Badge not found or insufficient permissions'
+        }
+      });
+    }
+
+    res.json({ message: 'Badge removed successfully' });
+
+  } catch (error) {
+    console.error('Remove badge error:', error);
+    res.status(500).json({
+      error: {
+        code: 'REMOVE_BADGE_FAILED',
+        message: 'Failed to remove badge'
       }
     });
   }
