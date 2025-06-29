@@ -92,9 +92,13 @@ router.post('/:leagueId/register', async (req, res) => {
       
       const instance = instanceResult.rows[0];
       
-      // Check skill level requirement
+      // Check USATT rating requirement
+      if (skillLevel < 0 || skillLevel > 3000) {
+        throw new Error('USATT rating must be between 0 and 3000');
+      }
+      
       if (skillLevel < instance.skill_level_min || skillLevel > instance.skill_level_max) {
-        throw new Error(`Skill level must be between ${instance.skill_level_min} and ${instance.skill_level_max}`);
+        throw new Error(`USATT rating must be between ${instance.skill_level_min} and ${instance.skill_level_max} for this league`);
       }
       
       // Check if league is full

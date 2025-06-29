@@ -12,7 +12,7 @@ const PublicLeagueSignup = () => {
     lastName: '',
     email: '',
     phone: '',
-    skillLevel: 5,
+    skillLevel: 1000,
     emergencyContact: ''
   });
   const [loading, setLoading] = useState(false);
@@ -67,7 +67,7 @@ const PublicLeagueSignup = () => {
         lastName: '',
         email: '',
         phone: '',
-        skillLevel: 5,
+        skillLevel: 1000,
         emergencyContact: ''
       });
       setSelectedLeague(null);
@@ -113,7 +113,7 @@ const PublicLeagueSignup = () => {
           <h2 className="text-2xl font-bold mb-4">{selectedLeague.name}</h2>
           <div className="mb-6 p-4 bg-gray-100 rounded">
             <p><strong>Schedule:</strong> {getDayName(selectedLeague.day_of_week)} {selectedLeague.start_time} - {selectedLeague.end_time}</p>
-            <p><strong>Skill Level:</strong> {selectedLeague.skill_level_min}-{selectedLeague.skill_level_max}</p>
+            <p><strong>USATT Rating:</strong> {selectedLeague.skill_level_min}-{selectedLeague.skill_level_max}</p>
             <p><strong>Spots Available:</strong> {selectedLeague.max_participants - selectedLeague.actual_participants}</p>
             {selectedLeague.entry_fee > 0 && <p><strong>Entry Fee:</strong> ${selectedLeague.entry_fee}</p>}
           </div>
@@ -157,17 +157,21 @@ const PublicLeagueSignup = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Skill Level (1=Beginner, 10=Expert)
+                USATT Rating (0-3000: Beginner &lt;1200, Advanced ≥1200)
               </label>
-              <select
+              <input
+                type="number"
+                min="0"
+                max="3000"
+                step="1"
                 value={formData.skillLevel}
-                onChange={(e) => setFormData({...formData, skillLevel: parseInt(e.target.value)})}
+                onChange={(e) => setFormData({...formData, skillLevel: parseInt(e.target.value) || 0})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {[1,2,3,4,5,6,7,8,9,10].map(level => (
-                  <option key={level} value={level}>{level}</option>
-                ))}
-              </select>
+                placeholder="Enter your USATT rating (0-3000)"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Don't have a USATT rating? Estimate: Beginner 0-800, Intermediate 800-1500, Advanced 1500+
+              </p>
             </div>
             
             <input
@@ -256,7 +260,7 @@ const PublicLeagueSignup = () => {
                 </p>
                 <p className="flex items-center gap-2">
                   <TargetIcon className="w-4 h-4 text-purple-600" />
-                  <strong>Skill Level:</strong> {league.skill_level_min}-{league.skill_level_max}
+                  <strong>USATT Rating:</strong> {league.skill_level_min}-{league.skill_level_max}
                 </p>
                 <p className="flex items-center gap-2">
                   <UsersIcon className="w-4 h-4 text-orange-600" />
