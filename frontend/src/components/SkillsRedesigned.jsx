@@ -155,12 +155,17 @@ const SkillsRedesigned = () => {
         fetchStudentSkills(selectedStudent.id);
         fetchSkillHistory(selectedStudent.id);
         setTimeout(() => setMessage(''), 3000);
+        return true; // Success
       } else {
         const data = await response.json();
-        setMessage(data.error?.message || 'Failed to update skill rating');
+        const errorMessage = data.error?.message || 'Failed to update skill rating';
+        setMessage(errorMessage);
+        throw new Error(errorMessage);
       }
     } catch (error) {
-      setMessage('Error updating skill rating');
+      const errorMessage = 'Error updating skill rating';
+      setMessage(errorMessage);
+      throw error; // Re-throw so SkillCard can handle it
     }
   };
 
@@ -452,22 +457,26 @@ const SkillsRedesigned = () => {
                   {commonSkills.map(skillName => {
                     const currentRating = getSkillRating(skillName);
                     
-                    return user.role === 'admin' ? (
-                      <SkillViewCard
-                        key={skillName}
-                        skillName={skillName}
-                        currentRating={currentRating}
-                        studentSkills={studentSkills}
-                      />
-                    ) : (
-                      <SkillCard
-                        key={skillName}
-                        skillName={skillName}
-                        currentRating={currentRating}
-                        onUpdate={addOrUpdateSkillRating}
-                      />
-                    );
-                  })}
+                    if (user.role === 'admin') {
+                      return (
+                        <SkillViewCard
+                          key={skillName}
+                          skillName={skillName}
+                          currentRating={currentRating}
+                          studentSkills={studentSkills}
+                        />
+                      );
+                    } else {
+                      return (
+                        <SkillCard
+                          key={skillName}
+                          skillName={skillName}
+                          currentRating={currentRating}
+                          onUpdate={addOrUpdateSkillRating}
+                        />
+                      );
+                    }
+                  })
                 </div>
               )}
             </div>
@@ -515,35 +524,59 @@ const SkillViewCard = ({ skillName, currentRating, studentSkills }) => {
   const skillData = studentSkills.find(skill => skill.skill_name === skillName);
   
   return (
-    <div className="border rounded-lg p-4 bg-gray-50">
-      <h3 className="font-semibold text-gray-900 mb-3">{skillName}</h3>
+    <div className="border rounded-lg p-4 bg-gray-50 relative">
+      {/* Read-only overlay */}
+      <div className="absolute top-2 right-2">
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-600">
+          👁️ View Only
+        </span>
+      </div>
+      
+      <h3 className="font-semibold text-gray-900 mb-3 pr-20">{skillName}</h3>
       
       <div className="space-y-3">
         <div className="flex items-center">
           <div className="flex items-center">
+            {/* Non-interactive stars */}
             {[...Array(10)].map((_, i) => (
               <StarIcon
                 key={i}
-                className={`w-5 h-5 ${
+                className={`w-5 h-5 pointer-events-none ${
                   i < currentRating ? 'text-yellow-400' : 'text-gray-300'
                 }`}
                 filled={i < currentRating}
               />
             ))}
-            <span className="ml-2 text-sm font-medium">{currentRating}/10</span>
+            <span className="ml-2 text-sm font-medium text-gray-700">
+              {currentRating > 0 ? `${currentRating}/10` : 'Not Rated'}
+            </span>
           </div>
         </div>
         
-        {skillData && (
-          <div className="text-xs text-gray-500">
-            <p>Coach: {skillData.coach_first_name} {skillData.coach_last_name}</p>
-            <p>Last Updated: {new Date(skillData.rating_created_at).toLocaleDateString()}</p>
-            {skillData.notes && <p className="mt-1 text-gray-600">Notes: {skillData.notes}</p>}
+        {skillData ? (
+          <div className="text-xs text-gray-500 space-y-1">
+            <p className="flex items-center gap-1">
+              <span className="font-medium">Coach:</span> 
+              {skillData.coach_first_name} {skillData.coach_last_name}
+            </p>
+            <p className="flex items-center gap-1">
+              <span className="font-medium">Updated:</span> 
+              {new Date(skillData.rating_created_at).toLocaleDateString()}
+            </p>
+            {skillData.notes && (
+              <p className="mt-2 p-2 bg-white rounded border text-gray-600">
+                <span className="font-medium">Notes:</span> {skillData.notes}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="text-xs text-gray-400 italic">
+            No rating assigned yet
           </div>
         )}
         
-        <div className="text-xs text-gray-400">
-          View only - Contact coach to update ratings
+        <div className="text-xs text-gray-400 border-t pt-2 mt-3">
+          🔒 Read-only view • Contact coach to update ratings
         </div>
       </div>
     </div>
@@ -554,15 +587,31 @@ const SkillViewCard = ({ skillName, currentRating, studentSkills }) => {
 const SkillCard = ({ skillName, currentRating, onUpdate }) => {
   const [rating, setRating] = useState(currentRating);
   const [hoverRating, setHoverRating] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setRating(currentRating);
   }, [currentRating]);
 
-  const handleStarClick = (starIndex) => {
+  const handleStarClick = async (starIndex) => {
     const newRating = starIndex + 1;
-    setRating(newRating);
-    onUpdate(skillName, newRating, ''); // Save immediately when star is clicked
+    const previousRating = rating;
+    
+    try {
+      setSaving(true);
+      setError('');
+      setRating(newRating); // Optimistically update UI
+      
+      await onUpdate(skillName, newRating, ''); // Save immediately when star is clicked
+    } catch (err) {
+      // Revert to previous rating on error
+      setRating(previousRating);
+      setError('Failed to update rating. Please try again.');
+      console.error('Error updating skill rating:', err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleStarHover = (starIndex) => {
@@ -580,25 +629,42 @@ const SkillCard = ({ skillName, currentRating, onUpdate }) => {
       <h3 className="font-semibold text-gray-900 mb-3">{skillName}</h3>
       
       <div className="space-y-3">
+        {error && (
+          <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+            {error}
+          </div>
+        )}
+        
         <div className="flex items-center">
           <div className="flex items-center" onMouseLeave={handleMouseLeave}>
             {[...Array(10)].map((_, i) => (
               <StarIcon
                 key={i}
-                className={`w-5 h-5 cursor-pointer transition-colors hover:scale-110 ${
+                className={`w-5 h-5 transition-colors hover:scale-110 ${
+                  saving 
+                    ? 'cursor-wait opacity-60' 
+                    : 'cursor-pointer'
+                } ${
                   i < displayRating ? 'text-yellow-400 hover:text-yellow-500' : 'text-gray-300 hover:text-yellow-200'
                 }`}
                 filled={i < displayRating}
-                onClick={() => handleStarClick(i)}
-                onMouseEnter={() => handleStarHover(i)}
+                onClick={() => !saving && handleStarClick(i)}
+                onMouseEnter={() => !saving && handleStarHover(i)}
               />
             ))}
-            <span className="ml-2 text-sm font-medium">{displayRating}/10</span>
+            <span className="ml-2 text-sm font-medium">
+              {displayRating}/10 {saving && <span className="text-xs text-blue-600">(saving...)</span>}
+            </span>
           </div>
         </div>
         
         <div className="text-xs text-gray-500">
-          {rating === 0 ? 'Click stars to rate this skill' : 'Click stars to update rating'}
+          {saving 
+            ? 'Saving rating...' 
+            : rating === 0 
+              ? 'Click stars to rate this skill' 
+              : 'Click stars to update rating'
+          }
         </div>
       </div>
     </div>
