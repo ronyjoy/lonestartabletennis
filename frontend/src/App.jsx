@@ -2298,6 +2298,9 @@ function LeagueSignupsManagement() {
   const [results, setResults] = useState({})
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
+  const [showElimination, setShowElimination] = useState(false)
+  const [eliminationMatches, setEliminationMatches] = useState({})
+  const [eliminationResults, setEliminationResults] = useState({})
 
   // Function to get time-based greeting
   const getTimeBasedGreeting = () => {
@@ -2441,7 +2444,7 @@ function LeagueSignupsManagement() {
     navigate('/')
   }
 
-  const generateMatchResults = () => {
+  const generateMatchResults = async () => {
     const newResults = {}
     
     groups.forEach(group => {
@@ -2463,9 +2466,33 @@ function LeagueSignupsManagement() {
     
     setResults(newResults)
     setShowResults(true)
+    
+    // Create league event in database
+    try {
+      const token = localStorage.getItem('token')
+      await fetch('/api/league-events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          league_instance_id: selectedLeague.instance_id,
+          event_date: new Date().toISOString().split('T')[0], // Today's date
+          event_name: `${selectedLeague.name} Tournament - ${new Date().toLocaleDateString()}`,
+          grouping_method: groupingMethod,
+          groups: groups,
+          matches: newResults
+        })
+      })
+    } catch (error) {
+      console.error('Error creating league event:', error)
+      setMessage('Tournament created locally, but database save failed')
+    }
   }
 
-  const updateResult = (groupId, matchKey, field, value) => {
+  const updateResult = async (groupId, matchKey, field, value) => {
+    // Update local state
     setResults(prev => ({
       ...prev,
       [groupId]: {
@@ -2476,6 +2503,34 @@ function LeagueSignupsManagement() {
         }
       }
     }))
+    
+    // Auto-save to database
+    try {
+      const token = localStorage.getItem('token')
+      await fetch('/api/league-events/auto-save', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          league_instance_id: selectedLeague.instance_id,
+          results: {
+            ...results,
+            [groupId]: {
+              ...results[groupId],
+              [matchKey]: {
+                ...results[groupId][matchKey],
+                [field]: value
+              }
+            }
+          }
+        })
+      })
+    } catch (error) {
+      console.error('Auto-save failed:', error)
+      // Could show a subtle notification here, but don't interrupt user flow
+    }
   }
 
   const calculateStandings = (groupId) => {
@@ -2626,6 +2681,164 @@ function LeagueSignupsManagement() {
     if (j === 2 && k !== 12) return 'nd'
     if (j === 3 && k !== 13) return 'rd'
     return 'th'
+  }
+
+  const generateEliminationTournament = () => {
+    if (groups.length < 2) {
+      setMessage('Elimination tournament requires at least 2 groups')
+      return
+    }
+
+    // Get top 2 players from each group
+    const advancingPlayers = []
+    
+    groups.forEach(group => {
+      const standings = calculateStandings(group.id)
+      const hasCompletedMatches = standings.some(s => s.wins > 0 || s.losses > 0)
+      
+      if (!hasCompletedMatches) {
+        setMessage('Complete some matches in the group stage first')
+        return
+      }
+      
+      // Add top 2 players
+      if (standings.length >= 2) {
+        advancingPlayers.push({
+          ...standings[0].player,
+          groupName: group.name,
+          position: 1,
+          groupId: group.id
+        })
+        advancingPlayers.push({
+          ...standings[1].player,
+          groupName: group.name,
+          position: 2,
+          groupId: group.id
+        })
+      }
+    })
+
+    if (advancingPlayers.length < 2) {
+      setMessage('Not enough advancing players for elimination tournament')
+      return
+    }
+
+    // Generate cross-over matches (Group 1 winner vs Group 2 runner-up, etc.)
+    const matches = {}
+    const results = {}
+    
+    if (advancingPlayers.length === 4) {
+      // Two groups: 1st from Group 1 vs 2nd from Group 2, 1st from Group 2 vs 2nd from Group 1
+      const group1Players = advancingPlayers.filter(p => p.groupId === groups[0].id)
+      const group2Players = advancingPlayers.filter(p => p.groupId === groups[1].id)
+      
+      if (group1Players.length >= 2 && group2Players.length >= 2) {
+        const match1Key = `${group1Players[0].id}-${group2Players[1].id}`
+        const match2Key = `${group2Players[0].id}-${group1Players[1].id}`
+        
+        matches.semifinals = {
+          [match1Key]: {
+            player1: group1Players[0],
+            player2: group2Players[1],
+            score1: '',
+            score2: '',
+            round: 'Semifinal 1'
+          },
+          [match2Key]: {
+            player1: group2Players[0],
+            player2: group1Players[1],
+            score1: '',
+            score2: '',
+            round: 'Semifinal 2'
+          }
+        }
+        
+        results.semifinals = {
+          [match1Key]: { player1: group1Players[0], player2: group2Players[1], score1: '', score2: '' },
+          [match2Key]: { player1: group2Players[0], player2: group1Players[1], score1: '', score2: '' }
+        }
+      }
+    } else if (advancingPlayers.length === 6) {
+      // Three groups: need to handle bye system
+      const sortedByPerformance = advancingPlayers.sort((a, b) => {
+        // Sort by position (1st place players first), then by some performance metric
+        if (a.position !== b.position) return a.position - b.position
+        return 0 // Could add more sophisticated sorting here
+      })
+      
+      // Give byes to the best performing players
+      const playersWithByes = sortedByPerformance.slice(0, 2)
+      const playersInFirstRound = sortedByPerformance.slice(2)
+      
+      if (playersInFirstRound.length >= 2) {
+        // First elimination match
+        const firstRoundKey = `${playersInFirstRound[0].id}-${playersInFirstRound[1].id}`
+        matches.quarterfinals = {
+          [firstRoundKey]: {
+            player1: playersInFirstRound[0],
+            player2: playersInFirstRound[1],
+            score1: '',
+            score2: '',
+            round: 'Quarterfinal'
+          }
+        }
+        
+        results.quarterfinals = {
+          [firstRoundKey]: { 
+            player1: playersInFirstRound[0], 
+            player2: playersInFirstRound[1], 
+            score1: '', 
+            score2: '' 
+          }
+        }
+      }
+      
+      setMessage(`Elimination tournament created! ${playersWithByes.map(p => `${p.first_name} ${p.last_name}`).join(' and ')} received byes to semifinals.`)
+    }
+    
+    setEliminationMatches(matches)
+    setEliminationResults(results)
+    setShowElimination(true)
+  }
+
+  const updateEliminationResult = async (round, matchKey, field, value) => {
+    setEliminationResults(prev => ({
+      ...prev,
+      [round]: {
+        ...prev[round],
+        [matchKey]: {
+          ...prev[round][matchKey],
+          [field]: value
+        }
+      }
+    }))
+    
+    // Auto-save elimination results
+    try {
+      const token = localStorage.getItem('token')
+      await fetch('/api/league-events/auto-save-elimination', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          league_instance_id: selectedLeague.instance_id,
+          elimination_results: {
+            ...eliminationResults,
+            [round]: {
+              ...eliminationResults[round],
+              [matchKey]: {
+                ...eliminationResults[round][matchKey],
+                [field]: value
+              }
+            }
+          }
+        })
+      })
+    } catch (error) {
+      console.error('Auto-save elimination failed:', error)
+    }
   }
 
   if (!user) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-600">Loading...</div></div>
@@ -2783,13 +2996,21 @@ function LeagueSignupsManagement() {
               ))}
 
               {/* Generate Results Button */}
-              <div className="flex justify-center">
+              <div className="flex justify-center space-x-4">
                 <button
                   onClick={generateMatchResults}
                   className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg"
                 >
                   Generate Match Results Table
                 </button>
+                {groups.length > 1 && showResults && (
+                  <button
+                    onClick={generateEliminationTournament}
+                    className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg"
+                  >
+                    Create Elimination Tournament
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -2942,6 +3163,112 @@ function LeagueSignupsManagement() {
                             </td>
                           </tr>
                         ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Elimination Tournament Section */}
+          {showElimination && (
+            <div className="mt-6 space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900">🏆 Elimination Tournament</h2>
+                <div className="text-sm text-gray-600">
+                  Cross-over format: Top 2 from each group advance
+                </div>
+              </div>
+
+              {/* Display elimination matches by round */}
+              {Object.entries(eliminationMatches).map(([round, roundMatches]) => (
+                <div key={round} className="bg-white shadow rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 capitalize">
+                    {round === 'semifinals' ? '🥇 Semifinals' : round === 'quarterfinals' ? '🥊 Quarterfinals' : round}
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Player 1 (Group)
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Score
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Player 2 (Group)
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Score
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {Object.entries(roundMatches).map(([matchKey, match]) => {
+                          const result = eliminationResults[round]?.[matchKey] || match
+                          const isCompleted = result.score1 !== '' && result.score2 !== ''
+                          const winner = isCompleted ? 
+                            (parseInt(result.score1) > parseInt(result.score2) ? result.player1 : result.player2) : null
+                          
+                          return (
+                            <tr key={matchKey} className={isCompleted ? 'bg-green-50' : ''}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {match.player1.first_name} {match.player1.last_name}
+                                  {winner?.id === match.player1.id && <span className="ml-2 text-green-600">🏆</span>}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {match.player1.groupName} - {match.player1.position === 1 ? '1st' : '2nd'} place
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="11"
+                                  value={result.score1}
+                                  onChange={(e) => updateEliminationResult(round, matchKey, 'score1', e.target.value)}
+                                  className="w-16 px-2 py-1 text-center border border-gray-300 rounded"
+                                />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {match.player2.first_name} {match.player2.last_name}
+                                  {winner?.id === match.player2.id && <span className="ml-2 text-green-600">🏆</span>}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {match.player2.groupName} - {match.player2.position === 1 ? '1st' : '2nd'} place
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="11"
+                                  value={result.score2}
+                                  onChange={(e) => updateEliminationResult(round, matchKey, 'score2', e.target.value)}
+                                  className="w-16 px-2 py-1 text-center border border-gray-300 rounded"
+                                />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                {isCompleted ? (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Complete
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    Pending
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          )
+                        })}
                       </tbody>
                     </table>
                   </div>

@@ -10,6 +10,7 @@ const commentRoutes = require('./routes/comments');
 const leagueRoutes = require('./routes/leagues');
 const matchRoutes = require('./routes/matches');
 const publicLeagueRoutes = require('./routes/publicLeagues');
+const leagueEventRoutes = require('./routes/leagueEvents');
 
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
@@ -43,6 +44,7 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/leagues', leagueRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/public/leagues', publicLeagueRoutes);
+app.use('/api/league-events', leagueEventRoutes);
 
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, '../public')));
