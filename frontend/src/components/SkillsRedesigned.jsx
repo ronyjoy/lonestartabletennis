@@ -85,6 +85,7 @@ const SkillsRedesigned = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Student skills data:', data.skills); // Debug log
         setStudentSkills(data.skills || []);
       }
     } catch (error) {
@@ -228,8 +229,8 @@ const SkillsRedesigned = () => {
                         {[...Array(10)].map((_, i) => (
                           <StarIcon
                             key={i}
-                            className={`w-4 h-4 ${i < skill.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                            filled={i < skill.rating}
+                            className={`w-4 h-4 ${i < Math.floor(parseFloat(skill.rating)) ? 'text-yellow-400' : 'text-gray-300'}`}
+                            filled={i < Math.floor(parseFloat(skill.rating))}
                           />
                         ))}
                         <span className="ml-2 text-sm font-medium">{skill.rating}/10</span>

@@ -13,19 +13,20 @@ router.get('/', auth, async (req, res) => {
       // Students see their own skills with cumulative average ratings from all coaches
       const query = `
         SELECT 
-          skill_id,
-          skill_name,
-          student_first_name,
-          student_last_name,
-          ROUND(AVG(rating)::numeric, 1) as rating,
-          STRING_AGG(DISTINCT notes, ' | ') FILTER (WHERE notes IS NOT NULL AND notes != '') as notes,
-          MAX(rating_created_at) as rating_created_at,
-          COUNT(DISTINCT coach_id) as coach_count
-        FROM current_skill_ratings 
-        WHERE user_id = $1 
-        ${showHistory === 'true' ? '' : 'AND rating_rank = 1'}
-        GROUP BY skill_id, skill_name, student_first_name, student_last_name
-        ORDER BY skill_name
+          s.id as skill_id,
+          s.skill_name,
+          u.first_name as student_first_name,
+          u.last_name as student_last_name,
+          ROUND(AVG(sr.rating)::numeric, 1) as rating,
+          STRING_AGG(DISTINCT sr.notes, ' | ') FILTER (WHERE sr.notes IS NOT NULL AND sr.notes != '') as notes,
+          MAX(sr.created_at) as rating_created_at,
+          COUNT(DISTINCT sr.coach_id) as coach_count
+        FROM skills s
+        JOIN users u ON s.user_id = u.id
+        JOIN skill_ratings sr ON s.id = sr.skill_id
+        WHERE s.user_id = $1 
+        GROUP BY s.id, s.skill_name, u.first_name, u.last_name
+        ORDER BY s.skill_name
       `;
       
       const result = await db.query(query, [req.user.userId]);
