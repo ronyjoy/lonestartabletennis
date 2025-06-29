@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_ENDPOINTS } from '../config/api';
+import SkillProgressChart from './SkillProgressChart';
 import { 
   ChartBarIcon, 
   StarIcon, 
@@ -18,6 +19,7 @@ const SkillsRedesigned = () => {
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [studentSkills, setStudentSkills] = useState([]);
+  const [skillHistory, setSkillHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
 
@@ -41,8 +43,9 @@ const SkillsRedesigned = () => {
       setUser(parsedUser);
       
       if (parsedUser.role === 'student') {
-        // For students, fetch their own skills
+        // For students, fetch their own skills and history
         fetchStudentSkills(parsedUser.userId);
+        fetchSkillHistory();
       } else {
         // For coaches/admins, fetch students list
         fetchStudents();
@@ -64,6 +67,7 @@ const SkillsRedesigned = () => {
           // Auto-select first student
           setSelectedStudent(data.students[0]);
           fetchStudentSkills(data.students[0].id);
+          fetchSkillHistory(data.students[0].id);
         }
       }
     } catch (error) {
@@ -90,6 +94,26 @@ const SkillsRedesigned = () => {
     }
   };
 
+  const fetchSkillHistory = async (studentId = null) => {
+    try {
+      const token = localStorage.getItem('token');
+      const url = studentId 
+        ? `${API_ENDPOINTS.SKILLS}/history?studentId=${studentId}`
+        : `${API_ENDPOINTS.SKILLS}/history`;
+      
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSkillHistory(data.history || []);
+      }
+    } catch (error) {
+      console.error('Error fetching skill history:', error);
+    }
+  };
+
   const addOrUpdateSkillRating = async (skillName, rating, notes = '') => {
     try {
       const token = localStorage.getItem('token');
@@ -110,6 +134,7 @@ const SkillsRedesigned = () => {
       if (response.ok) {
         setMessage(`${skillName} rating updated successfully!`);
         fetchStudentSkills(selectedStudent.id);
+        fetchSkillHistory(selectedStudent.id);
         setTimeout(() => setMessage(''), 3000);
       } else {
         const data = await response.json();
@@ -182,7 +207,17 @@ const SkillsRedesigned = () => {
                 <p className="text-gray-600">No skills assigned yet. Your coaches will add skills here!</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <>
+                {/* Progress Chart */}
+                <div className="mb-6">
+                  <SkillProgressChart 
+                    data={skillHistory} 
+                    title="Your Skill Progress Over Time"
+                  />
+                </div>
+
+                {/* Skills Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {studentSkills.map((skill) => (
                   <div key={skill.skill_id} className="bg-white rounded-lg shadow p-6">
                     <h3 className="text-lg font-bold text-gray-900 mb-3">{skill.skill_name}</h3>
@@ -216,7 +251,8 @@ const SkillsRedesigned = () => {
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
+              </>
             )}
           </div>
         </main>
@@ -270,6 +306,7 @@ const SkillsRedesigned = () => {
                   onClick={() => {
                     setSelectedStudent(student);
                     fetchStudentSkills(student.id);
+                    fetchSkillHistory(student.id);
                   }}
                   className={`p-4 rounded-lg border-2 text-left transition-colors ${
                     selectedStudent?.id === student.id
@@ -292,6 +329,16 @@ const SkillsRedesigned = () => {
               ))}
             </div>
           </div>
+
+          {/* Progress Chart - Only show when student is selected */}
+          {selectedStudent && (
+            <div className="mb-6">
+              <SkillProgressChart 
+                data={skillHistory} 
+                title={`Skill Progress for ${selectedStudent.first_name} ${selectedStudent.last_name}`}
+              />
+            </div>
+          )}
 
           {/* Skills Grid - Only show when student is selected */}
           {selectedStudent && (

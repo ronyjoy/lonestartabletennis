@@ -123,6 +123,111 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// Get skill history for graphing (students see cumulative averages over time)
+router.get('/history', auth, async (req, res) => {
+  try {
+    const { studentId } = req.query;
+    
+    // Determine which student to get history for
+    const targetStudentId = req.user.role === 'student' ? req.user.userId : studentId;
+    
+    if (!targetStudentId) {
+      return res.status(400).json({
+        error: {
+          code: 'MISSING_STUDENT_ID',
+          message: 'Student ID is required'
+        }
+      });
+    }
+    
+    if (req.user.role === 'student') {
+      // Students see their cumulative average progress over time
+      const query = `
+        WITH skill_timeline AS (
+          SELECT 
+            sr.created_at::date as rating_date,
+            s.skill_name,
+            AVG(sr.rating) as avg_rating
+          FROM skill_ratings sr
+          JOIN skills s ON sr.skill_id = s.id
+          WHERE s.user_id = $1
+          GROUP BY sr.created_at::date, s.skill_name
+          ORDER BY rating_date
+        ),
+        cumulative_averages AS (
+          SELECT 
+            rating_date,
+            AVG(avg_rating) as overall_avg
+          FROM skill_timeline
+          GROUP BY rating_date
+          ORDER BY rating_date
+        )
+        SELECT 
+          rating_date,
+          ROUND(overall_avg::numeric, 1) as overall_average
+        FROM cumulative_averages
+        ORDER BY rating_date
+      `;
+      
+      const result = await db.query(query, [targetStudentId]);
+      return res.json({ history: result.rows });
+    } else {
+      // Coaches/admins see detailed history
+      let query = `
+        WITH daily_averages AS (
+          SELECT 
+            sr.created_at::date as rating_date,
+            s.skill_name,
+            AVG(sr.rating) as avg_rating,
+            COUNT(*) as rating_count
+          FROM skill_ratings sr
+          JOIN skills s ON sr.skill_id = s.id
+          WHERE s.user_id = $1
+      `;
+      
+      let queryParams = [targetStudentId];
+      
+      // If user is a coach, only show their own ratings
+      if (req.user.role === 'coach') {
+        query += ' AND sr.coach_id = $2';
+        queryParams.push(req.user.userId);
+      }
+      
+      query += `
+          GROUP BY sr.created_at::date, s.skill_name
+        ),
+        overall_daily AS (
+          SELECT 
+            rating_date,
+            AVG(avg_rating) as overall_avg,
+            SUM(rating_count) as total_ratings
+          FROM daily_averages
+          GROUP BY rating_date
+          ORDER BY rating_date
+        )
+        SELECT 
+          rating_date,
+          ROUND(overall_avg::numeric, 1) as overall_average,
+          total_ratings
+        FROM overall_daily
+        ORDER BY rating_date
+      `;
+      
+      const result = await db.query(query, queryParams);
+      return res.json({ history: result.rows });
+    }
+    
+  } catch (error) {
+    console.error('Get skill history error:', error);
+    res.status(500).json({
+      error: {
+        code: 'GET_HISTORY_FAILED',
+        message: 'Failed to fetch skill history'
+      }
+    });
+  }
+});
+
 // Get skill statistics for dashboard
 router.get('/stats', auth, async (req, res) => {
   try {
