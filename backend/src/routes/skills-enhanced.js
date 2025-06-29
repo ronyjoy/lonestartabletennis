@@ -30,6 +30,7 @@ router.get('/', auth, async (req, res) => {
       `;
       
       const result = await db.query(query, [req.user.userId]);
+      console.log('Student skills query result:', result.rows);
       return res.json({ skills: result.rows });
     }
     
@@ -360,6 +361,7 @@ router.post('/', auth, async (req, res) => {
     }
 
     const { skillName, rating, notes, studentId } = req.body;
+    console.log('Creating skill rating:', { skillName, rating, notes, studentId, coachId: req.user.userId });
 
     // Validation
     if (!skillName || rating === undefined || !studentId) {
@@ -419,12 +421,14 @@ router.post('/', auth, async (req, res) => {
       }
 
       // Add new rating
+      console.log('Inserting skill rating with:', { skillId, coachId: req.user.userId, rating, notes: notes || '' });
       const ratingResult = await client.query(
         `INSERT INTO skill_ratings (skill_id, coach_id, rating, notes) 
          VALUES ($1, $2, $3, $4) 
          RETURNING id, created_at`,
         [skillId, req.user.userId, rating, notes || '']
       );
+      console.log('Skill rating inserted successfully:', ratingResult.rows[0]);
 
       // Update skill updated_at timestamp
       await client.query(
