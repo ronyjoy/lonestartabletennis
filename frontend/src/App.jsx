@@ -39,6 +39,7 @@ function App() {
         <Route path="/leagues" element={<LeaguesPage />} />
         <Route path="/leagues/signup" element={<LeagueSignupPage />} />
         <Route path="/league-signup" element={<PublicLeagueSignup />} />
+        <Route path="/league-signups" element={<LeagueSignupsManagement />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </Router>
@@ -1694,6 +1695,12 @@ function LeaguesPage() {
             <h2 className="text-2xl font-bold text-gray-900">League Templates</h2>
             <div className="space-x-4">
               <button
+                onClick={() => navigate('/league-signups')}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              >
+                Manage Signups
+              </button>
+              <button
                 onClick={() => navigate('/league-signup')}
                 className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               >
@@ -2273,6 +2280,496 @@ function ProfilePage() {
               </div>
             )}
           </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function LeagueSignupsManagement() {
+  const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+  const [leagues, setLeagues] = useState([])
+  const [selectedLeague, setSelectedLeague] = useState(null)
+  const [signups, setSignups] = useState([])
+  const [groups, setGroups] = useState([])
+  const [groupingMethod, setGroupingMethod] = useState('middle') // 'middle' or 'snake'
+  const [showResults, setShowResults] = useState(false)
+  const [results, setResults] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [message, setMessage] = useState('')
+
+  // Function to get time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour >= 5 && hour < 12) return 'Good morning'
+    if (hour >= 12 && hour < 17) return 'Good afternoon'
+    if (hour >= 17 && hour < 22) return 'Good evening'
+    return 'Good night'
+  }
+
+  // Function to get role-specific icon
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case 'student': return (
+        <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          S
+        </div>
+      )
+      case 'coach': return (
+        <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          C
+        </div>
+      )
+      case 'admin': return (
+        <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          A
+        </div>
+      )
+      default: return (
+        <div className="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          U
+        </div>
+      )
+    }
+  }
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+    
+    if (!token) {
+      navigate('/login')
+      return
+    }
+    
+    if (userData) {
+      const parsedUser = JSON.parse(userData)
+      setUser(parsedUser)
+      
+      if (parsedUser.role !== 'admin') {
+        navigate('/dashboard')
+        return
+      }
+      
+      fetchLeagues()
+    }
+  }, [navigate])
+
+  const fetchLeagues = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/public/leagues', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setLeagues(data.filter(league => league.actual_participants > 0))
+      }
+    } catch (error) {
+      console.error('Error fetching leagues:', error)
+      setMessage('Error fetching leagues')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchSignups = async (leagueId) => {
+    try {
+      const response = await fetch(`/api/public/leagues/${leagueId}/registrations`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        setSignups(data)
+        generateGroups(data)
+      }
+    } catch (error) {
+      console.error('Error fetching signups:', error)
+      setMessage('Error fetching signups')
+    }
+  }
+
+  const generateGroups = (players) => {
+    if (players.length === 0) {
+      setGroups([])
+      return
+    }
+
+    // Sort players by skill level (descending)
+    const sortedPlayers = [...players].sort((a, b) => b.skill_level - a.skill_level)
+    
+    if (players.length <= 8) {
+      // Single group
+      setGroups([{ id: 1, name: 'Group 1', players: sortedPlayers }])
+    } else {
+      // Two groups
+      const group1 = []
+      const group2 = []
+      
+      if (groupingMethod === 'middle') {
+        // Split at middle rating
+        const midPoint = Math.floor(sortedPlayers.length / 2)
+        group1.push(...sortedPlayers.slice(0, midPoint))
+        group2.push(...sortedPlayers.slice(midPoint))
+      } else {
+        // Snake seeding (1st to Group 1, 2nd to Group 2, 3rd to Group 2, 4th to Group 1, etc.)
+        sortedPlayers.forEach((player, index) => {
+          if (index % 4 === 0 || index % 4 === 3) {
+            group1.push(player)
+          } else {
+            group2.push(player)
+          }
+        })
+      }
+      
+      setGroups([
+        { id: 1, name: 'Group 1', players: group1 },
+        { id: 2, name: 'Group 2', players: group2 }
+      ])
+    }
+  }
+
+  const handleGroupingMethodChange = (method) => {
+    setGroupingMethod(method)
+    generateGroups(signups)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    navigate('/')
+  }
+
+  const generateMatchResults = () => {
+    const newResults = {}
+    
+    groups.forEach(group => {
+      newResults[group.id] = {}
+      
+      // Generate round-robin matches for each group
+      for (let i = 0; i < group.players.length; i++) {
+        for (let j = i + 1; j < group.players.length; j++) {
+          const matchKey = `${group.players[i].id}-${group.players[j].id}`
+          newResults[group.id][matchKey] = {
+            player1: group.players[i],
+            player2: group.players[j],
+            score1: '',
+            score2: ''
+          }
+        }
+      }
+    })
+    
+    setResults(newResults)
+    setShowResults(true)
+  }
+
+  const updateResult = (groupId, matchKey, field, value) => {
+    setResults(prev => ({
+      ...prev,
+      [groupId]: {
+        ...prev[groupId],
+        [matchKey]: {
+          ...prev[groupId][matchKey],
+          [field]: value
+        }
+      }
+    }))
+  }
+
+  const printResults = () => {
+    const printWindow = window.open('', '_blank')
+    const printContent = generatePrintableResults()
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>League Results - ${selectedLeague?.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+            .group-header { background-color: #e3f2fd; font-weight: bold; }
+            .match-result { text-align: center; }
+          </style>
+        </head>
+        <body>
+          ${printContent}
+        </body>
+      </html>
+    `)
+    
+    printWindow.document.close()
+    printWindow.print()
+  }
+
+  const generatePrintableResults = () => {
+    let html = `<h1>League Results: ${selectedLeague?.name}</h1>`
+    html += `<p>Date: ${new Date().toLocaleDateString()}</p>`
+    
+    groups.forEach(group => {
+      html += `<h2>${group.name} (${group.players.length} players)</h2>`
+      html += '<table>'
+      html += '<tr><th>Player 1</th><th>Score</th><th>Player 2</th><th>Score</th></tr>'
+      
+      const groupResults = results[group.id] || {}
+      Object.entries(groupResults).forEach(([matchKey, match]) => {
+        html += `
+          <tr>
+            <td>${match.player1.first_name} ${match.player1.last_name}</td>
+            <td class="match-result">${match.score1}</td>
+            <td>${match.player2.first_name} ${match.player2.last_name}</td>
+            <td class="match-result">${match.score2}</td>
+          </tr>
+        `
+      })
+      
+      html += '</table>'
+    })
+    
+    return html
+  }
+
+  if (!user) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-600">Loading...</div></div>
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center space-x-4">
+              <button onClick={() => navigate('/leagues')} className="text-blue-500 hover:text-blue-700">← League Management</button>
+              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <UsersIcon className="w-8 h-8 text-blue-600" />
+                League Signups Management
+              </h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-gray-700">
+                {getRoleIcon(user.role)}
+                <span className="font-medium">
+                  {getTimeBasedGreeting()}, {user.firstName}!
+                </span>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
+                  {user.role}
+                </span>
+              </div>
+              <button onClick={handleLogout} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          {message && (
+            <div className={`mb-4 p-3 rounded ${message.includes('Error') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+              {message}
+            </div>
+          )}
+
+          {/* League Selection */}
+          <div className="bg-white shadow rounded-lg p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Select League</h2>
+            {loading ? (
+              <p className="text-gray-600">Loading leagues...</p>
+            ) : leagues.length === 0 ? (
+              <p className="text-gray-600">No leagues with signups found.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {leagues.map(league => (
+                  <button
+                    key={league.id}
+                    onClick={() => {
+                      setSelectedLeague(league)
+                      fetchSignups(league.id)
+                      setShowResults(false)
+                    }}
+                    className={`p-4 rounded-lg border-2 text-left transition-colors ${
+                      selectedLeague?.id === league.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <h3 className="font-medium text-gray-900">{league.name}</h3>
+                    <p className="text-sm text-gray-600">{league.actual_participants} signups</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(league.league_date).toLocaleDateString()}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Grouping Options */}
+          {selectedLeague && signups.length > 8 && (
+            <div className="bg-white shadow rounded-lg p-6 mb-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Grouping Method</h2>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="middle"
+                    checked={groupingMethod === 'middle'}
+                    onChange={(e) => handleGroupingMethodChange(e.target.value)}
+                    className="mr-2"
+                  />
+                  Split at middle rating (higher rated players in Group 1)
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="snake"
+                    checked={groupingMethod === 'snake'}
+                    onChange={(e) => handleGroupingMethodChange(e.target.value)}
+                    className="mr-2"
+                  />
+                  Snake seeding (balanced groups by rating)
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* Groups Display */}
+          {groups.length > 0 && (
+            <div className="space-y-6">
+              {groups.map(group => (
+                <div key={group.id} className="bg-white shadow rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    {group.name} ({group.players.length} players)
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Player
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Rating
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Registration Date
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {group.players.map((player, index) => (
+                          <tr key={player.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">
+                                {player.first_name} {player.last_name}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {player.skill_level}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                              {player.email}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                              {new Date(player.registration_date).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+
+              {/* Generate Results Button */}
+              <div className="flex justify-center">
+                <button
+                  onClick={generateMatchResults}
+                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg"
+                >
+                  Generate Match Results Table
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Results Entry Table */}
+          {showResults && (
+            <div className="mt-6 space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-900">Match Results</h2>
+                <button
+                  onClick={printResults}
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Print Results
+                </button>
+              </div>
+
+              {groups.map(group => (
+                <div key={group.id} className="bg-white shadow rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">{group.name} Results</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Player 1
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Score
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Player 2
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Score
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {Object.entries(results[group.id] || {}).map(([matchKey, match]) => (
+                          <tr key={matchKey}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {match.player1.first_name} {match.player1.last_name}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <input
+                                type="number"
+                                min="0"
+                                max="11"
+                                value={match.score1}
+                                onChange={(e) => updateResult(group.id, matchKey, 'score1', e.target.value)}
+                                className="w-16 px-2 py-1 text-center border border-gray-300 rounded"
+                              />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {match.player2.first_name} {match.player2.last_name}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <input
+                                type="number"
+                                min="0"
+                                max="11"
+                                value={match.score2}
+                                onChange={(e) => updateResult(group.id, matchKey, 'score2', e.target.value)}
+                                className="w-16 px-2 py-1 text-center border border-gray-300 rounded"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>
