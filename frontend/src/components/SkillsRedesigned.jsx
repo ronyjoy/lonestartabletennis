@@ -476,7 +476,7 @@ const SkillsRedesigned = () => {
                         />
                       );
                     }
-                  })
+                  })}
                 </div>
               )}
             </div>
