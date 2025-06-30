@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const app = require('./src/app');
-const { runLeagueEventMigrations } = require('./src/utils/autoMigrate');
+const { runCriticalMigrations } = require('./src/utils/autoMigrate');
 
 const PORT = process.env.PORT || 3001;
 
@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3001;
 async function startServer() {
   try {
     // Run auto-migrations first
-    await runLeagueEventMigrations();
+    await runCriticalMigrations();
     
     // Start the server
     app.listen(PORT, '0.0.0.0', () => {

@@ -2,10 +2,61 @@ const fs = require('fs');
 const path = require('path');
 const db = require('../config/database');
 
-// Auto-run critical migrations needed for league events
-async function runLeagueEventMigrations() {
+// Auto-run user-related migrations
+async function runUserMigrations() {
+  try {
+    // Check if is_active column exists in users table
+    const checkColumnQuery = `
+      SELECT EXISTS (
+        SELECT FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'users'
+        AND column_name = 'is_active'
+      );
+    `;
+    
+    const result = await db.query(checkColumnQuery);
+    const columnExists = result.rows[0].exists;
+    
+    if (!columnExists) {
+      console.log('👤 Adding is_active column to users table...');
+      
+      const migrationPath = path.join(__dirname, '../database/migrations/006_add_is_active_to_users.sql');
+      
+      if (fs.existsSync(migrationPath)) {
+        const sql = fs.readFileSync(migrationPath, 'utf8');
+        await db.query(sql);
+        console.log('✅ is_active column added to users table');
+      } else {
+        console.log('⚠️ User migration file not found, creating column manually...');
+        
+        // Fallback: create column manually
+        const createColumnSQL = `
+          ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT true;
+          UPDATE users SET is_active = true WHERE is_active IS NULL;
+          CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
+        `;
+        
+        await db.query(createColumnSQL);
+        console.log('✅ is_active column created via fallback method');
+      }
+    } else {
+      console.log('✅ users.is_active column already exists');
+    }
+    
+  } catch (error) {
+    console.error('❌ User migration failed:', error);
+    console.log('⚠️ User management features may not work properly.');
+  }
+}
+
+// Auto-run critical migrations needed for the application
+async function runCriticalMigrations() {
   try {
     console.log('🔄 Checking for required database tables...');
+    
+    // First, ensure is_active column exists for user management
+    await runUserMigrations();
     
     // Check if league_events table exists
     const checkTableQuery = `
@@ -125,4 +176,4 @@ async function runLeagueEventMigrations() {
   }
 }
 
-module.exports = { runLeagueEventMigrations };
+module.exports = { runCriticalMigrations, runLeagueEventMigrations: runCriticalMigrations };
