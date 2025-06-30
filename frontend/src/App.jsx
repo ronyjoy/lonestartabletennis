@@ -39,6 +39,7 @@ function App() {
         <Route path="/leagues/signup" element={<LeagueSignupPage />} />
         <Route path="/league-signup" element={<PublicLeagueSignup />} />
         <Route path="/run-league" element={<RunLeaguePage />} />
+        <Route path="/user-management" element={<UserManagementPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </Router>
@@ -851,6 +852,17 @@ function DashboardPage() {
                 >
                   <PlayIcon className="w-5 h-5" color="white" />
                   Run League
+                </button>
+              )}
+              
+              {/* User Management - Admin only */}
+              {user.role === 'admin' && (
+                <button 
+                  onClick={() => navigate('/user-management')}
+                  className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-4 px-4 rounded-lg inline-flex items-center justify-center gap-2"
+                >
+                  <UsersIcon className="w-5 h-5" color="white" />
+                  User Management
                 </button>
               )}
               
@@ -2170,6 +2182,375 @@ function ProfilePage() {
                 <span className="text-6xl mb-4 block">🔐</span>
                 <p className="text-gray-600 mb-4">Keep your account secure by regularly updating your password.</p>
                 <p className="text-sm text-gray-500">Last password change: Not tracked (for privacy)</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function UserManagementPage() {
+  const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [message, setMessage] = useState('')
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [newUser, setNewUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    role: 'student'
+  })
+
+  // Function to get time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour >= 5 && hour < 12) return 'Good morning'
+    if (hour >= 12 && hour < 17) return 'Good afternoon'
+    if (hour >= 17 && hour < 22) return 'Good evening'
+    return 'Good night'
+  }
+
+  // Function to get role-specific icon
+  const getRoleIcon = (role) => {
+    switch(role) {
+      case 'student': return (
+        <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          S
+        </div>
+      )
+      case 'coach': return (
+        <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          C
+        </div>
+      )
+      case 'admin': return (
+        <div className="w-5 h-5 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          A
+        </div>
+      )
+      default: return (
+        <div className="w-5 h-5 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          U
+        </div>
+      )
+    }
+  }
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
+    
+    if (!token) {
+      navigate('/login')
+      return
+    }
+    
+    if (userData) {
+      const parsedUser = JSON.parse(userData)
+      setUser(parsedUser)
+      
+      if (parsedUser.role !== 'admin') {
+        navigate('/dashboard')
+        return
+      }
+      
+      fetchUsers()
+    }
+  }, [navigate])
+
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/admin/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setUsers(data.users)
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error)
+      setMessage('Error fetching users')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const createUser = async (e) => {
+    e.preventDefault()
+    setMessage('')
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/admin/create-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newUser)
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setMessage(`${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} created successfully!`)
+        setNewUser({ firstName: '', lastName: '', email: '', password: '', role: 'student' })
+        setShowCreateForm(false)
+        fetchUsers()
+      } else {
+        setMessage(data.error?.message || 'Failed to create user')
+      }
+    } catch (error) {
+      setMessage('Error creating user')
+    }
+  }
+
+  const deleteUser = async (userId) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      if (response.ok) {
+        setMessage('User deleted successfully')
+        fetchUsers()
+      } else {
+        setMessage('Failed to delete user')
+      }
+    } catch (error) {
+      setMessage('Error deleting user')
+    }
+  }
+
+  const cleanupData = async () => {
+    if (!confirm('⚠️ WARNING: This will delete ALL data except admin users!\n\nThis includes:\n• All students and coaches\n• All leagues and signups\n• All skills and badges\n• All match results\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?')) return
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/admin/cleanup-data', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setMessage('Data cleanup completed successfully! Only admin users remain.')
+        fetchUsers()
+      } else {
+        setMessage(data.error?.message || 'Failed to cleanup data')
+      }
+    } catch (error) {
+      setMessage('Error during data cleanup')
+    }
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    navigate('/')
+  }
+
+  if (!user) return <div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-600">Loading...</div></div>
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center space-x-4">
+              <button onClick={() => navigate('/dashboard')} className="text-blue-500 hover:text-blue-700">← Dashboard</button>
+              <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                <UsersIcon className="w-8 h-8 text-indigo-600" />
+                User Management
+              </h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-gray-700">
+                {getRoleIcon(user.role)}
+                <span className="font-medium">
+                  {getTimeBasedGreeting()}, {user.firstName}!
+                </span>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full capitalize">
+                  {user.role}
+                </span>
+              </div>
+              <button onClick={handleLogout} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          {message && (
+            <div className={`mb-6 p-4 rounded-lg ${
+              message.includes('successfully') || message.includes('completed')
+                ? 'bg-green-100 text-green-700 border border-green-200' 
+                : 'bg-red-100 text-red-700 border border-red-200'
+            }`}>
+              <div className="flex items-center">
+                <span className="mr-2">{message.includes('successfully') || message.includes('completed') ? '✅' : '❌'}</span>
+                {message}
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">System Management</h2>
+            <div className="space-x-4">
+              <button
+                onClick={() => setShowCreateForm(!showCreateForm)}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
+              >
+                <UserIcon className="w-4 h-4" />
+                {showCreateForm ? 'Cancel' : 'Create User'}
+              </button>
+              <button
+                onClick={cleanupData}
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
+              >
+                🗑️ Clean All Data
+              </button>
+            </div>
+          </div>
+
+          {/* Create User Form */}
+          {showCreateForm && (
+            <div className="bg-white p-6 rounded-lg shadow mb-6">
+              <h3 className="text-lg font-bold mb-4">Create New User</h3>
+              <form onSubmit={createUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">First Name</label>
+                  <input
+                    type="text"
+                    value={newUser.firstName}
+                    onChange={(e) => setNewUser({...newUser, firstName: e.target.value})}
+                    required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                  <input
+                    type="text"
+                    value={newUser.lastName}
+                    onChange={(e) => setNewUser({...newUser, lastName: e.target.value})}
+                    required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <input
+                    type="email"
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                    required
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Role</label>
+                  <select
+                    value={newUser.role}
+                    onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="student">Student</option>
+                    <option value="coach">Coach</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700">Password</label>
+                  <input
+                    type="password"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                    required
+                    minLength="6"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Minimum 6 characters"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <button
+                    type="submit"
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Create {newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Users List */}
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">All Users ({users.length})</h3>
+            </div>
+            
+            {loading ? (
+              <div className="p-6 text-center text-gray-600">Loading users...</div>
+            ) : users.length === 0 ? (
+              <div className="p-6 text-center text-gray-600">
+                No users found.
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {users.map((userItem) => (
+                  <div key={userItem.id} className="p-6 flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      {getRoleIcon(userItem.role)}
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {userItem.firstName} {userItem.lastName}
+                        </div>
+                        <div className="text-sm text-gray-500">{userItem.email}</div>
+                      </div>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        userItem.role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                        userItem.role === 'coach' ? 'bg-green-100 text-green-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {userItem.role}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3">
+                      <span className="text-xs text-gray-500">
+                        ID: #{userItem.id}
+                      </span>
+                      {userItem.role !== 'admin' && (
+                        <button
+                          onClick={() => deleteUser(userItem.id)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
