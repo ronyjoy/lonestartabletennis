@@ -9,7 +9,8 @@ async function runMigration() {
     const migrationsDir = path.join(__dirname, 'migrations');
     const migrationFiles = [
       'create_student_comments.sql',
-      '005_create_league_events.sql'
+      '005_create_league_events.sql',
+      '006_add_is_active_to_users.sql'
     ];
     
     for (const file of migrationFiles) {
