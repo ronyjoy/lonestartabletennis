@@ -2187,6 +2187,7 @@ function RunLeaguePage() {
   const [signups, setSignups] = useState([])
   const [groups, setGroups] = useState([])
   const [groupingMethod, setGroupingMethod] = useState('middle') // 'middle' or 'snake'
+  const [numberOfGroups, setNumberOfGroups] = useState('auto') // 'auto', '1', '2', '3'
   const [showResults, setShowResults] = useState(false)
   const [results, setResults] = useState({})
   const [loading, setLoading] = useState(true)
@@ -2194,6 +2195,8 @@ function RunLeaguePage() {
   const [showElimination, setShowElimination] = useState(false)
   const [eliminationMatches, setEliminationMatches] = useState({})
   const [eliminationResults, setEliminationResults] = useState({})
+  const [editingPlayer, setEditingPlayer] = useState(null)
+  const [newRating, setNewRating] = useState('')
 
   // Function to get time-based greeting
   const getTimeBasedGreeting = () => {
@@ -2331,40 +2334,125 @@ function RunLeaguePage() {
     // Sort players by skill level (descending)
     const sortedPlayers = [...players].sort((a, b) => b.skill_level - a.skill_level)
     
-    if (players.length <= 8) {
-      // Single group
+    // Determine number of groups
+    let numGroups
+    if (numberOfGroups === 'auto') {
+      numGroups = players.length <= 8 ? 1 : Math.min(3, Math.ceil(players.length / 6))
+    } else {
+      numGroups = parseInt(numberOfGroups)
+    }
+    
+    // Ensure we don't have more groups than players
+    numGroups = Math.min(numGroups, players.length)
+    
+    if (numGroups === 1) {
       setGroups([{ id: 1, name: 'Group 1', players: sortedPlayers }])
     } else {
-      // Two groups
-      const group1 = []
-      const group2 = []
+      const groups = Array.from({ length: numGroups }, (_, i) => ({
+        id: i + 1,
+        name: `Group ${i + 1}`,
+        players: []
+      }))
       
       if (groupingMethod === 'middle') {
-        // Split at middle rating
-        const midPoint = Math.floor(sortedPlayers.length / 2)
-        group1.push(...sortedPlayers.slice(0, midPoint))
-        group2.push(...sortedPlayers.slice(midPoint))
-      } else {
-        // Snake seeding (1st to Group 1, 2nd to Group 2, 3rd to Group 2, 4th to Group 1, etc.)
+        // Split evenly by rating ranges
+        const playersPerGroup = Math.ceil(sortedPlayers.length / numGroups)
         sortedPlayers.forEach((player, index) => {
-          if (index % 4 === 0 || index % 4 === 3) {
-            group1.push(player)
+          const groupIndex = Math.floor(index / playersPerGroup)
+          if (groupIndex < numGroups) {
+            groups[groupIndex].players.push(player)
           } else {
-            group2.push(player)
+            // Add overflow to last group
+            groups[numGroups - 1].players.push(player)
           }
+        })
+      } else {
+        // Snake seeding - distribute evenly across groups
+        sortedPlayers.forEach((player, index) => {
+          const cycle = Math.floor(index / numGroups)
+          const groupIndex = cycle % 2 === 0 
+            ? index % numGroups 
+            : numGroups - 1 - (index % numGroups)
+          groups[groupIndex].players.push(player)
         })
       }
       
-      setGroups([
-        { id: 1, name: 'Group 1', players: group1 },
-        { id: 2, name: 'Group 2', players: group2 }
-      ])
+      setGroups(groups)
     }
   }
 
   const handleGroupingMethodChange = (method) => {
     setGroupingMethod(method)
     generateGroups(signups)
+  }
+
+  const handleGroupCountChange = (count) => {
+    setNumberOfGroups(count)
+    generateGroups(signups)
+  }
+
+  const removePlayer = async (playerId) => {
+    if (!confirm('Remove this player from the league? This action cannot be undone.')) return
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`/api/public/leagues/remove-player/${playerId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      if (response.ok) {
+        const updatedSignups = signups.filter(player => player.id !== playerId)
+        setSignups(updatedSignups)
+        generateGroups(updatedSignups)
+        setMessage('Player removed from league')
+      } else {
+        setMessage('Failed to remove player')
+      }
+    } catch (error) {
+      console.error('Error removing player:', error)
+      setMessage('Error removing player')
+    }
+  }
+
+  const updatePlayerRating = async (playerId, newRating) => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`/api/public/leagues/update-player-rating`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          player_id: playerId,
+          skill_level: parseInt(newRating)
+        })
+      })
+
+      if (response.ok) {
+        const updatedSignups = signups.map(player => 
+          player.id === playerId 
+            ? { ...player, skill_level: parseInt(newRating) }
+            : player
+        )
+        setSignups(updatedSignups)
+        generateGroups(updatedSignups)
+        setEditingPlayer(null)
+        setNewRating('')
+        setMessage('Player rating updated successfully')
+      } else {
+        setMessage('Failed to update player rating')
+      }
+    } catch (error) {
+      console.error('Error updating player rating:', error)
+      setMessage('Error updating player rating')
+    }
+  }
+
+  const startEditingPlayer = (player) => {
+    setEditingPlayer(player)
+    setNewRating(player.skill_level.toString())
   }
 
   const handleLogout = () => {
@@ -2946,11 +3034,131 @@ function RunLeaguePage() {
             )}
           </div>
 
-          {/* Grouping Options */}
-          {selectedLeague && signups.length > 8 && (
+          {/* Player Management */}
+          {selectedLeague && signups.length > 0 && !showResults && (
             <div className="bg-white shadow rounded-lg p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Grouping Method</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Player Management</h2>
+              <div className="space-y-3">
+                {signups.map((player) => (
+                  <div key={player.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="font-medium text-gray-900">
+                        {player.first_name} {player.last_name}
+                      </div>
+                      <div className="text-sm text-gray-600">{player.email}</div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      {editingPlayer?.id === player.id ? (
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="number"
+                            min="0"
+                            max="3000"
+                            value={newRating}
+                            onChange={(e) => setNewRating(e.target.value)}
+                            className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                            placeholder="Rating"
+                          />
+                          <button
+                            onClick={() => updatePlayerRating(player.id, newRating)}
+                            className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingPlayer(null)}
+                            className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-3">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {player.skill_level}
+                          </span>
+                          <button
+                            onClick={() => startEditingPlayer(player)}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          >
+                            Edit Rating
+                          </button>
+                          <button
+                            onClick={() => removePlayer(player.id)}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Grouping Options */}
+          {selectedLeague && signups.length > 0 && !showResults && (
+            <div className="bg-white shadow rounded-lg p-6 mb-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Tournament Settings</h2>
+              
+              {/* Number of Groups */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-3">Number of Groups</label>
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => handleGroupCountChange('auto')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      numberOfGroups === 'auto'
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Auto
+                  </button>
+                  <button
+                    onClick={() => handleGroupCountChange('1')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      numberOfGroups === '1'
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    1 Group
+                  </button>
+                  <button
+                    onClick={() => handleGroupCountChange('2')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      numberOfGroups === '2'
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    2 Groups
+                  </button>
+                  <button
+                    onClick={() => handleGroupCountChange('3')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                      numberOfGroups === '3'
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    3 Groups
+                  </button>
+                </div>
+                <div className="text-sm text-gray-600 mt-2">
+                  {numberOfGroups === 'auto' 
+                    ? `Auto: ${signups.length <= 8 ? '1 group' : `${Math.min(3, Math.ceil(signups.length / 6))} groups`} (≤8 players = 1 group, >8 players = multiple groups)`
+                    : `Fixed: ${numberOfGroups} group${numberOfGroups === '1' ? '' : 's'}`
+                  }
+                </div>
+              </div>
+
+              {/* Grouping Method */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-3">Seeding Method</label>
                 <div className="flex bg-gray-100 rounded-lg p-1">
                   <button
                     onClick={() => handleGroupingMethodChange('middle')}
@@ -2973,12 +3181,12 @@ function RunLeaguePage() {
                     Snake Seeding
                   </button>
                 </div>
-              </div>
-              <div className="text-sm text-gray-600">
-                {groupingMethod === 'middle' 
-                  ? 'Higher rated players go to Group 1, lower rated to Group 2'
-                  : 'Balanced groups with even distribution of skill levels'
-                }
+                <div className="text-sm text-gray-600 mt-2">
+                  {groupingMethod === 'middle' 
+                    ? 'Higher rated players go to Group 1, lower rated players to subsequent groups'
+                    : 'Balanced groups with even distribution of skill levels (1st→Group1, 2nd→Group2, 3rd→Group2, 4th→Group1...)'
+                  }
+                </div>
               </div>
             </div>
           )}
