@@ -2267,7 +2267,7 @@ function UserManagementPage() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('/api/users/admin/users', {
+      const response = await fetch('/api/users/admin', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
 
@@ -2301,7 +2301,7 @@ function UserManagementPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('/api/users/admin/create-user', {
+      const response = await fetch('/api/users/admin/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2339,8 +2339,8 @@ function UserManagementPage() {
     try {
       const token = localStorage.getItem('token')
       const endpoint = isStudent 
-        ? `/api/users/admin/users/${userId}`
-        : `/api/users/admin/users/${userId}/archive`
+        ? `/api/users/admin/${userId}`
+        : `/api/users/admin/${userId}/archive`
       
       const response = await fetch(endpoint, {
         method: isStudent ? 'DELETE' : 'PUT',
@@ -2363,7 +2363,7 @@ function UserManagementPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`/api/users/admin/users/${userId}/reactivate`, {
+      const response = await fetch(`/api/users/admin/${userId}/reactivate`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       })
