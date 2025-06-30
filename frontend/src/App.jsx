@@ -600,6 +600,28 @@ function DashboardPage() {
     }
   }
 
+  const cleanupData = async () => {
+    if (!confirm('⚠️ WARNING: This will delete ALL data except admin users!\n\nThis includes:\n• All students and coaches\n• All leagues and signups\n• All skills and badges\n• All match results\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?')) return
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/admin/cleanup-data', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setMessage('Data cleanup completed successfully! Only admin users remain.')
+      } else {
+        setMessage(data.error?.message || 'Failed to cleanup data')
+      }
+    } catch (error) {
+      setMessage('Error during data cleanup')
+    }
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
@@ -2312,24 +2334,55 @@ function UserManagementPage() {
     }
   }
 
-  const deleteUser = async (userId) => {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return
+  const deleteUser = async (userId, userRole) => {
+    const isCoach = userRole === 'coach'
+    const actionText = isCoach ? 'archive' : 'delete'
+    const warningText = isCoach 
+      ? 'Are you sure you want to archive this coach? They will no longer be able to log in, but their ratings and comments will be preserved.'
+      : 'Are you sure you want to delete this user? This action cannot be undone.'
+    
+    if (!confirm(warningText)) return
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE',
+      const endpoint = isCoach 
+        ? `/api/admin/users/${userId}/archive`
+        : `/api/admin/users/${userId}`
+      
+      const response = await fetch(endpoint, {
+        method: isCoach ? 'PUT' : 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       })
 
       if (response.ok) {
-        setMessage('User deleted successfully')
+        setMessage(`User ${actionText}d successfully`)
         fetchUsers()
       } else {
-        setMessage('Failed to delete user')
+        setMessage(`Failed to ${actionText} user`)
       }
     } catch (error) {
-      setMessage('Error deleting user')
+      setMessage(`Error ${actionText}ing user`)
+    }
+  }
+
+  const reactivateUser = async (userId) => {
+    if (!confirm('Reactivate this archived user? They will be able to log in again.')) return
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`/api/admin/users/${userId}/reactivate`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+
+      if (response.ok) {
+        setMessage('User reactivated successfully')
+        fetchUsers()
+      } else {
+        setMessage('Failed to reactivate user')
+      }
+    } catch (error) {
+      setMessage('Error reactivating user')
     }
   }
 
@@ -2518,12 +2571,19 @@ function UserManagementPage() {
             ) : (
               <div className="divide-y divide-gray-200">
                 {users.map((userItem) => (
-                  <div key={userItem.id} className="p-6 flex items-center justify-between">
+                  <div key={userItem.id} className={`p-6 flex items-center justify-between ${
+                    userItem.is_active === false ? 'bg-gray-50 opacity-75' : ''
+                  }`}>
                     <div className="flex items-center space-x-4">
                       {getRoleIcon(userItem.role)}
                       <div>
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className={`text-sm font-medium ${
+                          userItem.is_active === false ? 'text-gray-500' : 'text-gray-900'
+                        }`}>
                           {userItem.firstName} {userItem.lastName}
+                          {userItem.is_active === false && (
+                            <span className="ml-2 text-xs text-red-600 font-medium">(Archived)</span>
+                          )}
                         </div>
                         <div className="text-sm text-gray-500">{userItem.email}</div>
                       </div>
@@ -2534,6 +2594,11 @@ function UserManagementPage() {
                       }`}>
                         {userItem.role}
                       </span>
+                      {userItem.is_active === false && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          Archived
+                        </span>
+                      )}
                     </div>
                     
                     <div className="flex items-center space-x-3">
@@ -2541,12 +2606,23 @@ function UserManagementPage() {
                         ID: #{userItem.id}
                       </span>
                       {userItem.role !== 'admin' && (
-                        <button
-                          onClick={() => deleteUser(userItem.id)}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium"
-                        >
-                          Delete
-                        </button>
+                        <>
+                          {userItem.is_active === false ? (
+                            <button
+                              onClick={() => reactivateUser(userItem.id)}
+                              className="text-green-600 hover:text-green-800 text-sm font-medium"
+                            >
+                              Reactivate
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => deleteUser(userItem.id, userItem.role)}
+                              className="text-red-600 hover:text-red-800 text-sm font-medium"
+                            >
+                              {userItem.role === 'coach' ? 'Archive' : 'Delete'}
+                            </button>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
