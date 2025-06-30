@@ -600,27 +600,6 @@ function DashboardPage() {
     }
   }
 
-  const cleanupData = async () => {
-    if (!confirm('⚠️ WARNING: This will delete ALL data except admin users!\n\nThis includes:\n• All students and coaches\n• All leagues and signups\n• All skills and badges\n• All match results\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?')) return
-
-    try {
-      const token = localStorage.getItem('token')
-      const response = await fetch('/api/admin/cleanup-data', {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setMessage('Data cleanup completed successfully! Only admin users remain.')
-      } else {
-        setMessage(data.error?.message || 'Failed to cleanup data')
-      }
-    } catch (error) {
-      setMessage('Error during data cleanup')
-    }
-  }
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -2386,28 +2365,6 @@ function UserManagementPage() {
     }
   }
 
-  const cleanupData = async () => {
-    if (!confirm('⚠️ WARNING: This will delete ALL data except admin users!\n\nThis includes:\n• All students and coaches\n• All leagues and signups\n• All skills and badges\n• All match results\n\nThis action CANNOT be undone!\n\nAre you absolutely sure?')) return
-
-    try {
-      const token = localStorage.getItem('token')
-      const response = await fetch('/api/admin/cleanup-data', {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
-        setMessage('Data cleanup completed successfully! Only admin users remain.')
-        fetchUsers()
-      } else {
-        setMessage(data.error?.message || 'Failed to cleanup data')
-      }
-    } catch (error) {
-      setMessage('Error during data cleanup')
-    }
-  }
 
   const handleLogout = () => {
     localStorage.removeItem('token')
@@ -2462,7 +2419,7 @@ function UserManagementPage() {
 
           {/* Action Buttons */}
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">System Management</h2>
+            <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
             <div className="space-x-4">
               <button
                 onClick={() => setShowCreateForm(!showCreateForm)}
@@ -2470,12 +2427,6 @@ function UserManagementPage() {
               >
                 <UserIcon className="w-4 h-4" />
                 {showCreateForm ? 'Cancel' : 'Create User'}
-              </button>
-              <button
-                onClick={cleanupData}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center gap-2"
-              >
-                🗑️ Clean All Data
               </button>
             </div>
           </div>
