@@ -24,7 +24,7 @@ const adminOnly = (req, res, next) => {
 };
 
 // Get all users (admin only)
-router.get('/admin/users', authenticateToken, adminOnly, async (req, res) => {
+router.get('/admin', authenticateToken, adminOnly, async (req, res) => {
   try {
     const result = await db.query(`
       SELECT id, email, first_name, last_name, role, is_active, created_at
@@ -55,7 +55,7 @@ router.get('/admin/users', authenticateToken, adminOnly, async (req, res) => {
 });
 
 // Create user (admin only)
-router.post('/admin/create-user', authenticateToken, adminOnly, async (req, res) => {
+router.post('/admin/create', authenticateToken, adminOnly, async (req, res) => {
   try {
     const { firstName, lastName, email, password, role } = req.body;
 
@@ -133,7 +133,7 @@ router.post('/admin/create-user', authenticateToken, adminOnly, async (req, res)
 });
 
 // Delete user (admin only) - hard delete for students
-router.delete('/admin/users/:id', authenticateToken, adminOnly, async (req, res) => {
+router.delete('/admin/:id', authenticateToken, adminOnly, async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
 
@@ -188,7 +188,7 @@ router.delete('/admin/users/:id', authenticateToken, adminOnly, async (req, res)
 });
 
 // Archive user (admin only) - soft delete for coaches and students
-router.put('/admin/users/:id/archive', authenticateToken, adminOnly, async (req, res) => {
+router.put('/admin/:id/archive', authenticateToken, adminOnly, async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
 
@@ -233,7 +233,7 @@ router.put('/admin/users/:id/archive', authenticateToken, adminOnly, async (req,
 });
 
 // Reactivate user (admin only)
-router.put('/admin/users/:id/reactivate', authenticateToken, adminOnly, async (req, res) => {
+router.put('/admin/:id/reactivate', authenticateToken, adminOnly, async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
 
