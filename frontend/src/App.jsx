@@ -2267,7 +2267,7 @@ function UserManagementPage() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('/api/admin/users', {
+      const response = await fetch('/api/users/admin/users', {
         headers: { 'Authorization': `Bearer ${token}` }
       })
 
@@ -2301,7 +2301,7 @@ function UserManagementPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('/api/admin/create-user', {
+      const response = await fetch('/api/users/admin/create-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2328,22 +2328,22 @@ function UserManagementPage() {
   }
 
   const deleteUser = async (userId, userRole) => {
-    const isCoach = userRole === 'coach'
-    const actionText = isCoach ? 'archive' : 'delete'
-    const warningText = isCoach 
-      ? 'Are you sure you want to archive this coach? They will no longer be able to log in, but their ratings and comments will be preserved.'
-      : 'Are you sure you want to delete this user? This action cannot be undone.'
+    const isStudent = userRole === 'student'
+    const actionText = isStudent ? 'delete' : 'archive'
+    const warningText = isStudent 
+      ? 'Are you sure you want to delete this student? This action cannot be undone.'
+      : 'Are you sure you want to archive this user? They will no longer be able to log in, but their data will be preserved.'
     
     if (!confirm(warningText)) return
 
     try {
       const token = localStorage.getItem('token')
-      const endpoint = isCoach 
-        ? `/api/admin/users/${userId}/archive`
-        : `/api/admin/users/${userId}`
+      const endpoint = isStudent 
+        ? `/api/users/admin/users/${userId}`
+        : `/api/users/admin/users/${userId}/archive`
       
       const response = await fetch(endpoint, {
-        method: isCoach ? 'PUT' : 'DELETE',
+        method: isStudent ? 'DELETE' : 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       })
 
@@ -2363,7 +2363,7 @@ function UserManagementPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`/api/admin/users/${userId}/reactivate`, {
+      const response = await fetch(`/api/users/admin/users/${userId}/reactivate`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       })
@@ -2521,84 +2521,213 @@ function UserManagementPage() {
             </div>
           )}
 
-          {/* Users List */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">All Users ({users.length})</h3>
+          {/* Users List by Role */}
+          {loading ? (
+            <div className="bg-white shadow rounded-lg p-6 text-center text-gray-600">Loading users...</div>
+          ) : users.length === 0 ? (
+            <div className="bg-white shadow rounded-lg p-6 text-center text-gray-600">
+              <p className="mb-2">No users found.</p>
+              <p className="text-sm text-gray-500">
+                If this is unexpected, check the browser console for API errors.
+                The backend user management endpoints may need to be implemented.
+              </p>
             </div>
-            
-            {loading ? (
-              <div className="p-6 text-center text-gray-600">Loading users...</div>
-            ) : users.length === 0 ? (
-              <div className="p-6 text-center text-gray-600">
-                <p className="mb-2">No users found.</p>
-                <p className="text-sm text-gray-500">
-                  If this is unexpected, check the browser console for API errors.
-                  The backend user management endpoints may need to be implemented.
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {users.map((userItem) => (
-                  <div key={userItem.id} className={`p-6 flex items-center justify-between ${
-                    userItem.is_active === false ? 'bg-gray-50 opacity-75' : ''
-                  }`}>
-                    <div className="flex items-center space-x-4">
-                      {getRoleIcon(userItem.role)}
-                      <div>
-                        <div className={`text-sm font-medium ${
-                          userItem.is_active === false ? 'text-gray-500' : 'text-gray-900'
-                        }`}>
-                          {userItem.firstName} {userItem.lastName}
-                          {userItem.is_active === false && (
-                            <span className="ml-2 text-xs text-red-600 font-medium">(Archived)</span>
-                          )}
+          ) : (
+            <div className="space-y-6">
+              {/* Admins Section */}
+              {(() => {
+                const admins = users.filter(u => u.role === 'admin')
+                return admins.length > 0 && (
+                  <div className="bg-white shadow rounded-lg">
+                    <div className="px-6 py-4 border-b border-gray-200 bg-purple-50">
+                      <h3 className="text-lg font-medium text-purple-900 flex items-center">
+                        <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3">
+                          A
                         </div>
-                        <div className="text-sm text-gray-500">{userItem.email}</div>
-                      </div>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        userItem.role === 'admin' ? 'bg-purple-100 text-purple-800' :
-                        userItem.role === 'coach' ? 'bg-green-100 text-green-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
-                        {userItem.role}
-                      </span>
-                      {userItem.is_active === false && (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          Archived
-                        </span>
-                      )}
+                        Administrators ({admins.length})
+                      </h3>
                     </div>
-                    
-                    <div className="flex items-center space-x-3">
-                      <span className="text-xs text-gray-500">
-                        ID: #{userItem.id}
-                      </span>
-                      {userItem.role !== 'admin' && (
-                        <>
-                          {userItem.is_active === false ? (
-                            <button
-                              onClick={() => reactivateUser(userItem.id)}
-                              className="text-green-600 hover:text-green-800 text-sm font-medium"
-                            >
-                              Reactivate
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => deleteUser(userItem.id, userItem.role)}
-                              className="text-red-600 hover:text-red-800 text-sm font-medium"
-                            >
-                              {userItem.role === 'coach' ? 'Archive' : 'Delete'}
-                            </button>
-                          )}
-                        </>
-                      )}
+                    <div className="divide-y divide-gray-200">
+                      {admins.map((userItem) => (
+                        <div key={userItem.id} className={`p-6 flex items-center justify-between ${
+                          userItem.is_active === false ? 'bg-gray-50 opacity-75' : ''
+                        }`}>
+                          <div className="flex items-center space-x-4">
+                            <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                              A
+                            </div>
+                            <div>
+                              <div className={`text-sm font-medium ${
+                                userItem.is_active === false ? 'text-gray-500' : 'text-gray-900'
+                              }`}>
+                                {userItem.firstName} {userItem.lastName}
+                                {userItem.is_active === false && (
+                                  <span className="ml-2 text-xs text-red-600 font-medium">(Archived)</span>
+                                )}
+                              </div>
+                              <div className="text-sm text-gray-500">{userItem.email}</div>
+                            </div>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              Admin
+                            </span>
+                            {userItem.is_active === false && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                Archived
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <span className="text-xs text-gray-500">ID: #{userItem.id}</span>
+                            <span className="text-xs text-gray-500 bg-purple-100 px-2 py-1 rounded">Protected</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                )
+              })()}
+
+              {/* Coaches Section */}
+              {(() => {
+                const coaches = users.filter(u => u.role === 'coach')
+                return coaches.length > 0 && (
+                  <div className="bg-white shadow rounded-lg">
+                    <div className="px-6 py-4 border-b border-gray-200 bg-green-50">
+                      <h3 className="text-lg font-medium text-green-900 flex items-center">
+                        <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3">
+                          C
+                        </div>
+                        Coaches ({coaches.length})
+                      </h3>
+                    </div>
+                    <div className="divide-y divide-gray-200">
+                      {coaches.map((userItem) => (
+                        <div key={userItem.id} className={`p-6 flex items-center justify-between ${
+                          userItem.is_active === false ? 'bg-gray-50 opacity-75' : ''
+                        }`}>
+                          <div className="flex items-center space-x-4">
+                            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                              C
+                            </div>
+                            <div>
+                              <div className={`text-sm font-medium ${
+                                userItem.is_active === false ? 'text-gray-500' : 'text-gray-900'
+                              }`}>
+                                {userItem.firstName} {userItem.lastName}
+                                {userItem.is_active === false && (
+                                  <span className="ml-2 text-xs text-red-600 font-medium">(Archived)</span>
+                                )}
+                              </div>
+                              <div className="text-sm text-gray-500">{userItem.email}</div>
+                            </div>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Coach
+                            </span>
+                            {userItem.is_active === false && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                Archived
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <span className="text-xs text-gray-500">ID: #{userItem.id}</span>
+                            {userItem.is_active === false ? (
+                              <button
+                                onClick={() => reactivateUser(userItem.id)}
+                                className="text-green-600 hover:text-green-800 text-sm font-medium"
+                              >
+                                Reactivate
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => deleteUser(userItem.id, userItem.role)}
+                                className="text-red-600 hover:text-red-800 text-sm font-medium"
+                              >
+                                Archive
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* Students Section */}
+              {(() => {
+                const students = users.filter(u => u.role === 'student')
+                return (
+                  <div className="bg-white shadow rounded-lg">
+                    <div className="px-6 py-4 border-b border-gray-200 bg-blue-50">
+                      <h3 className="text-lg font-medium text-blue-900 flex items-center">
+                        <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3">
+                          S
+                        </div>
+                        Students ({students.length})
+                      </h3>
+                    </div>
+                    {students.length === 0 ? (
+                      <div className="p-6 text-center text-gray-600">
+                        <p>No students found. Students can register themselves or be created by admins.</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-gray-200">
+                        {students.map((userItem) => (
+                          <div key={userItem.id} className={`p-6 flex items-center justify-between ${
+                            userItem.is_active === false ? 'bg-gray-50 opacity-75' : ''
+                          }`}>
+                            <div className="flex items-center space-x-4">
+                              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                S
+                              </div>
+                              <div>
+                                <div className={`text-sm font-medium ${
+                                  userItem.is_active === false ? 'text-gray-500' : 'text-gray-900'
+                                }`}>
+                                  {userItem.firstName} {userItem.lastName}
+                                  {userItem.is_active === false && (
+                                    <span className="ml-2 text-xs text-red-600 font-medium">(Archived)</span>
+                                  )}
+                                </div>
+                                <div className="text-sm text-gray-500">{userItem.email}</div>
+                              </div>
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Student
+                              </span>
+                              {userItem.is_active === false && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                  Archived
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <span className="text-xs text-gray-500">ID: #{userItem.id}</span>
+                              {userItem.is_active === false ? (
+                                <button
+                                  onClick={() => reactivateUser(userItem.id)}
+                                  className="text-green-600 hover:text-green-800 text-sm font-medium"
+                                >
+                                  Reactivate
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => deleteUser(userItem.id, userItem.role)}
+                                  className="text-red-600 hover:text-red-800 text-sm font-medium"
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+            </div>
+          )}
         </div>
       </main>
     </div>

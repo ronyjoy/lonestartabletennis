@@ -182,7 +182,7 @@ router.delete('/admin/users/:id', authenticateToken, adminOnly, async (req, res)
   }
 });
 
-// Archive user (admin only) - soft delete for coaches
+// Archive user (admin only) - soft delete for coaches and students
 router.put('/admin/users/:id/archive', authenticateToken, adminOnly, async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
