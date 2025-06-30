@@ -5,6 +5,11 @@ const authenticateToken = require('../middleware/auth');
 
 const router = express.Router();
 
+// Test route to verify users routes are working
+router.get('/test', (req, res) => {
+  res.json({ message: 'Users routes are working!' });
+});
+
 // Admin only middleware
 const adminOnly = (req, res, next) => {
   if (req.user.role !== 'admin') {
