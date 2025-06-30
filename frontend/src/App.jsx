@@ -2273,11 +2273,23 @@ function UserManagementPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setUsers(data.users)
+        console.log('Users API response:', data) // Debug log
+        // Handle different possible response structures
+        if (data.users) {
+          setUsers(data.users)
+        } else if (Array.isArray(data)) {
+          setUsers(data)
+        } else {
+          console.error('Unexpected users data structure:', data)
+          setMessage('Unexpected response format from users API')
+        }
+      } else {
+        console.error('Users API failed:', response.status, response.statusText)
+        setMessage(`Failed to fetch users: ${response.status} ${response.statusText}`)
       }
     } catch (error) {
       console.error('Error fetching users:', error)
-      setMessage('Error fetching users')
+      setMessage('Error fetching users - API endpoint may not be implemented yet')
     } finally {
       setLoading(false)
     }
@@ -2298,18 +2310,20 @@ function UserManagementPage() {
         body: JSON.stringify(newUser)
       })
 
-      const data = await response.json()
-
       if (response.ok) {
+        const data = await response.json()
         setMessage(`${newUser.role.charAt(0).toUpperCase() + newUser.role.slice(1)} created successfully!`)
         setNewUser({ firstName: '', lastName: '', email: '', password: '', role: 'student' })
         setShowCreateForm(false)
         fetchUsers()
       } else {
-        setMessage(data.error?.message || 'Failed to create user')
+        const data = await response.json()
+        console.error('Create user API failed:', response.status, data)
+        setMessage(data.error?.message || data.message || `Failed to create user: ${response.status}`)
       }
     } catch (error) {
-      setMessage('Error creating user')
+      console.error('Error creating user:', error)
+      setMessage('Error creating user - API endpoint may not be implemented yet')
     }
   }
 
@@ -2517,7 +2531,11 @@ function UserManagementPage() {
               <div className="p-6 text-center text-gray-600">Loading users...</div>
             ) : users.length === 0 ? (
               <div className="p-6 text-center text-gray-600">
-                No users found.
+                <p className="mb-2">No users found.</p>
+                <p className="text-sm text-gray-500">
+                  If this is unexpected, check the browser console for API errors.
+                  The backend user management endpoints may need to be implemented.
+                </p>
               </div>
             ) : (
               <div className="divide-y divide-gray-200">
