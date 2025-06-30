@@ -2264,7 +2264,8 @@ function RunLeaguePage() {
 
       if (response.ok) {
         const data = await response.json()
-        setLeagues(data.filter(league => league.actual_participants > 0))
+        // Show all active leagues, don't filter by participants yet since we need to check signups
+        setLeagues(data.filter(league => league.is_active !== false))
       }
     } catch (error) {
       console.error('Error fetching leagues:', error)
@@ -3006,7 +3007,12 @@ function RunLeaguePage() {
             {loading ? (
               <p className="text-gray-600">Loading leagues...</p>
             ) : leagues.length === 0 ? (
-              <p className="text-gray-600">No leagues with signups found.</p>
+              <div className="text-center py-8">
+                <p className="text-gray-600 mb-2">No active leagues found.</p>
+                <p className="text-sm text-gray-500">
+                  Create leagues in <button onClick={() => navigate('/leagues')} className="text-blue-600 hover:text-blue-800 underline">League Management</button> first.
+                </p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {leagues.map(league => (
@@ -3024,9 +3030,11 @@ function RunLeaguePage() {
                     }`}
                   >
                     <h3 className="font-medium text-gray-900">{league.name}</h3>
-                    <p className="text-sm text-gray-600">{league.actual_participants} signups</p>
+                    <p className="text-sm text-gray-600">
+                      {league.actual_participants || 0} signups
+                    </p>
                     <p className="text-xs text-gray-500">
-                      {new Date(league.league_date).toLocaleDateString()}
+                      {league.league_date ? new Date(league.league_date).toLocaleDateString() : 'No date set'}
                     </p>
                   </button>
                 ))}
